@@ -3,6 +3,22 @@
 All commands run from the repository root unless noted. Python 3.12 with uv, Node 20 or newer,
 Docker for the localnet.
 
+## 0. Try it on your desktop (no chain)
+
+```
+uv run --python 3.12 python scripts/dev/practice.py        # judge on port 8091
+cd web && npm install && npm run dev                        # app on http://localhost:5173
+```
+
+Open `http://localhost:5173/?pool=http://127.0.0.1:8091`. The practice server hands out tasks and
+judges each run with the real replay, success check and scoring, with no Bittensor involved.
+
+Controls: drag on the scene to move the blue target ring and the arm follows. Height slider or Q
+and E raise and lower the gripper. Hold the Hold to grip button or Space to close the gripper.
+Left and right arrows roll the wrist. W, S, A, D nudge the target. Nothing records until your first
+input. Typical run: hover over the cube, lower to the table, grip, lift, move over the bowl, lower
+a little, release, then Submit.
+
 ## 1. Local chain and subnet
 
 ```
