@@ -1,6 +1,6 @@
-import { TABLE_Z } from "./constants";
+import { HEIGHT_MAX, HEIGHT_MIN, REACH_MAX, REACH_MIN } from "./constants";
 import type { InputEvent } from "./types";
-import type { SceneView } from "./view";
+import type { SceneView, ViewName } from "./view";
 
 export interface Command {
   x: number;
@@ -12,17 +12,21 @@ export interface Command {
   active: boolean;
 }
 
-const REACH_MIN = 0.1;
-const REACH_MAX = 0.3;
-const HEIGHT_MIN = 0.012;
-const HEIGHT_MAX = 0.16;
 const KEY_STEP = 0.0035;
 const ROLL_LIMIT = 2.6;
 const TILT_GAIN = 0.035; // rad of wrist roll per degree of phone tilt
+const CONTROL_KEYS = new Set(["w", "a", "s", "d", "q", "e", "arrowleft", "arrowright", " "]);
 const EVENT_INTERVAL_MS = 33;
 const MAX_EVENTS = 20_000;
 
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
+
+/** Pull a target back inside the reachable workspace. */
+export function clampWorkspace(x: number, y: number, z: number): { x: number; y: number; z: number } {
+  const radius = Math.hypot(x, y);
+  const scale = radius > 0 ? clamp(radius, REACH_MIN, REACH_MAX) / radius : 1;
+  return { x: x * scale, y: y * scale, z: clamp(z, HEIGHT_MIN, HEIGHT_MAX) };
+}
 
 export class Controls {
   private cmd: Command;
@@ -36,7 +40,10 @@ export class Controls {
   constructor(private readonly canvas: HTMLCanvasElement, private readonly view: SceneView, start: { x: number; y: number; z: number }) {
     this.cmd = { ...start, roll: 0, gripClosed: false, active: false };
     this.bindPointer();
-    window.addEventListener("keydown", (e) => this.keys.add(e.key.toLowerCase()));
+    window.addEventListener("keydown", (e) => {
+      const key = e.key.toLowerCase();
+      if (CONTROL_KEYS.has(key) && !(e.target instanceof HTMLInputElement)) this.keys.add(key);
+    });
     window.addEventListener("keyup", (e) => {
       this.keys.delete(e.key.toLowerCase());
       if (e.key === " ") this.set({ gripClosed: false });
@@ -84,21 +91,26 @@ export class Controls {
   }
 
   private bindPointer(): void {
+    let dragView: ViewName | null = null;
     const move = (e: PointerEvent) => {
-      const hit = this.view.pointOnPlane(e.clientX, e.clientY, this.cmd.z + TABLE_Z);
+      if (dragView === null) return;
+      const hit = this.view.targetFrom(dragView, e.clientX, e.clientY, this.cmd);
       if (!hit) return;
-      const radius = Math.hypot(hit.x, hit.y);
-      const scale = radius > 0 ? clamp(radius, REACH_MIN, REACH_MAX) / radius : 1;
-      this.set({ x: hit.x * scale, y: hit.y * scale, active: true });
-      this.log("ptr", hit.x, hit.y);
+      const target = clampWorkspace(hit.x, hit.y, hit.z);
+      this.set({ ...target, active: true });
+      this.log("ptr", target.x, target.y);
     };
     this.canvas.addEventListener("pointerdown", (e) => {
+      // Left button moves the gripper; right and middle belong to the camera.
+      if (e.button !== 0 || !e.isPrimary) return;
+      dragView = this.view.viewAt(e.clientX, e.clientY);
       this.canvas.setPointerCapture(e.pointerId);
       move(e);
     });
     this.canvas.addEventListener("pointermove", (e) => {
-      if (e.buttons !== 0 || e.pointerType === "touch") move(e);
+      if (e.isPrimary) move(e);
     });
+    for (const type of ["pointerup", "pointercancel"]) this.canvas.addEventListener(type, () => (dragView = null));
   }
 
   private applyKeys(): void {

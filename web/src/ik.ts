@@ -5,7 +5,7 @@ import type { Sim } from "./sim";
 // the jaw axis stays pointed down. Wrist roll and the gripper are set directly by the player.
 const IK_JOINTS = 4;
 const DAMPING = 1e-3;
-const ORIENTATION_WEIGHT = 0.3;
+const ORIENTATION_WEIGHT = 0.03; // small, so position wins when both cannot be met
 const ITERATIONS = 4;
 const DOWN = [0, 0, -1];
 

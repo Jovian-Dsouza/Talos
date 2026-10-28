@@ -9,4 +9,8 @@ export const MIN_STEPS = 10;
 
 export const GRIPPER_OPEN = 1.3;
 export const GRIPPER_CLOSED = 0.05;
-export const TABLE_Z = 0.0;
+// Reachable workspace for the tip with the tool kept roughly pointing down (metres).
+export const REACH_MIN = 0.14;
+export const REACH_MAX = 0.29;
+export const HEIGHT_MIN = 0.012;
+export const HEIGHT_MAX = 0.11;

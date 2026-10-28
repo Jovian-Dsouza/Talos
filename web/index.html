@@ -11,6 +11,11 @@
     <main id="app">
       <canvas id="stage" aria-label="Robot arm simulation"></canvas>
 
+      <div id="insets" hidden>
+        <div class="inset" id="inset-top"><span>Top</span></div>
+        <div class="inset" id="inset-side"><span>Side</span></div>
+      </div>
+
       <section id="intro" class="card">
         <h1>Teach the arm</h1>
         <p>Drive a simulated SO-101 robot arm. Validators replay your run and score it, and the network pays for data that checks out.</p>
@@ -29,14 +34,14 @@
       </header>
 
       <footer id="dock" hidden>
-        <label class="slider">Height<input id="height" type="range" min="0.012" max="0.16" step="0.002" value="0.12" /></label>
+        <label class="slider">Height<input id="height" type="range" min="0.012" max="0.11" step="0.002" value="0.08" /></label>
         <div class="row">
           <button id="grip" class="grip">Hold to grip</button>
           <button id="tilt" class="secondary" hidden>Enable tilt</button>
           <button id="reset" class="secondary">Reset</button>
           <button id="submit" class="primary" disabled>Submit</button>
         </div>
-        <p class="hint">Drag to move. Height slider lifts and lowers. Keyboard: WASD, Q/E, arrows, space.</p>
+        <p class="hint">Left-drag in any view moves the gripper (top view: forward and sideways, side view: forward and height). Right-drag orbits, wheel zooms, shift + right-drag pans, double-click resets the camera. Keys: WASD, Q/E, arrows, space.</p>
       </footer>
 
       <section id="result" class="card" hidden>

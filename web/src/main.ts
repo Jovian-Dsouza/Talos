@@ -1,5 +1,6 @@
 import { fetchLeaderboard, fetchTicket, submitBundle, waitForVerdict } from "./api";
 import { EXPLORER_URL, POOL_URL, POOL_URLS } from "./config";
+import { HEIGHT_MAX, HEIGHT_MIN } from "./constants";
 import { Controls } from "./controls";
 import { IkSolver } from "./ik";
 import { Session } from "./session";
@@ -9,7 +10,7 @@ import { SceneView } from "./view";
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 const canvas = $<HTMLCanvasElement>("stage");
-const view = new SceneView(canvas);
+const view = new SceneView(canvas, { top: $("inset-top"), side: $("inset-side") });
 
 let sim: Sim | null = null;
 let ik: IkSolver | null = null;
@@ -47,13 +48,14 @@ async function beginRound(): Promise<void> {
   else controls = new Controls(canvas, view, start);
   session = new Session(sim, controls, ik, ticket);
   $("instruction").textContent = ticket.instruction;
-  $<HTMLInputElement>("height").value = String(Math.min(0.16, Math.max(0.012, tip[2])));
+  $<HTMLInputElement>("height").value = String(Math.min(HEIGHT_MAX, Math.max(HEIGHT_MIN, tip[2])));
   setStatus("Touch the scene to begin");
   $<HTMLButtonElement>("submit").disabled = true;
   show("intro", false);
   show("result", false);
   show("hud", true);
   show("dock", true);
+  show("insets", true);
   submitting = false;
 }
 
@@ -79,10 +81,17 @@ function frame(now: number): void {
     else if (session.readyToSubmit) setStatus("Cube is in the bowl. Submit when ready.", true);
     else if (session.phase === "recording") setStatus("Recording");
     $<HTMLButtonElement>("submit").disabled = !session.canSubmit;
+    syncHeightSlider();
   }
   if (sim) view.update(sim);
   view.render();
   requestAnimationFrame(frame);
+}
+
+function syncHeightSlider(): void {
+  // Dragging in the side view changes the height, so keep the slider showing it.
+  const slider = $<HTMLInputElement>("height");
+  if (controls && document.activeElement !== slider) slider.value = String(controls.snapshot().z);
 }
 
 function metric(label: string, value: string): string {
@@ -125,6 +134,7 @@ async function submit(): Promise<void> {
   if (!session || submitting) return;
   submitting = true;
   show("dock", false);
+  show("insets", false);
   show("result", true);
   $("verdict-title").textContent = "Sending your run...";
   $("verdict-title").className = "";
@@ -184,6 +194,7 @@ function bindUi(): void {
     tilt.textContent = granted ? "Tilt on" : "Tilt blocked";
     tilt.disabled = !!granted;
   });
+  canvas.addEventListener("dblclick", () => view.resetCamera());
   window.addEventListener("resize", () => view.resize());
 }
 
