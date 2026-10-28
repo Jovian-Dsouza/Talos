@@ -1,0 +1,40 @@
+"""Authoritative success check, run on replayed state.
+
+The browser ships a TypeScript copy of the same rules for instant feedback, but only this
+function decides whether an episode succeeded.
+"""
+
+from typing import Any, Mapping
+
+import mujoco
+import numpy as np
+
+from common.scene import task_config
+
+ARM_DOFS = 6
+
+
+def check_success(
+    model: mujoco.MjModel, data: mujoco.MjData, task_id: str
+) -> tuple[bool, dict[str, Any]]:
+    rule = task_config(task_id)["checker"]
+    return _object_in_container(model, data, rule)
+
+
+def _object_in_container(
+    model: mujoco.MjModel, data: mujoco.MjData, rule: Mapping[str, Any]
+) -> tuple[bool, dict[str, Any]]:
+    obj = data.body(rule["object"])
+    container = data.body(rule["container"])
+    dxy = float(np.linalg.norm(obj.xpos[:2] - container.xpos[:2]))
+    z = float(obj.xpos[2])
+    obj_speed = float(np.linalg.norm(data.qvel[model.body(rule["object"]).dofadr[0] :][:6]))
+    arm_speed = float(np.linalg.norm(data.qvel[:ARM_DOFS]))
+    details = {"dxy": dxy, "z": z, "object_speed": obj_speed, "arm_speed": arm_speed}
+    ok = (
+        dxy <= rule["xy_radius"]
+        and rule["z_min"] <= z <= rule["z_max"]
+        and obj_speed <= rule["max_speed"]
+        and arm_speed <= rule["max_arm_speed"]
+    )
+    return ok, details
