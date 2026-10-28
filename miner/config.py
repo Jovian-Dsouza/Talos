@@ -23,6 +23,7 @@ class MinerConfig:
     validator_allowlist: tuple[str, ...]
     task_id: str
     publish_endpoint: bool
+    trust_proxy: bool
 
     @staticmethod
     def from_env() -> "MinerConfig":
@@ -39,4 +40,5 @@ class MinerConfig:
             validator_allowlist=_csv("MINER_VALIDATOR_ALLOWLIST"),
             task_id=os.environ.get("TASK_ID", "put_cube_in_bowl"),
             publish_endpoint=os.environ.get("MINER_PUBLISH_ENDPOINT", "1") == "1",
+            trust_proxy=os.environ.get("MINER_TRUST_PROXY", "0") == "1",
         )

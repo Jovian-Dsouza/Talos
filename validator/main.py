@@ -78,7 +78,8 @@ def main() -> None:
     wallet = bt.Wallet(name=config.wallet_name, hotkey=config.hotkey_name)
     chain = Chain(config.chain_endpoint, config.netuid)
     config.db_path.parent.mkdir(parents=True, exist_ok=True)
-    ctx = Context(config.pipeline, Store(config.db_path), chain, scoring.load_demand(config.demand_file))
+    ctx = Context(config.pipeline, Store(config.db_path), chain, scoring.load_demand(config.demand_file),
+                  config.accepted_dir)
     me = wallet.hotkey.ss58_address
     last_weights_block = 0
     committed_epoch = chain.current_block() // config.pipeline.tempo_blocks - 1

@@ -22,7 +22,12 @@ VALIDATOR_CACHE_SECONDS = 30
 MAX_VERDICTS_PER_POST = 200
 
 
-def _client(request: Request) -> str:
+def _client(request: Request, trust_proxy: bool) -> str:
+    """Rate-limit key. Behind a tunnel every request comes from the proxy, so read its header."""
+    if trust_proxy:
+        forwarded = request.headers.get("cf-connecting-ip") or request.headers.get("x-forwarded-for", "")
+        if forwarded:
+            return forwarded.split(",")[0].strip()
     return request.client.host if request.client else "unknown"
 
 
@@ -38,7 +43,7 @@ def create_app(config: MinerConfig, hotkey: str, chain: Chain) -> FastAPI:
     validators: dict[str, Any] = {"at": 0.0, "keys": set()}
 
     def limit(kind: str, request: Request) -> None:
-        if not limits[kind].allow(_client(request)):
+        if not limits[kind].allow(_client(request, config.trust_proxy)):
             raise HTTPException(429, "too many requests, slow down")
 
     def validator_keys() -> set[str]:

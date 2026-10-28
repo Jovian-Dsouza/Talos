@@ -1,7 +1,8 @@
 """Per-recording validation: ticket, replay, success, duplicate, quality, score."""
 
-import time
+import json
 from dataclasses import dataclass, replace
+from pathlib import Path
 from typing import Any, Mapping, Protocol
 
 import mujoco
@@ -38,6 +39,7 @@ class Context:
     store: Store
     chain: ChainView
     demand: Mapping[str, float]
+    accepted_dir: Path | None = None
 
 
 def process(raw: Mapping[str, Any], miner_hotkey: str, ctx: Context) -> tuple[str, Verdict]:
@@ -48,6 +50,9 @@ def process(raw: Mapping[str, Any], miner_hotkey: str, ctx: Context) -> tuple[st
         return "", rejected(f"malformed upload: {exc}")
     bundle_id = bundle.bundle_id()
     verdict = _evaluate(bundle, bundle_id, miner_hotkey, ctx)
+    if verdict.accepted and ctx.accepted_dir is not None:
+        ctx.accepted_dir.mkdir(parents=True, exist_ok=True)
+        (ctx.accepted_dir / f"{bundle_id}.json").write_text(json.dumps(raw))
     ctx.store.add_verdict(bundle_id, miner_hotkey, verdict.to_dict())
     return bundle_id, verdict
 

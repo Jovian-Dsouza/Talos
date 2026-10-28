@@ -23,6 +23,7 @@ class ValidatorConfig:
     weights_every_blocks: int
     miner_urls: dict[str, str]
     demand_file: str | None
+    accepted_dir: Path
     pipeline: PipelineConfig
 
     @staticmethod
@@ -37,6 +38,7 @@ class ValidatorConfig:
             weights_every_blocks=int(os.environ.get("WEIGHTS_EVERY_BLOCKS", "10")),
             miner_urls=_overrides(os.environ.get("MINER_URLS", "")),
             demand_file=os.environ.get("DEMAND_FILE"),
+            accepted_dir=Path(os.environ.get("ACCEPTED_DIR", "data/accepted")),
             pipeline=PipelineConfig(
                 replay_mode=os.environ.get("REPLAY_MODE", "strict"),
                 eps_arm=float(os.environ.get("EPS_ARM", "0.01")),

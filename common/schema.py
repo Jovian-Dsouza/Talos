@@ -19,6 +19,10 @@ NUM_JOINTS = len(JOINT_NAMES)
 # Arm pose at the start of every episode (radians). Browser and validator both start here.
 HOME_POSE = (0.0, -1.2, 1.2, 0.8, 0.0, 0.5)
 
+# Gripper targets (radians) the browser uses for open and closed.
+GRIPPER_OPEN = 1.3
+GRIPPER_CLOSED = 0.05
+
 PHYSICS_DT = 0.002
 CONTROL_DT = 0.020
 SUBSTEPS = round(CONTROL_DT / PHYSICS_DT)
