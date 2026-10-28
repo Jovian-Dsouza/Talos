@@ -236,3 +236,33 @@ Tracks A, B and C are independent enough to run as parallel AI-agent workstreams
 | — | Data policy | Assumed **human demonstrations only**; enforcement in phase 2. |
 | — | Data format | **LeRobotDataset** (lerobot 0.6.1). |
 | — | POC task | Assumed **"Put the {color} cube in the {color} bowl"** with distractors; stretch: stacking. |
+
+---
+
+## 10. Implementation status (October 26, 2026)
+
+Built and verified on a local chain with real browser recordings: see [README.md](README.md) and
+[docs/runbook.md](docs/runbook.md).
+
+| Area | State |
+|---|---|
+| M0 determinism | Done. WASM and native MuJoCo 3.17.0 agree to 0.1 mm on contact, and a real Chromium recording of a grasp and lift replays natively with zero drift above tolerance. |
+| `common/` (seed, scene, MJCF, checker, bundle, ticket, chain adapter) | Done. |
+| Miner (tickets, uploads, signed serving, verdict feed, leaderboard, rate limits) | Done. Two pools run side by side on localnet. |
+| Validator (ticket checks, strict and windowed replay, dedup, quality, scoring, weights, epoch Merkle commitments) | Done. Weights and roots landed on the localnet chain. |
+| Web app (SO-101 in WASM, IK, drag, height slider, hold to grip, tilt, keyboard, recorder, verdict and leaderboard screens) | Done and driven end to end in headless Chromium. Not yet tried on a physical iPhone or Android phone. |
+| LeRobot export with rendered frames, real-arm replay script | Done. The export loads with the LeRobot loader. The real-arm script is untested on hardware and needs the calibration in docs/real-arm.md. |
+| Load: 20 simultaneous simulated phones | All answered in about 12 seconds on one validator process. |
+| Testnet deployment, 24 hour run, Hugging Face upload, phone and real-arm tests, outreach sending | Not done. They need testnet TAO, a VM, accounts and hardware. Scripts and docs are ready. |
+
+Deviations from the decisions above:
+
+- **Decision 7 (fork AxisWebInfra):** the web app is a fresh build instead. AxisWebInfra uses
+  `mujoco-js` 0.0.7 (not the official 3.17.0 build the validator replays with), a Franka specific
+  7-DOF IK of 1,500 lines and Next.js. Nothing was copied, and NOTICE records this.
+- **Task seed on the wire:** the 64-bit seed travels as a string because JavaScript numbers cannot
+  hold it.
+- **Episode cap:** 3,000 control steps (60 seconds), not 1,500.
+- **Palette:** teal replaced yellow so a bowl never matches the yellow arm.
+- **No tests, no TDD:** per CLAUDE.md. Verification was by running the real flow and tampering with
+  real recordings.
