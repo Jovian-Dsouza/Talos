@@ -16,6 +16,12 @@ VALIDATOR = "bittesnor-validator"
 POOLS = ("pool-open", "pool-two")
 
 
+def must(result, what: str):
+    if not result.success:
+        raise RuntimeError(f"{what} failed: {result.message}")
+    return result
+
+
 def ensure_wallet(name: str, hotkey: str) -> bt.Wallet:
     wallet = bt.Wallet(name=name, hotkey=hotkey)
     if not wallet.coldkey_file.exists_on_device():
@@ -45,13 +51,13 @@ def main() -> None:
 
     for wallet in (owner, validator, *pools):
         if st.read("balance", coldkey_ss58=wallet.coldkeypub.ss58_address).tao < FUND_TAO / 2:
-            st.execute(bt.Transfer(wallet.coldkeypub.ss58_address, FUND_TAO), alice)
+            must(st.execute(bt.Transfer(wallet.coldkeypub.ss58_address, FUND_TAO), alice), "transfer")
     print("funded wallets")
 
     # Subnet creation cost is only known at execution time, so a spend cap would block it.
     # Localnet only: the dev chain has no real money at stake.
     uncapped = bt.Subtensor(ENDPOINT)
-    uncapped.execute(bt.RegisterSubnet(hotkey_ss58=owner.hotkey.ss58_address), owner)
+    must(uncapped.execute(bt.RegisterSubnet(hotkey_ss58=owner.hotkey.ss58_address), owner), "register subnet")
     netuid = max(info.netuid for info in st.read("subnets"))
     print("subnet netuid", netuid)
 
@@ -59,11 +65,13 @@ def main() -> None:
     sub = bt.calls.SubtensorModule
     for wallet in (validator, *pools):
         call = sub.burned_register(netuid=netuid, hotkey=wallet.hotkey.ss58_address)
-        uncapped.submit_call(call, wallet)
+        must(uncapped.submit_call(call, wallet), "burned register")
+    # Staking and emissions stay disabled until the owner starts the subnet.
+    must(uncapped.submit_call(sub.start_call(netuid=netuid), owner), "start subnet")
     stake = sub.add_stake(
         hotkey=validator.hotkey.ss58_address, netuid=netuid, amount_staked=STAKE_TAO * 10**9
     )
-    uncapped.submit_call(stake, validator)
+    must(uncapped.submit_call(stake, validator), "add stake")
     for wallet in (owner, validator, *pools):
         print(wallet.name, "uid", st.read("uid", hotkey_ss58=wallet.hotkey.ss58_address, netuid=netuid))
     print("subnet registered")
