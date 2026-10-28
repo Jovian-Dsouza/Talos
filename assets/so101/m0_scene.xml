@@ -1,0 +1,20 @@
+<mujoco model="so101_m0">
+  <include file="so101.xml"/>
+
+  <worldbody>
+    <light pos="0 0 1.5" dir="0 0 -1"/>
+    <geom name="floor" type="plane" size="1 1 0.05" friction="1 5e-3 5e-4"/>
+    <body name="cube" pos="CUBE_POS">
+      <freejoint name="cube_free"/>
+      <geom name="cube_geom" type="box" size="0.0125 0.0125 0.0125" mass="0.02" rgba="0.9 0.1 0.1 1"
+        friction="1 5e-3 5e-4" condim="4"/>
+    </body>
+    <body name="bowl" pos="0.0 -0.22 0">
+      <geom type="box" size="0.05 0.05 0.003" pos="0 0 0.003" rgba="0.1 0.2 0.9 1"/>
+      <geom type="box" size="0.05 0.003 0.02" pos="0 0.05 0.02" rgba="0.1 0.2 0.9 1"/>
+      <geom type="box" size="0.05 0.003 0.02" pos="0 -0.05 0.02" rgba="0.1 0.2 0.9 1"/>
+      <geom type="box" size="0.003 0.05 0.02" pos="0.05 0 0.02" rgba="0.1 0.2 0.9 1"/>
+      <geom type="box" size="0.003 0.05 0.02" pos="-0.05 0 0.02" rgba="0.1 0.2 0.9 1"/>
+    </body>
+  </worldbody>
+</mujoco>
