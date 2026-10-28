@@ -2,11 +2,14 @@
 
 import json
 import sqlite3
+import threading
 import time
 from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
+
+from common.dblock import locked
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS tickets_used (
@@ -45,8 +48,10 @@ class AcceptedRow:
 class Store:
     def __init__(self, path: str | Path) -> None:
         self._db = sqlite3.connect(str(path), check_same_thread=False)
+        self._lock = threading.RLock()
         self._db.executescript(SCHEMA)
 
+    @locked
     def claim_ticket(self, hotkey: str, task_id: str, counter: int, bundle_id: str) -> bool:
         """Record first sight of a ticket; False when it was already seen."""
         try:
@@ -59,6 +64,7 @@ class Store:
         except sqlite3.IntegrityError:
             return False
 
+    @locked
     def recent_signatures(self, task_id: str) -> list[np.ndarray]:
         rows = self._db.execute(
             "SELECT signature FROM accepted WHERE task_id=? ORDER BY accepted_at DESC LIMIT ?",
@@ -66,6 +72,7 @@ class Store:
         ).fetchall()
         return [np.frombuffer(row[0], dtype="<f8") for row in rows]
 
+    @locked
     def accepted_count(self, hotkey: str, task_id: str, epoch: int) -> int:
         row = self._db.execute(
             "SELECT COUNT(*) FROM accepted WHERE hotkey=? AND task_id=? AND epoch=?",
@@ -73,6 +80,7 @@ class Store:
         ).fetchone()
         return int(row[0])
 
+    @locked
     def add_accepted(self, row: AcceptedRow, signature: np.ndarray) -> None:
         with self._db:
             self._db.execute(
@@ -82,6 +90,7 @@ class Store:
                  row.value, time.time()),
             )
 
+    @locked
     def add_verdict(self, bundle_id: str, hotkey: str, verdict: dict) -> None:
         with self._db:
             self._db.execute(
@@ -89,6 +98,7 @@ class Store:
                 (bundle_id, hotkey, json.dumps(verdict), time.time()),
             )
 
+    @locked
     def epoch_values(self) -> dict[int, dict[str, float]]:
         rows = self._db.execute("SELECT epoch, hotkey, SUM(value) FROM accepted GROUP BY epoch, hotkey")
         result: dict[int, dict[str, float]] = {}
@@ -96,10 +106,12 @@ class Store:
             result.setdefault(int(epoch), {})[hotkey] = float(total)
         return result
 
+    @locked
     def leaves(self, epoch: int) -> list[str]:
         rows = self._db.execute("SELECT leaf FROM accepted WHERE epoch=?", (epoch,)).fetchall()
         return [row[0] for row in rows]
 
+    @locked
     def contributor_totals(self) -> list[tuple[str, str, int, float]]:
         rows = self._db.execute(
             "SELECT contributor, hotkey, COUNT(*), SUM(value) FROM accepted "
@@ -107,14 +119,17 @@ class Store:
         ).fetchall()
         return [(r[0], r[1], int(r[2]), float(r[3])) for r in rows]
 
+    @locked
     def get_cursor(self, hotkey: str) -> int:
         row = self._db.execute("SELECT cursor FROM cursors WHERE hotkey=?", (hotkey,)).fetchone()
         return int(row[0]) if row else 0
 
+    @locked
     def set_cursor(self, hotkey: str, cursor: int) -> None:
         with self._db:
             self._db.execute("INSERT OR REPLACE INTO cursors VALUES (?,?)", (hotkey, cursor))
 
+    @locked
     def save_root(self, epoch: int, root: str, count: int) -> None:
         with self._db:
             self._db.execute("INSERT OR REPLACE INTO epoch_roots VALUES (?,?,?)", (epoch, root, count))

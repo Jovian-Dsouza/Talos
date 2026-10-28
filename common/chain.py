@@ -76,7 +76,19 @@ class Chain:
         _must(self._st.execute(bt.ServeAxon(self.netuid, ip, port), wallet), "serve endpoint")
 
     def set_weights(self, wallet: "bt.Wallet", uids: Sequence[int], weights: Sequence[float]) -> None:
-        _must(self._st.execute(bt.SetWeights(self.netuid, list(uids), list(weights)), wallet), "set weights")
+        """Use the SDK intent (handles commit-reveal); fall back to a raw plain call when the
+        runtime lacks storage the intent preflights, as the Docker localnet does."""
+        try:
+            _must(self._st.execute(bt.SetWeights(self.netuid, list(uids), list(weights)), wallet), "set weights")
+        except Exception as exc:
+            if "not found" not in str(exc):
+                raise
+            peak = max(weights)
+            scaled = [round(w / peak * 65535) for w in weights]
+            call = bt.calls.SubtensorModule.set_weights(
+                netuid=self.netuid, dests=list(uids), weights=scaled, version_key=0
+            )
+            _must(self._st.submit_call(call, wallet, signer="hotkey"), "set weights (raw)")
 
     def commit_root(self, wallet: "bt.Wallet", epoch: int, root: str) -> None:
         """Publish the epoch's Merkle root as a hotkey-signed on-chain commitment."""

@@ -40,7 +40,8 @@ class Ticket:
     expires_block: int
 
     def to_dict(self) -> dict[str, Any]:
-        return asdict(self)
+        # The seed is 64 bits, which JavaScript numbers cannot hold, so it travels as a string.
+        return {**asdict(self), "seed": str(self.seed)}
 
     @staticmethod
     def from_dict(raw: Mapping[str, Any]) -> "Ticket":
