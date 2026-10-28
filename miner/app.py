@@ -85,6 +85,9 @@ def create_app(config: MinerConfig, hotkey: str, chain: Chain) -> FastAPI:
     @app.post("/submit")
     async def submit(request: Request) -> dict[str, Any]:
         limit("submit", request)
+        declared = request.headers.get("content-length")
+        if declared and declared.isdigit() and int(declared) > MAX_BODY_BYTES:
+            raise HTTPException(413, "recording too large")
         body = await request.body()
         if len(body) > MAX_BODY_BYTES:
             raise HTTPException(413, "recording too large")
