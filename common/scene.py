@@ -19,7 +19,7 @@ PALETTE: dict[str, tuple[float, float, float]] = {
     "red": (0.85, 0.12, 0.12),
     "green": (0.15, 0.65, 0.2),
     "blue": (0.12, 0.25, 0.85),
-    "yellow": (0.95, 0.8, 0.1),
+    "teal": (0.1, 0.6, 0.62),
     "orange": (0.95, 0.5, 0.1),
     "purple": (0.5, 0.2, 0.7),
 }

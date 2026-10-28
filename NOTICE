@@ -1,0 +1,12 @@
+Third-party material in this repository
+
+- assets/so101: SO-101 robot model from MuJoCo Menagerie (robotstudio_so101), Apache License 2.0.
+  The license text is kept at assets/so101/LICENSE. The simulation timestep in so101.xml was
+  changed from 0.005 to 0.002. web/public/assets/so101 holds a derived copy with decimated
+  visual meshes.
+- MuJoCo (native `mujoco` and the `@mujoco/mujoco` WebAssembly build), Apache License 2.0.
+- three.js, MIT License.
+- The browser teleoperation app was designed after Axis Robotics' open AxisWebInfra
+  (Apache License 2.0, https://github.com/AxisAIOrg/AxisWebInfra). No source code from that
+  repository was copied: it targets a Franka arm, an older mujoco-js build and Next.js, none of
+  which fit this project's requirement of one exact MuJoCo version in browser and validator.

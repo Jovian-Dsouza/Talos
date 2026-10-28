@@ -10,6 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from common.bundle import BundleError, parse_bundle
 from common.chain import Chain
+from common.mjcf import model_hash
 from common.ticket import TICKET_TTL_BLOCKS, build_ticket
 from miner.config import MinerConfig
 from miner.db import MinerDb
@@ -74,7 +75,7 @@ def create_app(config: MinerConfig, hotkey: str, chain: Chain) -> FastAPI:
         counter = db.issue_ticket_slot(block, block_hash)
         issued = build_ticket(block, block_hash, hotkey, config.task_id, counter)
         db.set_seed(counter, issued.seed)
-        return issued.to_dict()
+        return {**issued.to_dict(), "model_hash": model_hash(issued.scene_xml)}
 
     @app.post("/submit")
     async def submit(request: Request) -> dict[str, Any]:

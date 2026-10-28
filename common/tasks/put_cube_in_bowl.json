@@ -1,7 +1,7 @@
 {
   "task_id": "put_cube_in_bowl",
   "instruction_template": "Put the {cube_color} cube in the {bowl_color} bowl",
-  "max_steps": 1500,
+  "max_steps": 3000,
   "checker": {
     "type": "object_in_container",
     "object": "cube_target",
