@@ -3,7 +3,7 @@
   "createdOnFiles": {"v": 1, "at": "2026-10-29T13:37:13Z"},
   "lists": "css",
   "title": "Talos Pitch",
-  "order": ["cover", "problem-data", "problem-trust", "solution", "how", "subnet", "anticheat", "proof", "openroboto", "business", "appendix", "a-miners", "a-validator", "a-setup", "a-matrix", "a-risks"],
+  "order": ["cover", "problem-data", "problem-trust", "solution", "how", "subnet", "proof", "openroboto", "business", "appendix", "a-miners", "a-validator", "a-setup", "a-matrix", "a-risks"],
   "sections": {
     "s1": {"description": "Talos at a glance", "start": "cover"},
     "s2": {"description": "Robots lack trustworthy demonstration data", "start": "problem-data"},
