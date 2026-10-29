@@ -3,14 +3,12 @@
   "createdOnFiles": {"v": 1, "at": "2026-10-29T13:37:13Z"},
   "lists": "css",
   "title": "Talos Pitch",
-  "order": ["cover", "problem-data", "problem-trust", "solution", "how", "subnet", "anticheat", "proof", "openroboto", "business", "close", "appendix", "a-miners", "a-validator", "a-setup", "a-matrix", "a-risks"],
+  "order": ["cover", "problem-data", "problem-trust", "solution", "how", "subnet", "anticheat", "proof", "openroboto", "business", "appendix", "a-miners", "a-validator", "a-setup", "a-matrix", "a-risks"],
   "sections": {
     "s1": {"description": "Talos at a glance", "start": "cover"},
     "s2": {"description": "Robots lack trustworthy demonstration data", "start": "problem-data"},
     "s3": {"description": "Phone teleop verified by a Bittensor subnet", "start": "solution"},
-    "s4": {"description": "OpenRoboto, buyers and the demand flywheel", "start": "openroboto"},
-    "s5": {"description": "Live demo and team", "start": "close"},
-    "s6": {"description": "Bittensor details and risks for Q&A", "start": "appendix"}
+    "s4": {"description": "OpenRoboto, buyers and the demand flywheel", "start": "openroboto"},    "s6": {"description": "Bittensor details and risks for Q&A", "start": "appendix"}
   },
   "cover": "cover",
   "faces": {
