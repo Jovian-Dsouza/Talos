@@ -1,26 +1,22 @@
-<section id="verification" data-transition="fade" style="background:#0A0F12;color:#EAF2F0;font-family:'Space Grotesk', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
-<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;letter-spacing:4px;text-transform:uppercase;color:#2EC4B6">02 · Verification</p>
-<h2 style="font-size:72px;font-weight:600;line-height:1.1;letter-spacing:-1px;color:#EAF2F0">Verification with RoboJEV</h2>
-<p style="font-size:32px;line-height:1.4;color:#A8BCB8">RoboJEV checks physical success in MuJoCo, independent of what the operator or model claims. <span style="color:#EAF2F0">Failures are caught and kept.</span></p>
-<div style="display:flex;flex-direction:row;gap:24px">
-<div style="flex:1;display:flex;flex-direction:column;gap:12px">
-<img src="/_blob/782ddf2de26a781e4103e879c62e23ee" data-video="/_blob/279478588e017bf055bf91b9d6234922" alt="RoboJEV: Franka Panda inserting a peg into a socket, verified success" style="width:538px;height:303px;object-fit:cover;border:1px solid #22323A;border-radius:12px">
+<section id="verification" data-transition="push" style="background:#0A0F12;color:#EAF2F0;font-family:'Space Grotesk', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;letter-spacing:4px;text-transform:uppercase;color:#2EC4B6">Verification · RoboJEV</p>
+<h2 style="font-size:72px;font-weight:600;line-height:1.1;letter-spacing:-1px;color:#EAF2F0">The physics decides, not the player</h2>
+<p style="font-size:32px;line-height:1.4;color:#A8BCB8">RoboJEV re-checks every run in MuJoCo. Passes go through, failures get caught.</p>
+<div data-build-in="pop 1 auto" style="position:absolute;left:128px;top:450px;width:538px;display:flex;flex-direction:column;gap:16px">
+<img src="/_blob/782ddf2de26a781e4103e879c62e23ee" data-video="/_blob/279478588e017bf055bf91b9d6234922" alt="RoboJEV: robot arm inserting a peg into a socket, verified success" style="width:538px;height:303px;object-fit:cover;border:2px solid #2EC4B6;border-radius:16px">
 <p style="font-size:24px;color:#EAF2F0">Peg insertion · <span style="color:#2EC4B6">passed</span></p>
 </div>
-<div style="flex:1;display:flex;flex-direction:column;gap:12px">
-<img src="/_blob/7c2e1396effde59bfefe551d072354b4" data-video="/_blob/3f2ba2854d165c57db597d9b866455b4" alt="RoboJEV: Franka Panda placing a cube past a gate, verified success" style="width:538px;height:303px;object-fit:cover;border:1px solid #22323A;border-radius:12px">
+<div data-build-in="pop 2 auto" style="position:absolute;left:691px;top:450px;width:538px;display:flex;flex-direction:column;gap:16px">
+<img src="/_blob/7c2e1396effde59bfefe551d072354b4" data-video="/_blob/3f2ba2854d165c57db597d9b866455b4" alt="RoboJEV: robot arm placing a cube past a gate, verified success" style="width:538px;height:303px;object-fit:cover;border:2px solid #2EC4B6;border-radius:16px">
 <p style="font-size:24px;color:#EAF2F0">Gate pick and place · <span style="color:#2EC4B6">passed</span></p>
 </div>
-<div style="flex:1;display:flex;flex-direction:column;gap:12px">
-<img src="/_blob/946515a104d28d7c0010646718b2680d" data-video="/_blob/16aa6343ee80cc109920681b58b885c1" alt="RoboJEV: Franka Panda arm colliding with the gate, failure caught" style="width:538px;height:303px;object-fit:cover;border:1px solid #F2A541;border-radius:12px">
+<div data-build-in="pop 3 auto" style="position:absolute;left:1254px;top:450px;width:538px;display:flex;flex-direction:column;gap:16px">
+<img src="/_blob/946515a104d28d7c0010646718b2680d" data-video="/_blob/16aa6343ee80cc109920681b58b885c1" alt="RoboJEV: robot arm colliding with the gate, failure caught" style="width:538px;height:303px;object-fit:cover;border:2px solid #F2A541;border-radius:16px">
 <p style="font-size:24px;color:#EAF2F0">Gate pick and place · <span style="color:#F2A541">failure caught</span></p>
 </div>
-</div>
-<div style="flex:1"></div>
-<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;letter-spacing:2px;color:#7E918D">5 TASKS · 100 EVALUATED EPISODES · 10 SEEDS PER TASK · EVERY FAILURE COUNTED</p>
 <div style="position:absolute;left:128px;right:128px;bottom:64px;display:flex;flex-direction:row;justify-content:space-between">
 <p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;letter-spacing:2px;color:#7E918D">TALOS</p>
 <p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#7E918D">05</p>
 </div>
-<aside>For verification we use RoboJEV. It checks physical success in MuJoCo on its own, regardless of what the operator or the model says happened. Two clips pass; the third shows a failure being caught: the cube clears the gate but the arm collides with it, so the run is rejected. RoboJEV has been evaluated on five tasks over 100 episodes with ten fixed seeds per task, and every failure is counted.</aside>
+<aside>For verification we use RoboJEV. It checks physical success in MuJoCo on its own, regardless of what the player or the software claims. Two clips pass; the third is a failure being caught: the cube clears the gate but the arm hits it, so the run is rejected. RoboJEV has been evaluated on five tasks over 100 episodes with ten fixed seeds per task, and every failure is counted.</aside>
 </section>

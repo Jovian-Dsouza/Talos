@@ -1,27 +1,20 @@
-<section id="solution" data-transition="fade" style="background:#2EC4B6;color:#0A0F12;font-family:'Space Grotesk', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
-<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;letter-spacing:4px;text-transform:uppercase;color:#0A0F12">02 · The solution</p>
-<h1 style="font-size:96px;font-weight:700;line-height:1.05;letter-spacing:-2px;color:#0A0F12">Axis-style robot teleop data, verified by Bittensor.</h1>
-<div style="flex:1"></div>
-<div style="display:flex;flex-direction:row;gap:32px">
-<div style="flex:1;display:flex;flex-direction:column;gap:16px;border-top:3px solid #0A0F12;padding:32px 0px 0px 0px">
-<x-icon name="Lightning" style="color:#0A0F12;width:48px;height:48px"></x-icon>
-<h3 style="font-size:44px;font-weight:700;color:#0A0F12">Zero hardware</h3>
-<p style="font-size:24px;line-height:1.4;color:#0E2B2A">A phone or laptop is the controller. Physics runs in the browser with MuJoCo WASM.</p>
+<section id="solution" data-transition="push" style="background:#2EC4B6;color:#0A0F12;font-family:'Space Grotesk', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;letter-spacing:4px;text-transform:uppercase;color:#0A0F12">The solution</p>
+<h1 style="font-size:120px;font-weight:700;line-height:1.05;letter-spacing:-3px;color:#0A0F12">Bittensor solves both.</h1>
+<div data-build-in="left 1 auto" style="position:absolute;left:128px;top:440px;width:808px;display:flex;flex-direction:column;gap:16px;background:#0A0F12;border-radius:24px;padding:48px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;letter-spacing:2px;text-transform:uppercase;color:#F2A541">Problem 1 · Collection</p>
+<h3 style="font-size:44px;font-weight:700;color:#EAF2F0">Miners collect</h3>
+<p style="font-size:32px;line-height:1.4;color:#A8BCB8">Anyone with a phone drives a simulated robot. Pools pay them for every verified run.</p>
 </div>
-<div style="flex:1;display:flex;flex-direction:column;gap:16px;border-top:3px solid #0A0F12;padding:32px 0px 0px 0px">
-<x-icon name="Verified" style="color:#0A0F12;width:48px;height:48px"></x-icon>
-<h3 style="font-size:44px;font-weight:700;color:#0A0F12">Trustless checks</h3>
-<p style="font-size:24px;line-height:1.4;color:#0E2B2A">Independent validators replay every run in native MuJoCo and agree on chain.</p>
+<div data-build-in="right 2 auto" style="position:absolute;left:984px;top:440px;width:808px;display:flex;flex-direction:column;gap:16px;background:#0A0F12;border-radius:24px;padding:48px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;letter-spacing:2px;text-transform:uppercase;color:#F2A541">Problem 2 · Verification</p>
+<h3 style="font-size:44px;font-weight:700;color:#EAF2F0">Validators verify</h3>
+<p style="font-size:32px;line-height:1.4;color:#A8BCB8">Independent validators replay and score every run. The chain records the verdict.</p>
 </div>
-<div style="flex:1;display:flex;flex-direction:column;gap:16px;border-top:3px solid #0A0F12;padding:32px 0px 0px 0px">
-<x-icon name="Wrench" style="color:#0A0F12;width:48px;height:48px"></x-icon>
-<h3 style="font-size:44px;font-weight:700;color:#0A0F12">Real-arm ready</h3>
-<p style="font-size:24px;line-height:1.4;color:#0E2B2A">Same action space as a real robot arm. Verified runs play back on hardware.</p>
-</div>
-</div>
+<p data-build-in="rise 3 auto" style="position:absolute;left:128px;top:820px;width:1664px;font-size:32px;font-weight:600;line-height:1.4;color:#0A0F12">No hardware. No trust needed. Real robot actions.</p>
 <div style="position:absolute;left:128px;right:128px;bottom:64px;display:flex;flex-direction:row;justify-content:space-between">
 <p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;letter-spacing:2px;color:#0E2B2A">TALOS</p>
 <p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#0E2B2A">04</p>
 </div>
-<aside>Talos is the same idea as Axis, built on Bittensor. Three things: no hardware, just a phone; every run replayed by independent validators instead of a company server; and the data uses the same action space as the real robot, so a verified run plays back on a real arm.</aside>
+<aside>Bittensor already pays strangers to do work and pays others to check it. That maps exactly onto our two problems. Miners are pools that collect robot teleop data from people on their phones. Validators independently replay and score every run, and the result is recorded on chain. No hardware, no trust in a single company, and the data contains real robot actions.</aside>
 </section>

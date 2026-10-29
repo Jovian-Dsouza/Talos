@@ -6,9 +6,9 @@
   "order": ["cover", "problem-data", "problem-trust", "solution", "verification", "how", "subnet", "proof", "openroboto", "business", "appendix", "a-miners", "a-validator", "a-setup", "a-matrix", "a-risks"],
   "sections": {
     "s1": {"description": "Talos at a glance", "start": "cover"},
-    "s2": {"description": "Robots lack trustworthy demonstration data", "start": "problem-data"},
-    "s3": {"description": "Phone teleop verified by a Bittensor subnet", "start": "solution"},
-    "s4": {"description": "OpenRoboto, buyers and the demand flywheel", "start": "openroboto"},    "s6": {"description": "Bittensor details and risks for Q&A", "start": "appendix"}
+    "s2": {"description": "Two problems: collecting robot teleop data and verifying it", "start": "problem-data"},
+    "s3": {"description": "Bittensor solves both: miners collect, validators verify", "start": "solution"},
+    "s4": {"description": "Why not egocentric video, and who pays", "start": "openroboto"},    "s6": {"description": "Bittensor details and risks for Q&A", "start": "appendix"}
   },
   "cover": "cover",
   "faces": {

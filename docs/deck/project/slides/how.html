@@ -1,43 +1,30 @@
-<section id="how" data-transition="fade" style="background:#0A0F12;color:#EAF2F0;font-family:'Space Grotesk', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
-<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;letter-spacing:4px;text-transform:uppercase;color:#2EC4B6">02 · How it works</p>
-<h2 style="font-size:72px;font-weight:600;line-height:1.1;letter-spacing:-1px;color:#EAF2F0">From a phone to a robot-ready dataset</h2>
-<div style="flex:1"></div>
-<div style="display:flex;flex-direction:row;align-items:center;gap:12px">
-<div style="flex:1;display:flex;flex-direction:column;gap:12px;background:#111A1F;border:1px solid #22323A;border-radius:16px;padding:28px">
-<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#2EC4B6">01</p>
-<h3 style="font-size:32px;font-weight:600;color:#EAF2F0">Phone</h3>
-<p style="font-size:24px;line-height:1.4;color:#A8BCB8">A person drives a sim SO-101 on a seeded task. Physics runs on the device.</p>
+<section id="how" data-transition="push" style="background:#10181C;color:#EAF2F0;font-family:'Space Grotesk', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;letter-spacing:4px;text-transform:uppercase;color:#2EC4B6">How it works</p>
+<h2 style="font-size:72px;font-weight:600;line-height:1.1;letter-spacing:-1px;color:#EAF2F0">Four steps, about a minute</h2>
+<div data-build-in="rise 1 auto" style="position:absolute;left:128px;top:420px;width:380px;display:flex;flex-direction:column;gap:12px;background:#111A1F;border:1px solid #22323A;border-radius:20px;padding:40px">
+<p style="font-size:72px;font-weight:700;line-height:1.1;color:#2EC4B6">1</p>
+<h3 style="font-size:44px;font-weight:700;color:#EAF2F0">Drive</h3>
+<p style="font-size:24px;line-height:1.4;color:#A8BCB8">Steer a simulated robot arm on your phone.</p>
 </div>
-<x-connector style="width:48px;height:2px;color:#2EC4B6"></x-connector>
-<div style="flex:1;display:flex;flex-direction:column;gap:12px;background:#111A1F;border:1px solid #22323A;border-radius:16px;padding:28px">
-<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#2EC4B6">02</p>
-<h3 style="font-size:32px;font-weight:600;color:#EAF2F0">Miner pool</h3>
-<p style="font-size:24px;line-height:1.4;color:#A8BCB8">Issues the task ticket, collects the run, pays its people.</p>
+<div data-build-in="rise 2 auto" style="position:absolute;left:556px;top:420px;width:380px;display:flex;flex-direction:column;gap:12px;background:#111A1F;border:1px solid #22323A;border-radius:20px;padding:40px">
+<p style="font-size:72px;font-weight:700;line-height:1.1;color:#2EC4B6">2</p>
+<h3 style="font-size:44px;font-weight:700;color:#EAF2F0">Submit</h3>
+<p style="font-size:24px;line-height:1.4;color:#A8BCB8">Your run goes to a miner pool.</p>
 </div>
-<x-connector style="width:48px;height:2px;color:#2EC4B6"></x-connector>
-<div style="flex:1;display:flex;flex-direction:column;gap:12px;background:#0F2A2E;border:1px solid #2EC4B6;border-radius:16px;padding:28px">
-<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#2EC4B6">03</p>
-<h3 style="font-size:32px;font-weight:600;color:#EAF2F0">Validator</h3>
-<p style="font-size:24px;line-height:1.4;color:#A8BCB8">Replays the run in native MuJoCo, checks success, scores it.</p>
+<div data-build-in="rise 3 auto" style="position:absolute;left:984px;top:420px;width:380px;display:flex;flex-direction:column;gap:12px;background:#0F2A2E;border:1px solid #2EC4B6;border-radius:20px;padding:40px">
+<p style="font-size:72px;font-weight:700;line-height:1.1;color:#2EC4B6">3</p>
+<h3 style="font-size:44px;font-weight:700;color:#EAF2F0">Verify</h3>
+<p style="font-size:24px;line-height:1.4;color:#A8BCB8">Validators replay it and score it.</p>
 </div>
-<x-connector style="width:48px;height:2px;color:#2EC4B6"></x-connector>
-<div style="flex:1;display:flex;flex-direction:column;gap:12px;background:#111A1F;border:1px solid #22323A;border-radius:16px;padding:28px">
-<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#2EC4B6">04</p>
-<h3 style="font-size:32px;font-weight:600;color:#EAF2F0">Subtensor</h3>
-<p style="font-size:24px;line-height:1.4;color:#A8BCB8">Weights every tempo, plus a Merkle root of accepted runs.</p>
+<div data-build-in="rise 4 auto" style="position:absolute;left:1412px;top:420px;width:380px;display:flex;flex-direction:column;gap:12px;background:#111A1F;border:1px solid #22323A;border-radius:20px;padding:40px">
+<p style="font-size:72px;font-weight:700;line-height:1.1;color:#2EC4B6">4</p>
+<h3 style="font-size:44px;font-weight:700;color:#EAF2F0">Earn</h3>
+<p style="font-size:24px;line-height:1.4;color:#A8BCB8">Good runs earn rewards and join the dataset.</p>
 </div>
-<x-connector style="width:48px;height:2px;color:#2EC4B6"></x-connector>
-<div style="flex:1;display:flex;flex-direction:column;gap:12px;background:#111A1F;border:1px solid #22323A;border-radius:16px;padding:28px">
-<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#2EC4B6">05</p>
-<h3 style="font-size:32px;font-weight:600;color:#EAF2F0">Dataset</h3>
-<p style="font-size:24px;line-height:1.4;color:#A8BCB8">Training-ready export for VLA labs, replayable on a real arm.</p>
-</div>
-</div>
-<div style="flex:1"></div>
-<p style="font-size:32px;line-height:1.4;color:#A8BCB8">Physics on the phone. <span style="color:#EAF2F0">Verification on the network.</span> <span style="color:#2EC4B6">Value in the dataset.</span></p>
+<p data-build-in="fade 5 auto" style="position:absolute;left:128px;top:800px;width:1664px;font-size:32px;line-height:1.4;color:#A8BCB8">Physics on the phone. <span style="color:#EAF2F0">Verification on the network.</span> <span style="color:#2EC4B6">Data for robotics labs.</span></p>
 <div style="position:absolute;left:128px;right:128px;bottom:64px;display:flex;flex-direction:row;justify-content:space-between">
 <p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;letter-spacing:2px;color:#7E918D">TALOS</p>
 <p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#7E918D">06</p>
 </div>
-<aside>The flow in five steps. The phone gets a seeded task from a miner pool and runs the physics locally. The pool hands the recording to validators. Each validator replays it in native MuJoCo, the same 3.17 build the browser uses, checks success on its own replay and scores it. Scores become weights on chain every tempo, with a Merkle root of accepted runs. Accepted runs export as a standard robot-learning dataset.</aside>
+<aside>From the player’s side it is four steps. Drive a simulated robot arm on your phone, submit the run to a miner pool, validators replay and score it, and good runs earn rewards and become part of the dataset we sell to robotics labs.</aside>
 </section>

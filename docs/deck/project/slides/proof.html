@@ -1,35 +1,26 @@
-<section id="proof" data-transition="fade" style="background:#0A0F12;color:#EAF2F0;font-family:'Space Grotesk', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
-<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;letter-spacing:4px;text-transform:uppercase;color:#2EC4B6">04 · Traction</p>
-<h2 style="font-size:72px;font-weight:600;line-height:1.1;letter-spacing:-1px;color:#EAF2F0">Built and tested against attacks</h2>
-<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px">
-<div style="display:flex;flex-direction:column;gap:12px;background:#111A1F;border:1px solid #22323A;border-radius:16px;padding:40px">
+<section id="proof" data-transition="push" style="background:#10181C;color:#EAF2F0;font-family:'Space Grotesk', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;letter-spacing:4px;text-transform:uppercase;color:#2EC4B6">Traction</p>
+<h2 style="font-size:72px;font-weight:600;line-height:1.1;letter-spacing:-1px;color:#EAF2F0">It works today</h2>
+<div data-build-in="pop 1 auto" style="position:absolute;left:128px;top:420px;width:392px;display:flex;flex-direction:column;gap:16px;background:#111A1F;border:1px solid #22323A;border-radius:20px;padding:40px">
 <p style="font-size:72px;font-weight:700;line-height:1.1;color:#2EC4B6">0.1 mm</p>
-<p style="font-size:24px;line-height:1.4;color:#A8BCB8">max drift between browser WASM and native MuJoCo 3.17.0 on contact</p>
+<p style="font-size:24px;line-height:1.4;color:#A8BCB8">physics drift between the phone and the validator</p>
 </div>
-<div style="display:flex;flex-direction:column;gap:12px;background:#111A1F;border:1px solid #22323A;border-radius:16px;padding:40px">
+<div data-build-in="pop 2 auto" style="position:absolute;left:552px;top:420px;width:392px;display:flex;flex-direction:column;gap:16px;background:#111A1F;border:1px solid #22323A;border-radius:20px;padding:40px">
 <p style="font-size:72px;font-weight:700;line-height:1.1;color:#2EC4B6">~12 s</p>
-<p style="font-size:24px;line-height:1.4;color:#A8BCB8">to verify 20 simultaneous phones on one validator core</p>
+<p style="font-size:24px;line-height:1.4;color:#A8BCB8">to verify 20 phones at once</p>
 </div>
-<div style="display:flex;flex-direction:column;gap:12px;background:#111A1F;border:1px solid #22323A;border-radius:16px;padding:40px">
-<p style="font-size:72px;font-weight:700;line-height:1.1;color:#2EC4B6">0 passed</p>
-<p style="font-size:24px;line-height:1.4;color:#A8BCB8">forged, edited, copied or reused runs in our attack drills</p>
+<div data-build-in="pop 3 auto" style="position:absolute;left:976px;top:420px;width:392px;display:flex;flex-direction:column;gap:16px;background:#111A1F;border:1px solid #22323A;border-radius:20px;padding:40px">
+<p style="font-size:72px;font-weight:700;line-height:1.1;color:#2EC4B6">0</p>
+<p style="font-size:24px;line-height:1.4;color:#A8BCB8">faked or copied runs got through our attack tests</p>
 </div>
-<div style="display:flex;flex-direction:column;gap:12px;background:#111A1F;border:1px solid #22323A;border-radius:16px;padding:40px">
-<p style="font-size:72px;font-weight:700;line-height:1.1;color:#EAF2F0">Testnet</p>
-<p style="font-size:24px;line-height:1.4;color:#A8BCB8">live subnet: weights and epoch Merkle roots land on chain</p>
+<div data-build-in="pop 4 auto" style="position:absolute;left:1400px;top:420px;width:392px;display:flex;flex-direction:column;gap:16px;background:#111A1F;border:1px solid #22323A;border-radius:20px;padding:40px">
+<p style="font-size:72px;font-weight:700;line-height:1.1;color:#2EC4B6">Live</p>
+<p style="font-size:24px;line-height:1.4;color:#A8BCB8">own subnet on Bittensor testnet, weights on chain</p>
 </div>
-<div style="display:flex;flex-direction:column;gap:12px;background:#111A1F;border:1px solid #22323A;border-radius:16px;padding:40px">
-<p style="font-size:72px;font-weight:700;line-height:1.1;color:#EAF2F0">Dataset</p>
-<p style="font-size:24px;line-height:1.4;color:#A8BCB8">training-ready export with camera frames and a task instruction per episode</p>
-</div>
-<div style="display:flex;flex-direction:column;gap:12px;background:#111A1F;border:1px solid #22323A;border-radius:16px;padding:40px">
-<p style="font-size:72px;font-weight:700;line-height:1.1;color:#EAF2F0">Real arm</p>
-<p style="font-size:24px;line-height:1.4;color:#A8BCB8">accepted runs replay on a physical robot arm</p>
-</div>
-</div>
+<p data-build-in="fade 5 auto" style="position:absolute;left:128px;top:760px;width:1664px;font-size:32px;line-height:1.4;color:#A8BCB8">And verified runs play back on a <span style="color:#EAF2F0">real robot arm.</span></p>
 <div style="position:absolute;left:128px;right:128px;bottom:64px;display:flex;flex-direction:row;justify-content:space-between">
 <p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;letter-spacing:2px;color:#7E918D">TALOS</p>
 <p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#7E918D">08</p>
 </div>
-<aside>This is built, not a mockup. Browser and validator physics agree to a tenth of a millimetre, so strict replay works. Twenty phones at once verified in about twelve seconds on one core. Every attack drill (forged checkpoints, edited controls, wrong seed, wrong pool, reused ticket) was rejected with a reason. The subnet is live on testnet, the dataset export works, and accepted runs replay on a real SO-101.</aside>
+<aside>This is built, not a mockup. Phone and validator physics agree to a tenth of a millimetre. Twenty phones verified in about twelve seconds on one core. No faked, edited, copied or reused run got through our attack drills. The subnet is live on testnet with weights on chain, and accepted runs replay on a physical robot arm.</aside>
 </section>
