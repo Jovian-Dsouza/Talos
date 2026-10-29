@@ -1,0 +1,39 @@
+<section id="a-setup" data-transition="fade" style="background:#0A0F12;color:#EAF2F0;font-family:'Space Grotesk', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;letter-spacing:4px;text-transform:uppercase;color:#2EC4B6">A3 · Subnet</p>
+<h2 style="font-size:72px;font-weight:600;line-height:1.1;letter-spacing:-1px;color:#EAF2F0">How the subnet is created</h2>
+<div style="display:flex;flex-direction:row;gap:64px;align-items:start">
+<div style="flex:1;display:flex;flex-direction:column">
+<div style="display:flex;flex-direction:row;gap:24px;border-top:1px solid #22323A;padding:20px 0px">
+<p style="width:64px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#2EC4B6">01</p>
+<p style="flex:1;font-size:24px;line-height:1.4;color:#EAF2F0">RegisterSubnet locks TAO and creates the netuid <span style="color:#7E918D">(1 testnet TAO; about 440 TAO on mainnet)</span></p>
+</div>
+<div style="display:flex;flex-direction:row;gap:24px;border-top:1px solid #22323A;padding:20px 0px">
+<p style="width:64px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#2EC4B6">02</p>
+<p style="flex:1;font-size:24px;line-height:1.4;color:#EAF2F0">start_call turns on staking and emissions</p>
+</div>
+<div style="display:flex;flex-direction:row;gap:24px;border-top:1px solid #22323A;padding:20px 0px">
+<p style="width:64px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#2EC4B6">03</p>
+<p style="flex:1;font-size:24px;line-height:1.4;color:#EAF2F0">burned_register for the validator, the open pool and a second pool</p>
+</div>
+<div style="display:flex;flex-direction:row;gap:24px;border-top:1px solid #22323A;padding:20px 0px">
+<p style="width:64px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#2EC4B6">04</p>
+<p style="flex:1;font-size:24px;line-height:1.4;color:#EAF2F0">add_stake on the validator hotkey to earn a validator permit</p>
+</div>
+<div style="display:flex;flex-direction:row;gap:24px;border-top:1px solid #22323A;border-bottom:1px solid #22323A;padding:20px 0px">
+<p style="width:64px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#2EC4B6">05</p>
+<p style="flex:1;font-size:24px;line-height:1.4;color:#EAF2F0">Docker compose on a VM runs the pools and the validator</p>
+</div>
+</div>
+<div style="width:600px;display:flex;flex-direction:column;gap:20px;background:#111A1F;border:1px solid #22323A;border-radius:16px;padding:32px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;letter-spacing:2px;text-transform:uppercase;color:#2EC4B6">Facts</p>
+<p style="font-size:24px;line-height:1.4;color:#A8BCB8">Tempo is 360 blocks, about 72 minutes: emissions land once per epoch.</p>
+<p style="font-size:24px;line-height:1.4;color:#A8BCB8">Bittensor SDK 11 removed Axon and Dendrite, so Talos uses FastAPI with bt.http_auth signed requests.</p>
+<p style="font-size:24px;line-height:1.4;color:#A8BCB8">Development runs on a Docker localnet with fast blocks; the demo runs on testnet.</p>
+</div>
+</div>
+<div style="position:absolute;left:128px;right:128px;bottom:64px;display:flex;flex-direction:row;justify-content:space-between">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;letter-spacing:2px;color:#7E918D">TALOS</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#7E918D">A3</p>
+</div>
+<aside>We own the subnet. One script registers it, starts it, registers the validator and two pools, and stakes the validator. Testnet cost is about 1 TAO; mainnet needs roughly 440 TAO locked, which is why revenue has to come before mainnet. The newest Bittensor SDK dropped Axon and Dendrite, so the network layer is plain signed HTTP.</aside>
+</section>

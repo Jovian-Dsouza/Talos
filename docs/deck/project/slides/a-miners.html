@@ -1,0 +1,43 @@
+<section id="a-miners" data-transition="fade" style="background:#0A0F12;color:#EAF2F0;font-family:'Space Grotesk', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;letter-spacing:4px;text-transform:uppercase;color:#2EC4B6">A1 · Miners</p>
+<h2 style="font-size:72px;font-weight:600;line-height:1.1;letter-spacing:-1px;color:#EAF2F0">How a miner registers and runs</h2>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:24px">
+<div style="display:flex;flex-direction:column;gap:12px;background:#111A1F;border:1px solid #22323A;border-radius:16px;padding:32px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#2EC4B6">01 · Wallet</p>
+<p style="font-size:24px;line-height:1.4;color:#A8BCB8">Create a coldkey (holds TAO) and a hotkey (the pool’s identity).</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;background:#111A1F;border:1px solid #22323A;border-radius:16px;padding:32px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#2EC4B6">02 · Register</p>
+<p style="font-size:24px;line-height:1.4;color:#A8BCB8">Burn TAO with burned_register on the Talos netuid to get a UID.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;background:#111A1F;border:1px solid #22323A;border-radius:16px;padding:32px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#2EC4B6">03 · Publish</p>
+<p style="font-size:24px;line-height:1.4;color:#A8BCB8">ServeAxon writes the pool’s public IP and port on chain.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;background:#111A1F;border:1px solid #22323A;border-radius:16px;padding:32px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#2EC4B6">04 · Serve</p>
+<p style="font-size:24px;line-height:1.4;color:#A8BCB8">Run the FastAPI pool: tickets and uploads for phones, runs for validators.</p>
+</div>
+</div>
+<div style="display:flex;flex-direction:row;gap:48px;align-items:start">
+<div style="flex:1;display:grid;grid-template-columns:360px 1fr;gap:8px 24px;background:#111A1F;border:1px solid #22323A;border-radius:16px;padding:32px;font-family:'JetBrains Mono', 'Courier New', monospace">
+<p style="font-size:24px;line-height:1.6;color:#EAF2F0">GET /ticket</p>
+<p style="font-size:24px;line-height:1.6;color:#7E918D">phone: seeded task</p>
+<p style="font-size:24px;line-height:1.6;color:#EAF2F0">POST /submit</p>
+<p style="font-size:24px;line-height:1.6;color:#7E918D">phone: the recording</p>
+<p style="font-size:24px;line-height:1.6;color:#EAF2F0">GET /status</p>
+<p style="font-size:24px;line-height:1.6;color:#7E918D">phone: the verdict</p>
+<p style="font-size:24px;line-height:1.6;color:#2EC4B6">GET /trajectories</p>
+<p style="font-size:24px;line-height:1.6;color:#7E918D">validators only, signed</p>
+</div>
+<div style="width:560px;display:flex;flex-direction:column;gap:16px">
+<p style="font-size:24px;line-height:1.4;color:#A8BCB8">Validator pulls are signed with bt.http_auth and checked against the validator permit on chain, with fresh nonces.</p>
+<p style="font-size:24px;line-height:1.4;color:#A8BCB8">Miners never set weights. Emissions go to the pool’s UID, and the pool pays its people.</p>
+</div>
+</div>
+<div style="position:absolute;left:128px;right:128px;bottom:64px;display:flex;flex-direction:row;justify-content:space-between">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;letter-spacing:2px;color:#7E918D">TALOS</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#7E918D">A1</p>
+</div>
+<aside>A miner is a pool. It creates a Bittensor wallet, registers a hotkey on our subnet by burning a little TAO, publishes its HTTPS endpoint on chain with ServeAxon, then runs our FastAPI pool service. Phones talk to the public endpoints; validators pull recordings through a signed endpoint that only accepts hotkeys with a validator permit.</aside>
+</section>

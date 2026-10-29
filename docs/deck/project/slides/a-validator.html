@@ -1,0 +1,35 @@
+<section id="a-validator" data-transition="fade" style="background:#0A0F12;color:#EAF2F0;font-family:'Space Grotesk', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;letter-spacing:4px;text-transform:uppercase;color:#2EC4B6">A2 · Validators</p>
+<h2 style="font-size:72px;font-weight:600;line-height:1.1;letter-spacing:-1px;color:#EAF2F0">How a validator scores every run</h2>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px">
+<div style="display:flex;flex-direction:column;gap:12px;background:#111A1F;border:1px solid #22323A;border-radius:16px;padding:32px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#2EC4B6">01 · Pull</p>
+<p style="font-size:24px;line-height:1.4;color:#A8BCB8">Signed GET /trajectories from every pool’s on-chain endpoint, every few blocks.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;background:#111A1F;border:1px solid #22323A;border-radius:16px;padding:32px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#2EC4B6">02 · Ticket</p>
+<p style="font-size:24px;line-height:1.4;color:#A8BCB8">Seed derives correctly, block hash is on chain and fresh, ticket used once.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;background:#0F2A2E;border:1px solid #2EC4B6;border-radius:16px;padding:32px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#2EC4B6">03 · Replay</p>
+<p style="font-size:24px;line-height:1.4;color:#A8BCB8">Native MuJoCo 3.17.0 re-runs the controls. Drift must stay under 0.01 rad and 5 mm.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;background:#111A1F;border:1px solid #22323A;border-radius:16px;padding:32px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#2EC4B6">04 · Success</p>
+<p style="font-size:24px;line-height:1.4;color:#A8BCB8">Checked on the replayed state. The browser’s own flag is never trusted.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;background:#111A1F;border:1px solid #22323A;border-radius:16px;padding:32px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#2EC4B6">05 · Dedup, quality</p>
+<p style="font-size:24px;line-height:1.4;color:#A8BCB8">Near-duplicate paths rejected. Jerk, efficiency, idle time, collisions, gripper chatter.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;background:#111A1F;border:1px solid #22323A;border-radius:16px;padding:32px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#2EC4B6">06 · Weights</p>
+<p style="font-size:24px;line-height:1.4;color:#A8BCB8">Per-pool EMA, then SetWeights each tempo. Merkle root of accepted runs committed on chain.</p>
+</div>
+</div>
+<div style="position:absolute;left:128px;right:128px;bottom:64px;display:flex;flex-direction:row;justify-content:space-between">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;letter-spacing:2px;color:#7E918D">TALOS</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#7E918D">A2</p>
+</div>
+<aside>A validator is a staked hotkey with a validator permit running our Python validator. It discovers pools from the metagraph, pulls their recordings over signed HTTP, and runs six steps on each. Weights come from an exponential moving average of each pool’s score and are set once per tempo; Yuma Consensus combines validators. Each epoch the validator also commits one Merkle root of accepted run hashes, so provenance is on chain at a fraction of the cost of per-run records.</aside>
+</section>
