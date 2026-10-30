@@ -14,3 +14,7 @@
 
 - Think from first principles. Work out what the problem actually requires before reaching for existing patterns.
 - Write only the main code. Do not write QA tests, unit tests, or any other test code, and do not follow a TDD workflow in this repo.
+
+## Rules
+
+- Please use less amount of TAO for testing. Always use small amounts when doing test transactions.
