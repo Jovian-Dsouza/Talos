@@ -2,14 +2,8 @@
 const params = new URLSearchParams(window.location.search);
 
 function defaultPoolUrl(): string {
-  const env = import.meta.env.VITE_POOL_URL;
-  if (env) return env;
-  const { protocol, hostname, origin } = window.location;
-  // Desktop dev on localhost keeps a direct HTTP backend; HTTPS (tunnels, Vercel) uses same-origin /pool.
-  if (protocol === "https:" || (hostname !== "localhost" && hostname !== "127.0.0.1")) {
-    return `${origin}/pool`;
-  }
-  return "http://127.0.0.1:8091";
+  // Same origin everywhere: Vite (dev and preview) proxies /pool to POOL_TARGET, Vercel rewrites it.
+  return import.meta.env.VITE_POOL_URL || `${window.location.origin}/pool`;
 }
 
 export const POOL_URL: string = params.get("pool") ?? defaultPoolUrl();

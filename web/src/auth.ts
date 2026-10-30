@@ -1,4 +1,4 @@
-import { Clerk } from "@clerk/clerk-js";
+import type { Clerk } from "@clerk/clerk-js";
 import { CLERK_KEY, DEV_LOGIN } from "./config";
 
 let clerk: Clerk | null = null;
@@ -7,9 +7,14 @@ const listeners = new Set<() => void>();
 
 export const authAvailable = Boolean(devName || CLERK_KEY);
 
+/** `?dev=NAME` to carry a local dev sign-in across page links; empty otherwise. */
+export const devQuery: string = devName ? `?dev=${encodeURIComponent(devName)}` : "";
+
 export async function initAuth(): Promise<void> {
   if (devName || !CLERK_KEY) return;
-  clerk = new Clerk(CLERK_KEY);
+  // Loaded on demand so pages that only read public data stay light.
+  const { Clerk: ClerkClass } = await import("@clerk/clerk-js");
+  clerk = new ClerkClass(CLERK_KEY);
   await clerk.load();
   clerk.addListener(() => listeners.forEach((notify) => notify()));
 }

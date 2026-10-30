@@ -1,0 +1,72 @@
+/* TauNet tokens, shared by every page. A run is a lab sample: bench colours for the page, nitrile
+   blue for actions and single-series charts, safety yellow only for the player's own progress. The
+   verified, rejected and waiting fills were checked with the dataviz palette validator in both modes. */
+:root {
+  color-scheme: light;
+  --bench: #e8eeeb;
+  --surface: #fbfcfb;
+  --surface-2: #f0f4f2;
+  --ink: #13201c;
+  --ink-2: #4c5a55;
+  --ink-3: #6a7772;
+  --line: #cfd8d4;
+  --nitrile: #3a4fd6;
+  --nitrile-ink: #ffffff;
+  --nitrile-soft: #e3e7fb;
+  --hazard: #f2c12e;
+  --hazard-ink: #13201c;
+  --hazard-soft: #fbefc6;
+  --hazard-line: #ecc95a;
+  --verified: #1fae4b;
+  --verified-text: #0b6b1d;
+  --rejected: #9e2222;
+  --rejected-text: #a92626;
+  --waiting: #9aa7a2;
+  --radius-s: 6px;
+  --radius-m: 12px;
+  --radius-l: 20px;
+  --font: "Archivo", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bench: #0e1614;
+    --surface: #151f1c;
+    --surface-2: #1b2723;
+    --ink: #e5edea;
+    --ink-2: #b3c0bb;
+    --ink-3: #8b9994;
+    --line: #2b3834;
+    --nitrile: #8a98ff;
+    --nitrile-ink: #0d1330;
+    --nitrile-soft: #20284f;
+    --hazard-soft: #3a3217;
+    --hazard-line: #8a7224;
+    --verified: #3fae5c;
+    --verified-text: #63d37b;
+    --rejected: #c43c36;
+    --rejected-text: #ff8f8f;
+    --waiting: #7f8e89;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bench: #0e1614;
+  --surface: #151f1c;
+  --surface-2: #1b2723;
+  --ink: #e5edea;
+  --ink-2: #b3c0bb;
+  --ink-3: #8b9994;
+  --line: #2b3834;
+  --nitrile: #8a98ff;
+  --nitrile-ink: #0d1330;
+  --nitrile-soft: #20284f;
+  --hazard-soft: #3a3217;
+  --hazard-line: #8a7224;
+  --verified: #3fae5c;
+  --verified-text: #63d37b;
+  --rejected: #c43c36;
+  --rejected-text: #ff8f8f;
+  --waiting: #7f8e89;
+}
