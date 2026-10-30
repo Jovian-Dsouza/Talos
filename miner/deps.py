@@ -17,6 +17,7 @@ from miner.ratelimit import RateLimiter
 
 VALIDATOR_CACHE_SECONDS = 30
 NEURON_CACHE_SECONDS = 10
+SUBNET_NAME_CACHE_SECONDS = 300
 
 
 @dataclass
@@ -33,12 +34,19 @@ class AppState:
     })
     _validators: dict[str, Any] = field(default_factory=lambda: {"at": 0.0, "keys": frozenset()})
     _neurons: dict[str, Any] = field(default_factory=lambda: {"at": 0.0, "items": []})
+    _subnet_name: dict[str, Any] = field(default_factory=lambda: {"at": float("-inf"), "name": None})
 
     def neurons(self) -> list[NeuronView]:
         if time.monotonic() - self._neurons["at"] > NEURON_CACHE_SECONDS:
             self._neurons["items"] = self.chain.neurons()
             self._neurons["at"] = time.monotonic()
         return self._neurons["items"]
+
+    def subnet_name(self) -> str | None:
+        if time.monotonic() - self._subnet_name["at"] > SUBNET_NAME_CACHE_SECONDS:
+            self._subnet_name["name"] = self.chain.subnet_name()
+            self._subnet_name["at"] = time.monotonic()
+        return self._subnet_name["name"]
 
     def validator_keys(self) -> frozenset[str]:
         if time.monotonic() - self._validators["at"] > VALIDATOR_CACHE_SECONDS:

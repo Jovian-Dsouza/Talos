@@ -13,6 +13,7 @@ from miner.app import create_app
 from miner.config import MinerConfig
 from miner.db import MinerDb
 from miner.deps import AppState
+from miner.earnings import StakeSampler
 
 
 def main() -> None:
@@ -28,6 +29,7 @@ def main() -> None:
         config=config, db=MinerDb(config.data_dir), chain=chain, accounts=accounts, vault=vault,
         auth=ClerkAuth(ClerkSettings.from_env(config.chain_endpoint)),
     )
+    StakeSampler(state).start()
     uvicorn.run(create_app(state), host=config.host, port=config.port)
 
 

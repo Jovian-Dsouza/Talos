@@ -114,6 +114,15 @@ class Chain:
     def balance_rao(self, coldkey_ss58: str) -> int:
         return int(self._st.read("balance", coldkey_ss58=coldkey_ss58).rao)
 
+    def stake_alpha(self, coldkey_ss58: str, hotkey_ss58: str) -> float:
+        """Alpha the coldkey holds on the hotkey here. A miner's emissions accrue as exactly this stake."""
+        stake = self._st.read("stake", coldkey_ss58=coldkey_ss58, hotkey_ss58=hotkey_ss58, netuid=self.netuid)
+        return float(stake.alpha)
+
+    def alpha_price(self) -> float:
+        """Spot price of this subnet's alpha, in TAO per alpha."""
+        return float(self._st.read("alpha_price", netuid=self.netuid)["tao_per_alpha"])
+
     def burn_rao(self) -> int:
         """Current cost to register one neuron on this subnet."""
         return int(self._st.read("burn", netuid=self.netuid).rao)

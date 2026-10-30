@@ -1,4 +1,4 @@
-"""SQLite storage for issued tickets, received bundles and validator verdicts (all players)."""
+"""SQLite storage for issued tickets, received bundles, validator verdicts and stake samples (all players)."""
 
 import json
 import sqlite3
@@ -17,13 +17,37 @@ CREATE TABLE IF NOT EXISTS tickets (
 CREATE TABLE IF NOT EXISTS bundles (
   seq INTEGER PRIMARY KEY AUTOINCREMENT, bundle_id TEXT UNIQUE NOT NULL, counter INTEGER NOT NULL,
   hotkey TEXT NOT NULL, contributor TEXT NOT NULL, signature TEXT NOT NULL, path TEXT NOT NULL,
-  received_at REAL NOT NULL
+  received_at REAL NOT NULL, task_id TEXT NOT NULL DEFAULT ''
 );
 CREATE TABLE IF NOT EXISTS verdicts (
   bundle_id TEXT NOT NULL, validator TEXT NOT NULL, verdict TEXT NOT NULL, created_at REAL NOT NULL,
   PRIMARY KEY (bundle_id, validator)
 );
+CREATE TABLE IF NOT EXISTS stake_samples (
+  hotkey TEXT NOT NULL, block INTEGER NOT NULL, alpha REAL NOT NULL, at REAL NOT NULL
+);
+CREATE INDEX IF NOT EXISTS stake_samples_by_hotkey ON stake_samples (hotkey, at);
 """
+
+# Each run with its first verdict (the earliest validator to judge it), or NULLs while it waits.
+JOBS_SQL = """
+WITH first AS (
+  SELECT bundle_id, validator, verdict, created_at,
+         ROW_NUMBER() OVER (PARTITION BY bundle_id ORDER BY created_at) AS n
+  FROM verdicts
+)
+SELECT b.seq, b.bundle_id, b.hotkey, b.contributor, b.task_id, b.received_at, f.validator, f.verdict, f.created_at
+FROM bundles b LEFT JOIN first f ON f.bundle_id = b.bundle_id AND f.n = 1
+"""
+
+
+def _job(row: tuple) -> dict[str, Any]:
+    seq, bundle_id, hotkey, contributor, task_id, received_at, validator, verdict, judged_at = row
+    return {
+        "seq": seq, "bundle_id": bundle_id, "hotkey": hotkey, "contributor": contributor, "task_id": task_id,
+        "received_at": received_at, "validator": validator,
+        "verdict": json.loads(verdict) if verdict else None, "judged_at": judged_at,
+    }
 
 
 class MinerDb:
@@ -34,6 +58,20 @@ class MinerDb:
         self._db = sqlite3.connect(str(data_dir / "miner.db"), check_same_thread=False)
         self._lock = threading.RLock()
         self._db.executescript(SCHEMA)
+        self._add_task_ids()
+
+    def _add_task_ids(self) -> None:
+        """Databases from before task_id existed: add the column and fill it from the stored bundles."""
+        columns = {row[1] for row in self._db.execute("PRAGMA table_info(bundles)")}
+        with self._db:
+            if "task_id" not in columns:
+                self._db.execute("ALTER TABLE bundles ADD COLUMN task_id TEXT NOT NULL DEFAULT ''")
+            for seq, path in self._db.execute("SELECT seq, path FROM bundles WHERE task_id=''").fetchall():
+                try:
+                    task_id = json.loads(Path(path).read_text())["ticket"]["task_id"]
+                except (OSError, ValueError, KeyError, TypeError):
+                    continue
+                self._db.execute("UPDATE bundles SET task_id=? WHERE seq=?", (task_id, seq))
 
     @locked
     def issue_ticket_slot(self, hotkey: str, block: int, block_hash: str) -> int:
@@ -70,14 +108,14 @@ class MinerDb:
 
     @locked
     def add_bundle(self, bundle_id: str, counter: int, hotkey: str, contributor: str, signature: str,
-                   raw_text: str) -> int:
+                   task_id: str, raw_text: str) -> int:
         path = self._dir / "bundles" / f"{bundle_id}.json"
         path.write_text(raw_text)
         with self._db:
             cursor = self._db.execute(
-                "INSERT INTO bundles (bundle_id, counter, hotkey, contributor, signature, path, received_at)"
-                " VALUES (?,?,?,?,?,?,?)",
-                (bundle_id, counter, hotkey, contributor, signature, str(path), time.time()),
+                "INSERT INTO bundles (bundle_id, counter, hotkey, contributor, signature, path, received_at, task_id)"
+                " VALUES (?,?,?,?,?,?,?,?)",
+                (bundle_id, counter, hotkey, contributor, signature, str(path), time.time(), task_id),
             )
         return int(cursor.lastrowid)
 
@@ -123,21 +161,34 @@ class MinerDb:
         }
 
     @locked
+    def jobs(self, *, hotkey: str | None = None, task_id: str | None = None, since: float = 0.0,
+             before_seq: int | None = None, judged_only: bool = False, limit: int = -1) -> list[dict[str, Any]]:
+        """Runs newest first, each with its first verdict (None while no validator has judged it)."""
+        where, params = ["b.received_at >= ?"], [since]
+        if hotkey is not None:
+            where.append("b.hotkey = ?")
+            params.append(hotkey)
+        if task_id is not None:
+            where.append("b.task_id = ?")
+            params.append(task_id)
+        if before_seq is not None:
+            where.append("b.seq < ?")
+            params.append(before_seq)
+        if judged_only:
+            where.append("f.verdict IS NOT NULL")
+        sql = f"{JOBS_SQL} WHERE {' AND '.join(where)} ORDER BY b.seq DESC LIMIT ?"
+        return [_job(row) for row in self._db.execute(sql, (*params, limit)).fetchall()]
+
     def player_totals(self) -> dict[str, dict[str, Any]]:
-        """Per hotkey: runs submitted, accepted and summed score from the first verdict of each run."""
-        rows = self._db.execute(
-            "SELECT b.hotkey, b.contributor, v.verdict FROM bundles b "
-            "JOIN verdicts v ON v.bundle_id=b.bundle_id GROUP BY b.bundle_id"
-        ).fetchall()
+        """Per hotkey: runs judged, accepted and summed score from the first verdict of each run."""
         totals: dict[str, dict[str, Any]] = {}
-        for hotkey, contributor, text in rows:
-            verdict = json.loads(text)
-            entry = totals.setdefault(hotkey, {"hotkey": hotkey, "contributor": contributor,
-                                               "submitted": 0, "accepted": 0, "value": 0.0})
+        for job in self.jobs(judged_only=True):
+            entry = totals.setdefault(job["hotkey"], {"hotkey": job["hotkey"], "contributor": job["contributor"],
+                                                      "submitted": 0, "accepted": 0, "value": 0.0})
             entry["submitted"] += 1
-            if verdict.get("accepted"):
+            if job["verdict"].get("accepted"):
                 entry["accepted"] += 1
-                entry["value"] += float(verdict.get("score", 0.0))
+                entry["value"] += float(job["verdict"].get("score", 0.0))
         return totals
 
     @locked
@@ -147,3 +198,42 @@ class MinerDb:
             "JOIN bundles b ON b.bundle_id=v.bundle_id ORDER BY v.created_at DESC LIMIT ?", (limit,)
         ).fetchall()
         return [{"hotkey": h, "contributor": c, "verdict": json.loads(v), "at": at} for h, c, v, at in rows]
+
+    @locked
+    def playing_since(self, since: float) -> int:
+        """Players holding a ticket issued since `since` that they have not submitted yet."""
+        row = self._db.execute(
+            "SELECT COUNT(DISTINCT hotkey) FROM tickets WHERE submitted=0 AND issued_at >= ?", (since,)
+        ).fetchone()
+        return int(row[0])
+
+    @locked
+    def validators_since(self, since: float) -> int:
+        """Distinct validators that pushed a verdict since `since`."""
+        row = self._db.execute(
+            "SELECT COUNT(DISTINCT validator) FROM verdicts WHERE created_at >= ?", (since,)
+        ).fetchone()
+        return int(row[0])
+
+    @locked
+    def latest_stakes(self) -> dict[str, float]:
+        rows = self._db.execute(
+            "SELECT hotkey, alpha FROM stake_samples s WHERE at = (SELECT MAX(at) FROM stake_samples WHERE hotkey=s.hotkey)"
+        ).fetchall()
+        return {hotkey: alpha for hotkey, alpha in rows}
+
+    @locked
+    def add_stake_samples(self, samples: list[tuple[str, int, float]]) -> None:
+        now = time.time()
+        with self._db:
+            self._db.executemany(
+                "INSERT INTO stake_samples (hotkey, block, alpha, at) VALUES (?,?,?,?)",
+                [(hotkey, block, alpha, now) for hotkey, block, alpha in samples],
+            )
+
+    @locked
+    def stake_history(self, hotkey: str, limit: int) -> list[dict[str, Any]]:
+        rows = self._db.execute(
+            "SELECT block, alpha, at FROM stake_samples WHERE hotkey=? ORDER BY at DESC LIMIT ?", (hotkey, limit)
+        ).fetchall()
+        return [{"block": block, "alpha": alpha, "at": at} for block, alpha, at in reversed(rows)]

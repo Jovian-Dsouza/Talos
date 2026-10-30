@@ -1,6 +1,7 @@
-"""Routes a signed-in player uses: profile, ticket, submit, run status."""
+"""Routes a signed-in player uses: profile, progress, wallet, ticket, submit, run status."""
 
 import json
+import logging
 from typing import Any
 
 from fastapi import APIRouter, HTTPException, Request
@@ -10,8 +11,13 @@ from common.mjcf import model_hash
 from common.scene import pick_task
 from common.ticket import TICKET_TTL_BLOCKS, build_ticket
 from miner.deps import AppState, current_user, limit
+from miner.progress import progress
+from miner.wallet import wallet_view
+
+log = logging.getLogger("routes_player")
 
 MAX_BODY_BYTES = 4_000_000
+WALLET_HISTORY = 240
 
 
 def build_router(state: AppState) -> APIRouter:
@@ -32,6 +38,34 @@ def build_router(state: AppState) -> APIRouter:
             "incentive": neuron.incentive if neuron else 0.0, "emission": neuron.emission if neuron else 0,
             "netuid": cfg.netuid,
         }
+
+    @router.get("/me/progress")
+    def my_progress(request: Request) -> dict[str, Any]:
+        user = current_user(state, request)
+        limit(state, "read", request, user)
+        hotkey = user.wallet.hotkey_ss58
+        ranking = sorted(db.player_totals().values(), key=lambda row: row["value"], reverse=True)
+        rank = next((i + 1 for i, row in enumerate(ranking) if row["hotkey"] == hotkey), None)
+        return progress(db.jobs(hotkey=hotkey), cfg.task_ids, rank, len(ranking))
+
+    @router.get("/me/wallet")
+    def my_wallet(request: Request) -> dict[str, Any]:
+        user = current_user(state, request)
+        limit(state, "read", request, user)
+        coldkey, hotkey = user.wallet.coldkey_ss58, user.wallet.hotkey_ss58
+        neuron = next((n for n in state.neurons() if n.hotkey == hotkey), None)
+        try:
+            free_rao = chain.balance_rao(coldkey)
+            staked = chain.stake_alpha(coldkey, hotkey) if neuron else 0.0
+            price = chain.alpha_price()
+        except Exception as exc:  # the SDK raises several transport and decode errors
+            log.warning("wallet read failed for %s: %s", hotkey, exc)
+            raise HTTPException(503, "could not reach the chain, try again in a moment") from exc
+        return wallet_view(
+            coldkey=coldkey, hotkey=hotkey, uid=user.uid, registration=user.reg_status, netuid=cfg.netuid,
+            subnet_name=state.subnet_name(), free_rao=free_rao, staked_alpha=staked, alpha_price=price,
+            emission_rao=neuron.emission if neuron else 0, history=db.stake_history(hotkey, WALLET_HISTORY),
+        )
 
     @router.get("/ticket")
     def ticket(request: Request, task: str | None = None) -> dict[str, Any]:
@@ -81,7 +115,8 @@ def build_router(state: AppState) -> APIRouter:
             raise HTTPException(410, "ticket expired")
         bundle_id = bundle.bundle_id()
         signature = state.vault.open(user.wallet).hotkey.sign(bundle_id.encode()).hex()
-        db.add_bundle(bundle_id, ticket_in.counter, hotkey, user.display_name, signature, json.dumps(raw))
+        db.add_bundle(bundle_id, ticket_in.counter, hotkey, user.display_name, signature, ticket_in.task_id,
+                      json.dumps(raw))
         return {"bundle_id": bundle_id, "status": "pending", "registration": user.reg_status}
 
     @router.get("/status/{bundle_id}")

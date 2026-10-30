@@ -21,6 +21,12 @@ def _task_ids() -> tuple[str, ...]:
     return tasks
 
 
+def _dataset_links() -> dict[str, str]:
+    """DATASET_URLS="task_id=https://...,task_id=https://..." links each task's published dataset."""
+    links = dict(part.split("=", 1) for part in _csv("DATASET_URLS") if "=" in part)
+    return {task.strip(): url.strip() for task, url in links.items()}
+
+
 def _treasury_secret(chain_endpoint: str) -> str:
     """The dev account pays on a local chain; anywhere else the treasury key must be supplied."""
     secret = os.environ.get("TREASURY_MNEMONIC", "")
@@ -45,6 +51,7 @@ class MinerConfig:
     trust_proxy: bool
     treasury_mnemonic: str
     wallet_encryption_key: str
+    dataset_links: dict[str, str]
 
     @staticmethod
     def from_env() -> "MinerConfig":
@@ -66,4 +73,5 @@ class MinerConfig:
             trust_proxy=os.environ.get("MINER_TRUST_PROXY", "0") == "1",
             treasury_mnemonic=_treasury_secret(chain_endpoint),
             wallet_encryption_key=key,
+            dataset_links=_dataset_links(),
         )
