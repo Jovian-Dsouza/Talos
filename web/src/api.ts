@@ -42,3 +42,7 @@ export async function fetchLeaderboard(pool: string): Promise<LeaderboardEntry[]
   const body = await json<{ contributors: LeaderboardEntry[] }>(await fetch(`${pool}/leaderboard`));
   return body.contributors;
 }
+
+export async function fetchTasks(pool: string): Promise<string[]> {
+  return (await json<{ tasks: string[] }>(await fetch(`${pool}/tasks`))).tasks;
+}

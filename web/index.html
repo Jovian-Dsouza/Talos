@@ -18,7 +18,8 @@
 
       <section id="intro" class="card">
         <h1>Teach the arm</h1>
-        <p>Drive a simulated SO-101 robot arm. Validators replay your run and score it, and the network pays for data that checks out.</p>
+        <p>Pick a job, then drive a simulated SO-101 robot arm through it. Validators replay your run and score it, and the network pays for data that checks out.</p>
+        <div id="tasks" class="task-list" role="radiogroup" aria-label="Task"></div>
         <label>Nickname<input id="nickname" maxlength="24" autocomplete="off" placeholder="your name" /></label>
         <label>Wallet address (optional)<input id="wallet" maxlength="64" autocomplete="off" placeholder="5F..." /></label>
         <p class="tip touch-only">Tip: hold your phone sideways for the biggest view.</p>
@@ -67,7 +68,8 @@
         <ol id="leaderboard"></ol>
         <p id="pools"></p>
         <p><a id="explorer" target="_blank" rel="noreferrer" hidden>See the validator's weights on chain</a></p>
-        <button id="again" class="primary">Try another</button>
+        <button id="again" class="primary">Same task, new scene</button>
+        <button id="switch" class="secondary wide">Switch task</button>
       </section>
     </main>
     <script type="module" src="/src/main.ts"></script>

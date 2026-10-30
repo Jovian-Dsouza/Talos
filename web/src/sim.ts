@@ -86,6 +86,17 @@ export class Sim {
     return [p[3 * id], p[3 * id + 1], p[3 * id + 2]];
   }
 
+  sitePos(name: string): [number, number, number] {
+    const id = this.model.site(name).id;
+    const p = this.data.site_xpos;
+    return [p[3 * id], p[3 * id + 1], p[3 * id + 2]];
+  }
+
+  /** z component of the body's up axis: 1 when upright, 0 when lying on its side. */
+  bodyUpright(name: string): number {
+    return this.data.xmat[9 * this.model.body(name).id + 8];
+  }
+
   dispose(): void {
     this.data.delete();
     this.model.delete();

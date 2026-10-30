@@ -1,4 +1,4 @@
-import { fetchLeaderboard, fetchTicket, submitBundle, waitForVerdict } from "./api";
+import { fetchLeaderboard, fetchTasks, fetchTicket, submitBundle, waitForVerdict } from "./api";
 import { EXPLORER_URL, POOL_URL, POOL_URLS } from "./config";
 import { HEIGHT_MAX, HEIGHT_MIN } from "./constants";
 import { Controls } from "./controls";
@@ -8,6 +8,7 @@ import { buildSlotLabels } from "./labels";
 import { Joystick } from "./joystick";
 import { Session } from "./session";
 import { getMujoco, Sim } from "./sim";
+import { TASKS, taskInfo, type TaskInfo } from "./tasks";
 import type { LeaderboardEntry, Verdict } from "./types";
 import { SceneView } from "./view";
 
@@ -22,6 +23,7 @@ let session: Session | null = null;
 let contributor = "anonymous";
 let submitting = false;
 let sticksOn = false;
+let task: TaskInfo = TASKS[0];
 let lastFrame = performance.now();
 let frameAverage = 1 / 60;
 let slowSeconds = 0;
@@ -47,7 +49,7 @@ function cleanup(): void {
 
 async function beginRound(): Promise<void> {
   cleanup();
-  const [mujoco, ticket] = await Promise.all([getMujoco(), fetchTicket(POOL_URL, "put_cube_in_bowl")]);
+  const [mujoco, ticket] = await Promise.all([getMujoco(), fetchTicket(POOL_URL, task.id)]);
   sim = new Sim(mujoco, ticket.scene_xml);
   view.build(sim);
   view.setDecor(buildSlotLabels(sim, ticket.scene_spec));
@@ -69,6 +71,51 @@ async function beginRound(): Promise<void> {
   show("insets", true);
   submitting = false;
   keepAwake(true);
+}
+
+function renderTasks(offered: readonly TaskInfo[]): void {
+  const list = $("tasks");
+  list.replaceChildren();
+  const cards = offered.map((info) => {
+    const card = document.createElement("button");
+    card.type = "button";
+    card.className = "task";
+    card.setAttribute("role", "radio");
+    for (const [tag, text] of [["em", info.industry], ["strong", info.title], ["span", info.blurb]] as const) {
+      const part = document.createElement(tag);
+      part.textContent = text;
+      card.append(part);
+    }
+    card.addEventListener("click", () => {
+      task = info;
+      for (const other of cards) other.setAttribute("aria-checked", String(other === card));
+    });
+    return card;
+  });
+  const first = offered.find((info) => info.id === task.id) ?? offered[0];
+  task = first;
+  cards.forEach((card, i) => card.setAttribute("aria-checked", String(offered[i] === first)));
+  list.append(...cards);
+}
+
+/** Offer the tasks the pool serves, in its order; fall back to the full catalog if it cannot say. */
+async function loadTasks(): Promise<void> {
+  try {
+    const served = await fetchTasks(POOL_URL);
+    const offered = served.map(taskInfo).filter((info, i) => info.id === served[i]);
+    renderTasks(offered.length > 0 ? offered : TASKS);
+  } catch (error) {
+    console.debug("pool did not list tasks", error);
+    renderTasks(TASKS);
+  }
+}
+
+function backToIntro(): void {
+  cleanup();
+  keepAwake(false);
+  for (const id of ["result", "hud", "dock", "insets"]) show(id, false);
+  show("intro", true);
+  $<HTMLButtonElement>("start").disabled = false;
 }
 
 function setSticks(on: boolean): void {
@@ -101,7 +148,7 @@ function frame(now: number): void {
     view.setMarker(tx, ty, tz);
     $("timer").textContent = `${(session.steps * 0.02).toFixed(1)} s`;
     if (session.phase === "full") setStatus("Time limit reached, submit or reset");
-    else if (session.readyToSubmit) setStatus("Cube is in the bowl. Submit when ready.", true);
+    else if (session.readyToSubmit) setStatus(task.done, true);
     else if (session.phase === "recording") setStatus("Recording");
     $<HTMLButtonElement>("submit").disabled = !session.canSubmit;
     syncHeightSlider();
@@ -197,6 +244,7 @@ function bindUi(): void {
       start.disabled = false;
     }
   });
+  $("switch").addEventListener("click", backToIntro);
   $("again").addEventListener("click", () => void beginRound().catch((e) => ($("verdict-detail").textContent = String(e))));
   $("reset").addEventListener("click", replayAttempt);
   $("submit").addEventListener("click", () => void submit());
@@ -253,6 +301,7 @@ function bindUi(): void {
 }
 
 bindUi();
+void loadTasks();
 requestAnimationFrame(frame);
 if (new URLSearchParams(window.location.search).has("debug")) {
   // Test hook for automated browser runs: lets a script read the live session and view.

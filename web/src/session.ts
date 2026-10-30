@@ -44,7 +44,7 @@ export class Session {
   ) {
     this.target = sim.tip();
     for (let i = 0; i < IK_WARMUP; i++) this.q = this.ik.solve(this.q, this.target);
-    this.progress = checkProgress(sim);
+    this.progress = checkProgress(sim, ticket.scene_spec);
   }
 
   get phase(): Phase {
@@ -98,7 +98,7 @@ export class Session {
     this.sim.step(row);
     this.ctrl.push(row);
     if (this.ctrl.length % CHECKPOINT_EVERY === 0) this.checkpoints.push(this.sim.state());
-    this.progress = checkProgress(this.sim);
+    this.progress = checkProgress(this.sim, this.ticket.scene_spec);
     this.settled = this.progress.success ? this.settled + 1 : 0;
   }
 

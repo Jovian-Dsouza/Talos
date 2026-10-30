@@ -1,28 +1,46 @@
 import type { Sim } from "./sim";
+import type { SceneSpec } from "./types";
 
-// Same rules as common/tasks/put_cube_in_bowl.json. Only the validator's copy decides success;
-// this one gives instant feedback.
-const RULE = { xyRadius: 0.03, zMin: 0.008, zMax: 0.03, maxSpeed: 0.05, maxArmSpeed: 0.2 };
+// Same rules as common/tasks/*.json. Only the validator's copy decides success; this one gives
+// instant feedback.
+const CONTAINER_RULE = { xyRadius: 0.03, zMin: 0.008, zMax: 0.03, maxSpeed: 0.05, maxArmSpeed: 0.2 };
+const SLOT_RULE = { xyRadius: 0.008, zMin: 0.026, zMax: 0.034, minUpright: 0.94, maxSpeed: 0.05, maxArmSpeed: 0.2 };
 
 export interface Progress {
   success: boolean;
   distance: number;
 }
 
-export function checkProgress(sim: Sim): Progress {
-  const cube = sim.bodyPos("cube_target");
-  const bowl = sim.bodyPos("bowl_target");
-  const distance = Math.hypot(cube[0] - bowl[0], cube[1] - bowl[1]);
-  const first: number = sim.model.body_dofadr[sim.model.body("cube_target").id];
-  let objectSpeed = 0;
-  for (let i = 0; i < 6; i++) objectSpeed += sim.data.qvel[first + i] ** 2;
-  let armSpeed = 0;
-  for (let i = 0; i < 6; i++) armSpeed += sim.data.qvel[i] ** 2;
+function speedOf(sim: Sim, first: number): number {
+  let sum = 0;
+  for (let i = 0; i < 6; i++) sum += sim.data.qvel[first + i] ** 2;
+  return Math.sqrt(sum);
+}
+
+export function checkProgress(sim: Sim, spec: SceneSpec): Progress {
+  const object = sim.bodyPos(spec.pick);
+  const objectSpeed = speedOf(sim, sim.model.body_dofadr[sim.model.body(spec.pick).id]);
+  const armSpeed = speedOf(sim, 0);
+  if (spec.target_slot !== undefined) {
+    const slot = sim.sitePos(`slot_${spec.target_slot}`);
+    const distance = Math.hypot(object[0] - slot[0], object[1] - slot[1]);
+    const rule = SLOT_RULE;
+    const success =
+      distance <= rule.xyRadius &&
+      object[2] >= rule.zMin &&
+      object[2] <= rule.zMax &&
+      sim.bodyUpright(spec.pick) >= rule.minUpright &&
+      objectSpeed <= rule.maxSpeed &&
+      armSpeed <= rule.maxArmSpeed;
+    return { success, distance };
+  }
+  const distance = Math.hypot(object[0] - spec.place.x, object[1] - spec.place.y);
+  const rule = CONTAINER_RULE;
   const success =
-    distance <= RULE.xyRadius &&
-    cube[2] >= RULE.zMin &&
-    cube[2] <= RULE.zMax &&
-    Math.sqrt(objectSpeed) <= RULE.maxSpeed &&
-    Math.sqrt(armSpeed) <= RULE.maxArmSpeed;
+    distance <= rule.xyRadius &&
+    object[2] >= rule.zMin &&
+    object[2] <= rule.zMax &&
+    objectSpeed <= rule.maxSpeed &&
+    armSpeed <= rule.maxArmSpeed;
   return { success, distance };
 }
