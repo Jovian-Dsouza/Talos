@@ -554,3 +554,7 @@ tbody tr:hover { background: #ffffff40; }
   .demo-controls { border-left: 0; border-top: 1px solid var(--line); padding: 20px; }
   .demo-sliders { gap: 18px; }
 }
+
+.real-film { margin: 40px 0 0; }
+.real-film video { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; border: 1px solid var(--line); border-radius: 8px; background: var(--bench); box-shadow: var(--raised-shadow); }
+.real-film figcaption { margin-top: 12px; color: var(--ink-2); font-size: 13px; }

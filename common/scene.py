@@ -32,12 +32,12 @@ VIAL_TASK_ID = "rack_vial"
 VIAL_COLORS = ("red", "green", "blue", "orange", "purple", "teal")
 RACK_ROWS = "AB"
 RACK_COLS = 4
-RACK_PITCH = 0.048  # metres between slot centres (must exceed 2 * RACK_HOLE_HALF)
+RACK_PITCH = 0.058 # metres between slot centres (must exceed 2 * RACK_HOLE_HALF)
 RACK_RADIUS_RANGE = (0.20, 0.235)
 RACK_ANGLE_RANGE = (-0.35, 0.35)
 VIAL_RADIUS_RANGE = (0.17, 0.24)
 VIAL_ANGLE_RANGE = (-0.9, 0.9)
-RACK_CLEARANCE = 0.115  # keep loose vials away from the rack footprint
+RACK_CLEARANCE = 0.135 # keep loose vials away from the rack footprint
 VIAL_SEPARATION = 0.075
 
 

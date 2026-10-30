@@ -31,7 +31,7 @@ VIAL_GLASS_RGBA = "0.82 0.9 0.95 0.5"
 # Rack: base plate, then a top plate with square holes. Seated vial centre sits on the base.
 RACK_BASE_HALF_Z = 0.003
 RACK_TOP = 0.025
-RACK_HOLE_HALF = 0.0205
+RACK_HOLE_HALF = 0.0255
 RACK_RIM = 0.008
 RACK_RGBA = "0.28 0.31 0.34 1"
 SEATED_Z = 2 * RACK_BASE_HALF_Z + VIAL_HALF[2] + 0.0005
