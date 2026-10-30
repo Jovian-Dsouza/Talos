@@ -523,20 +523,13 @@ tbody tr:hover { background: #ffffff40; }
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
 
-/* The film is a background surface; the alternate view is an on-demand robot explorer. */
-.media-toolbar { display: flex; gap: 5px; padding: 5px; margin-bottom: 12px; width: fit-content; max-width: 100%; background: var(--surface-2); border-radius: 6px; box-shadow: var(--well-shadow); }
-.media-tab { min-height: 44px; padding: 0 18px; border: 1px solid var(--line); border-radius: var(--radius-s); background: var(--surface); color: var(--ink-2); font: 500 13px/1.4 var(--font); box-shadow: var(--raised-shadow); cursor: pointer; }
-.media-tab[aria-selected="true"] { background: var(--bench); color: var(--ink); box-shadow: var(--pressed-shadow); }
-.media-tab[aria-selected="true"]::before { content: ""; display: inline-block; width: 5px; height: 5px; margin: 0 8px 2px 0; border-radius: 50%; background: var(--nitrile); }
-.media-tab > span { margin-left: 10px; }
-.film-panel { position: relative; height: clamp(300px, 38vw, 500px); overflow: hidden; border-radius: 2px; background: var(--field); }
-.media-well .film-panel video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; background: #adb1b2; pointer-events: none; }
-.film-overlay { position: absolute; inset: 0; padding: 28px; display: flex; align-items: end; justify-content: space-between; gap: 20px; color: var(--on-field); background: linear-gradient(transparent 58%, #181e2299); }
-.film-overlay > span { font-size: clamp(22px, 3vw, 38px); font-weight: 500; letter-spacing: -.04em; line-height: 1.05; text-shadow: 0 1px 6px #181e2280; }
-.film-toggle { min-width: 104px; flex-shrink: 0; }
+/* The arm is immediately interactive, with reference footage behind the transparent canvas. */
 .demo-panel { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(260px, 1fr); background: var(--bench); }
-.demo-viewport { position: relative; min-width: 0; min-height: 420px; height: 100%; background: var(--surface-2); }
-#robot-demo { display: block; width: 100%; height: 100%; min-height: 420px; }
+.demo-viewport { position: relative; min-width: 0; min-height: 420px; height: 100%; overflow: hidden; isolation: isolate; background: var(--surface-2); }
+.media-well .demo-background { position: absolute; z-index: -2; inset: 0; width: 100%; height: 100%; min-height: 0; object-fit: cover; filter: grayscale(1); opacity: .24; }
+.demo-viewport::before { content: ""; position: absolute; z-index: -1; inset: 0; pointer-events: none; background: linear-gradient(135deg, #e7eaeb80, #b6bec233); }
+#robot-demo { position: relative; display: block; width: 100%; height: 100%; min-height: 420px; }
+.film-toggle { position: absolute; right: 14px; bottom: 14px; z-index: 1; display: grid; place-items: center; width: 40px; height: 40px; padding: 0; border: 1px solid var(--line); border-radius: var(--radius-s); background: var(--surface); color: var(--ink); box-shadow: var(--raised-shadow); font: 16px/1 var(--font); cursor: pointer; }
 .demo-status { position: absolute; top: 50%; left: 24px; right: 24px; margin: 0; transform: translateY(-50%); padding: 18px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-s); color: var(--ink-2); font-size: 14px; }
 .demo-retry { position: absolute; bottom: 24px; left: 24px; }
 .demo-controls { padding: 24px; border-left: 1px solid var(--line); }
@@ -552,20 +545,12 @@ tbody tr:hover { background: #ffffff40; }
 .demo-sliders input { grid-column: 1 / -1; width: 100%; margin: 0; min-height: 28px; accent-color: var(--ink); cursor: pointer; }
 .demo-view-actions { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; border-top: 1px solid var(--line); padding-top: 18px; }
 .demo-view-actions .btn { min-width: 40px; padding: 0 10px; font-size: 18px; }
-.demo-view-actions .inline-link { margin-left: auto; font-size: 12px; gap: 8px; }
 .media-credit { display: inline-block; margin-top: 4px; font-size: 11px; }
 .media-credit a { color: inherit; }
 @media (max-width: 1100px) { .demo-panel { grid-template-columns: minmax(0, 1fr) 280px; } .demo-controls { padding: 20px; } }
 @media (max-width: 760px) {
-  .film-panel { height: auto; aspect-ratio: 16 / 10; }
-  .film-overlay { padding: 16px; gap: 12px; }
-  .film-overlay > span { font-size: 22px; }
-  .film-toggle { min-width: 92px; font-size: 11px; padding: 0 12px; }
-  .media-tab { padding: 0 12px; font-size: 12px; }
-  .media-tab > span { margin-left: 4px; }
   .demo-panel { grid-template-columns: 1fr; }
   .demo-viewport, #robot-demo { height: 320px; min-height: 320px; }
   .demo-controls { border-left: 0; border-top: 1px solid var(--line); padding: 20px; }
   .demo-sliders { gap: 18px; }
 }
-@media (max-width: 370px) { .media-tab { font-size: 11px; padding: 0 9px; } .film-overlay { padding: 12px; } .film-overlay > span { font-size: 19px; } }

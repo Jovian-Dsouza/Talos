@@ -3,10 +3,9 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { STLLoader } from "three/examples/jsm/loaders/STLLoader.js";
 import arm from "./arm-model.json";
 import { JOINTS, POSES, type JointName, type JointState } from "./joints";
-import { ARM_MOUNT, WHEELS, chassisParts, makeGeometry, piParts, wheelParts, type Part } from "./robot-model";
 
-const CAMERA = new THREE.Vector3(0.68, 0.46, 0.65);
-const TARGET = new THREE.Vector3(0.03, 0.18, 0);
+const CAMERA = new THREE.Vector3(0.60, 0.36, 0.55);
+const TARGET = new THREE.Vector3(0.03, 0.15, 0);
 
 /** A visual robot explorer, independent of the authenticated physics simulator. */
 export class RobotDemo {
@@ -18,16 +17,16 @@ export class RobotDemo {
   private readonly joints = new Map<string, THREE.Group>();
   private readonly axes = new Map<string, THREE.Vector3>();
   private readonly meshGeometry = new Map<string, THREE.BufferGeometry>();
-  private readonly rover = new THREE.Group();
+  private readonly robot = new THREE.Group();
   private values: JointState = { ...POSES.Ready };
   private active = true;
   private disposed = false;
   private frame = 0;
 
   constructor(private readonly canvas: HTMLCanvasElement) {
-    this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
+    this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
-    this.renderer.setClearColor(0xb6bec2);
+    this.renderer.setClearColor(0x000000, 0);
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 1.35;
@@ -48,15 +47,8 @@ export class RobotDemo {
     const fill = new THREE.DirectionalLight(0xd8e2e8, 1.3);
     fill.position.set(2, 0.8, -1);
     this.scene.add(key, fill);
-    this.rover.rotation.x = -Math.PI / 2;
-    this.scene.add(this.rover);
-    const floor = new THREE.Mesh(new THREE.CircleGeometry(0.48, 80), new THREE.MeshStandardMaterial({ color: 0xcbd0d2, roughness: 0.9, metalness: 0.05 }));
-    floor.rotation.x = -Math.PI / 2;
-    floor.position.y = -0.001;
-    this.scene.add(floor);
-    const grid = new THREE.GridHelper(1.4, 28, 0x96a2aa, 0xa7b1b6);
-    grid.position.y = -0.003;
-    this.scene.add(grid);
+    this.robot.rotation.x = -Math.PI / 2;
+    this.scene.add(this.robot);
     this.resetView();
   }
 
@@ -76,13 +68,6 @@ export class RobotDemo {
       this.meshGeometry.forEach((geometry) => geometry.dispose());
       this.meshGeometry.clear();
       return;
-    }
-    for (const part of [...chassisParts(), ...piParts()]) this.rover.add(this.partMesh(part));
-    for (const wheel of WHEELS) {
-      const group = new THREE.Group();
-      group.position.fromArray(wheel.position);
-      for (const part of wheelParts(wheel.handed)) group.add(this.partMesh(part));
-      this.rover.add(group);
     }
     const links = new Map<string, THREE.Group>();
     const printed = new THREE.MeshStandardMaterial({ color: 0x353c41, roughness: 0.64, metalness: 0.12 });
@@ -110,22 +95,9 @@ export class RobotDemo {
       this.axes.set(joint.name, new THREE.Vector3().fromArray(joint.axis));
     }
     const base = links.get("base_link")!;
-    base.position.fromArray(ARM_MOUNT);
-    this.rover.add(base);
+    this.robot.add(base);
     this.setPose("Ready");
     this.draw();
-  }
-
-  private partMesh(part: Part): THREE.Mesh {
-    const dark = part.name.includes("roller") || part.name.includes("battery") || part.name.includes("pcb") || part.name.includes("gpio");
-    const mesh = new THREE.Mesh(makeGeometry(part), new THREE.MeshStandardMaterial({
-      color: dark ? 0x30383d : 0x9ca8af,
-      roughness: 0.58,
-      metalness: dark ? 0.05 : 0.35,
-    }));
-    mesh.position.fromArray(part.position);
-    mesh.quaternion.fromArray(part.quaternion);
-    return mesh;
   }
 
   setJoint(name: JointName, degrees: number): void {

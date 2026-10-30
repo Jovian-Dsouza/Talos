@@ -1,13 +1,10 @@
 import type { RobotDemo } from "./robot-demo";
 import type { JointName, JointState } from "./joints";
 
-/** Video and demo share one viewport; neither runs when its panel is hidden. */
+/** The arm loads automatically while the film plays behind its transparent viewport. */
 export function mountHeroMedia(): void {
   const video = document.getElementById("robot-film") as HTMLVideoElement;
   const toggle = document.getElementById("film-toggle") as HTMLButtonElement;
-  const filmTab = document.getElementById("film-tab") as HTMLButtonElement;
-  const demoTab = document.getElementById("demo-tab") as HTMLButtonElement;
-  const filmPanel = document.getElementById("film-panel")!;
   const demoPanel = document.getElementById("demo-panel")!;
   const controls = document.getElementById("demo-controls")!;
   const status = document.getElementById("demo-status")!;
@@ -16,8 +13,7 @@ export function mountHeroMedia(): void {
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
   let manuallyPaused = false;
   let manuallyPlaying = false;
-  let demoSelected = false;
-  let inView = true;
+  let inView = false;
   let loading = false;
   let demo: RobotDemo | undefined;
 
@@ -25,25 +21,30 @@ export function mountHeroMedia(): void {
   video.defaultMuted = true;
   video.autoplay = !reduced.matches;
   const syncPlayback = (): void => {
-    const playing = !demoSelected && !document.hidden && inView && !manuallyPaused && (!reduced.matches || manuallyPlaying);
-    if (playing) void video.play().catch(() => { toggle.textContent = "Play video"; });
+    const playing = !document.hidden && inView && !manuallyPaused && (!reduced.matches || manuallyPlaying);
+    if (playing) void video.play().catch(() => { updateVideoButton(); });
     else video.pause();
-    demo?.setActive(demoSelected && inView && !document.hidden);
+    demo?.setActive(inView && !document.hidden);
   };
-  const updateVideoButton = () => { toggle.textContent = video.paused ? "Play video" : "Pause video"; };
+  const updateVideoButton = (): void => {
+    const label = video.paused ? "Play background video" : "Pause background video";
+    toggle.textContent = video.paused ? "▷" : "Ⅱ";
+    toggle.setAttribute("aria-label", label);
+    toggle.title = label;
+  };
   video.addEventListener("play", updateVideoButton);
   video.addEventListener("pause", updateVideoButton);
   video.addEventListener("error", () => { toggle.hidden = true; });
   toggle.addEventListener("click", () => {
     manuallyPaused = !video.paused;
     manuallyPlaying = video.paused;
-    if (video.paused) void video.play().catch(() => { toggle.textContent = "Video unavailable"; });
+    if (video.paused) void video.play().catch(() => { toggle.title = "Background video unavailable"; });
     else video.pause();
   });
   reduced.addEventListener("change", () => { manuallyPlaying = false; syncPlayback(); updateVideoButton(); });
   document.addEventListener("visibilitychange", syncPlayback);
   const observer = new IntersectionObserver(([entry]) => { inView = entry.isIntersecting; syncPlayback(); });
-  observer.observe(filmPanel.closest("figure")!);
+  observer.observe(demoPanel);
 
   const syncSliders = (pose: JointState): void => {
     for (const input of controls.querySelectorAll<HTMLInputElement>("[data-joint]")) {
@@ -56,7 +57,7 @@ export function mountHeroMedia(): void {
     loading = true;
     retry.hidden = true;
     status.hidden = false;
-    status.textContent = "Loading the robot model…";
+    status.textContent = "Loading the robot arm…";
     demoPanel.setAttribute("aria-busy", "true");
     try {
       const { RobotDemo } = await import("./robot-demo");
@@ -75,27 +76,6 @@ export function mountHeroMedia(): void {
       demoPanel.removeAttribute("aria-busy");
     }
   };
-  const select = (showDemo: boolean): void => {
-    demoSelected = showDemo;
-    filmPanel.hidden = showDemo;
-    demoPanel.hidden = !showDemo;
-    filmTab.setAttribute("aria-selected", String(!showDemo));
-    demoTab.setAttribute("aria-selected", String(showDemo));
-    filmTab.tabIndex = showDemo ? -1 : 0;
-    demoTab.tabIndex = showDemo ? 0 : -1;
-    document.getElementById("media-description")!.textContent = showDemo ? "Interactive model preview / no sign-in needed" : "Teleoperation reference footage";
-    syncPlayback();
-    if (showDemo) void loadDemo();
-  };
-  filmTab.addEventListener("click", () => select(false));
-  demoTab.addEventListener("click", () => select(true));
-  for (const tab of [filmTab, demoTab]) tab.addEventListener("keydown", (event) => {
-    if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
-    event.preventDefault();
-    const nextDemo = event.key === "Home" ? false : event.key === "End" ? true : !demoSelected;
-    select(nextDemo);
-    (nextDemo ? demoTab : filmTab).focus();
-  });
   retry.addEventListener("click", () => void loadDemo());
   canvas.addEventListener("webglcontextlost", (event) => {
     event.preventDefault();
@@ -126,4 +106,5 @@ export function mountHeroMedia(): void {
   window.addEventListener("pageshow", syncPlayback);
   syncPlayback();
   updateVideoButton();
+  void loadDemo();
 }
