@@ -11,6 +11,7 @@ const LINKS: readonly [Page | "play", string, string][] = [
   ["play", "/play", "Play"],
   ["live", "/network", "Live"],
   ["datasets", "/datasets", "Datasets"],
+  ["wallet", "/wallet", "Wallet"],
 ];
 const WALLET_REFRESH_MS = 30_000;
 

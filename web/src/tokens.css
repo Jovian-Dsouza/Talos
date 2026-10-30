@@ -1,72 +1,72 @@
-/* TauNet tokens, shared by every page. A run is a lab sample: bench colours for the page, nitrile
-   blue for actions and single-series charts, safety yellow only for the player's own progress. The
-   verified, rejected and waiting fills were checked with the dataviz palette validator in both modes. */
+/* Industrial chassis. Existing aliases keep the simulator and charts on the same system. */
+@font-face {
+  font-family: "Industrial Host";
+  src: local("Host Grotesk"), url("/fonts/host-grotesk-latin.woff2") format("woff2");
+  font-style: normal; font-weight: 300 800; font-display: swap;
+}
+@font-face {
+  font-family: "Industrial Plex";
+  src: local("IBM Plex Mono"), url("/fonts/ibm-plex-mono-latin.woff2") format("woff2");
+  font-style: normal; font-weight: 400; font-display: swap;
+}
 :root {
   color-scheme: light;
-  --bench: #e8eeeb;
-  --surface: #fbfcfb;
-  --surface-2: #f0f4f2;
-  --ink: #13201c;
-  --ink-2: #4c5a55;
-  --ink-3: #6a7772;
-  --line: #cfd8d4;
-  --nitrile: #3a4fd6;
-  --nitrile-ink: #ffffff;
-  --nitrile-soft: #e3e7fb;
-  --hazard: #f2c12e;
-  --hazard-ink: #13201c;
-  --hazard-soft: #fbefc6;
-  --hazard-line: #ecc95a;
-  --verified: #1fae4b;
-  --verified-text: #0b6b1d;
-  --rejected: #9e2222;
-  --rejected-text: #a92626;
-  --waiting: #9aa7a2;
-  --radius-s: 6px;
-  --radius-m: 12px;
-  --radius-l: 20px;
-  --font: "Archivo", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --mono: ui-monospace, "SF Mono", Menlo, monospace;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    color-scheme: dark;
-    --bench: #0e1614;
-    --surface: #151f1c;
-    --surface-2: #1b2723;
-    --ink: #e5edea;
-    --ink-2: #b3c0bb;
-    --ink-3: #8b9994;
-    --line: #2b3834;
-    --nitrile: #8a98ff;
-    --nitrile-ink: #0d1330;
-    --nitrile-soft: #20284f;
-    --hazard-soft: #3a3217;
-    --hazard-line: #8a7224;
-    --verified: #3fae5c;
-    --verified-text: #63d37b;
-    --rejected: #c43c36;
-    --rejected-text: #ff8f8f;
-    --waiting: #7f8e89;
-  }
-}
-:root[data-theme="dark"] {
-  color-scheme: dark;
-  --bench: #0e1614;
-  --surface: #151f1c;
-  --surface-2: #1b2723;
-  --ink: #e5edea;
-  --ink-2: #b3c0bb;
-  --ink-3: #8b9994;
-  --line: #2b3834;
-  --nitrile: #8a98ff;
-  --nitrile-ink: #0d1330;
-  --nitrile-soft: #20284f;
-  --hazard-soft: #3a3217;
-  --hazard-line: #8a7224;
-  --verified: #3fae5c;
-  --verified-text: #63d37b;
-  --rejected: #c43c36;
-  --rejected-text: #ff8f8f;
-  --waiting: #7f8e89;
+  --dp-color-chassis: #cbd0d2;
+  --dp-color-raised: #e7eaeb;
+  --dp-color-well: #b6bec2;
+  --dp-color-ink: #181e22;
+  --dp-color-label: #414b52;
+  --dp-color-field: #20272b;
+  --dp-color-on-field: #f2f4f4;
+  --dp-color-on-field-muted: #d8dee1;
+  --dp-color-accent: #f15b22;
+  --dp-typography-sans: "Industrial Host", sans-serif;
+  --dp-typography-mono: "Industrial Plex", monospace;
+  --dp-typography-body: 17px;
+  --dp-typography-reading: 16px;
+  --dp-typography-metadata: 13px;
+  --dp-typography-label: 11px;
+  --dp-spacing-column-gap: 25px;
+  --dp-spacing-compact-gap: 12px;
+  --dp-radius-key: 4px;
+  --dp-radius-circular: 50%;
+  --dp-border-hairline: 1px;
+  --dp-motion-navigation: 130ms;
+  --dp-motion-key: 140ms;
+  --dp-motion-dial: 150ms;
+  --dp-motion-settle: cubic-bezier(0.3, 0.7, 0.4, 1.25);
+  --bench: var(--dp-color-chassis);
+  --surface: var(--dp-color-raised);
+  --surface-2: var(--dp-color-well);
+  --ink: var(--dp-color-ink);
+  --ink-2: var(--dp-color-label);
+  --ink-3: var(--dp-color-label);
+  --line: #9da7ad;
+  --nitrile: var(--dp-color-accent);
+  --nitrile-ink: var(--dp-color-ink);
+  --nitrile-soft: #f6d6c8;
+  --hazard: var(--dp-color-accent);
+  --hazard-ink: var(--dp-color-ink);
+  --hazard-soft: #f6d6c8;
+  --hazard-line: #b44a21;
+  --verified: #33785a;
+  --verified-text: #215c40;
+  --rejected: #aa3b35;
+  --rejected-text: #912d28;
+  --waiting: #64717a;
+  --focus: #8d3010;
+  --radius-s: 4px;
+  --radius-m: 8px;
+  --radius-l: 24px;
+  --font: var(--dp-typography-sans);
+  --mono: var(--dp-typography-mono);
+  --field: var(--dp-color-field);
+  --on-field: var(--dp-color-on-field);
+  --on-field-muted: var(--dp-color-on-field-muted);
+  --raised-shadow: inset 0 1px 0 #ffffffb3, 0 2px 1px #58636b40, 0 4px 8px #58636b12;
+  --well-shadow: inset 0 2px 4px #34414940, 0 1px 0 #ffffff90;
+  --pressed-shadow: inset 0 2px 4px #34414945, 0 1px 0 #ffffff80;
+  --housing-shadow: inset 0 1px 0 #ffffffc7, 0 16px 48px #34414926;
+  --housing-radius: 24px;
+  --seam: 64px;
 }

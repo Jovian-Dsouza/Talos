@@ -3,24 +3,24 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#e8eeeb" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#0e1614" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#cbd0d2" />
     <title>Datasets | TauNet</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&display=swap" />
+    <link rel="preload" href="/fonts/host-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="stylesheet" href="/src/tokens.css" />
     <link rel="stylesheet" href="/src/site.css" />
   </head>
-  <body>
+  <body class="dashboard-page">
+    <a class="skip-link" href="#main-content">Skip to content</a>
+    <div class="chassis">
     <header class="site-top" id="top"></header>
-    <main class="wrap">
-      <div class="page-head">
+    <main class="wrap dashboard-main" id="main-content" tabindex="-1">
+      <div class="page-head"><p class="eyebrow">02 / DATA LIBRARY</p>
         <h1>Datasets</h1>
         <p class="muted" id="format">Every verified run is added to the dataset for its task.</p>
       </div>
 
       <div class="datasets" id="datasets"><p class="empty">Loading datasets...</p></div>
+      <button type="button" class="btn small retry" id="retry-datasets" hidden>Retry connection</button>
 
       <div class="episodes-head">
         <h2>Episodes</h2>
@@ -34,6 +34,7 @@
 
       <footer class="site">Exports keep a provenance file per episode: miner hotkey, ticket block and seed, and the validator's scores.</footer>
     </main>
+    </div>
     <script type="module" src="/src/datasets.ts"></script>
   </body>
 </html>

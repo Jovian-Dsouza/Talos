@@ -24,6 +24,8 @@ const REJECTED: Series[] = [{ key: "count", label: "Rejected runs", color: "var(
 const $ = (id: string) => document.getElementById(id) as HTMLElement;
 const conveyor = new Conveyor($("conveyor"));
 let windowName: Activity["window"] = "1h";
+let activityLoaded = false;
+let networkLoaded = false;
 
 function cell(label: string, value: string, note: string): string {
   return `<div><span>${label}</span><strong>${value}</strong><small>${note}</small></div>`;
@@ -102,16 +104,30 @@ function renderNetwork(net: Network): void {
 async function pollActivity(): Promise<void> {
   try {
     renderActivity(await fetchActivity(windowName));
+    activityLoaded = true;
+    $("retry-network").hidden = true;
   } catch (error) {
-    $("meta").textContent = `Cannot reach the subnet right now (${error instanceof Error ? error.message : String(error)}). Retrying.`;
+    $("meta").textContent = activityLoaded ? "Connection interrupted. Showing the last update; reconnecting…" : "Cannot reach the subnet right now. Reconnecting…";
+    $("retry-network").hidden = false;
+    if (!activityLoaded) {
+      $("readout").innerHTML = `<div><span>Network totals</span><strong>Unavailable</strong><small>Waiting for a connection</small></div>`;
+      for (const id of ["conveyor", "outcomes", "timeline", "reasons", "tasks", "feed"]) {
+        $(id).innerHTML = id === "conveyor" || id === "feed" ? `<li class="empty">Waiting for network data. Retry the connection to load this view.</li>` : `<p class="empty">Waiting for network data.</p>`;
+      }
+    }
   }
 }
 
 async function pollNetwork(): Promise<void> {
   try {
     renderNetwork(await fetchNetwork());
+    networkLoaded = true;
   } catch (error) {
     console.warn("network tables unavailable", error);
+    if (!networkLoaded) {
+      $("miners").innerHTML = `<tr><td colspan="5" class="muted">Miners are unavailable. Retrying the connection.</td></tr>`;
+      $("validators").innerHTML = `<tr><td colspan="3" class="muted">Validators are unavailable. Retrying the connection.</td></tr>`;
+    }
   }
 }
 
@@ -124,6 +140,10 @@ for (const button of document.querySelectorAll<HTMLButtonElement>("[data-window]
 }
 
 void mountHeader("live");
+$("retry-network").addEventListener("click", () => {
+  void pollActivity();
+  void pollNetwork();
+});
 void pollActivity();
 void pollNetwork();
 window.setInterval(() => void pollActivity(), ACTIVITY_POLL_MS);

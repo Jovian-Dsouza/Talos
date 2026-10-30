@@ -99,13 +99,27 @@ function renderTasks(offered: readonly TaskInfo[]): void {
     }
     card.addEventListener("click", () => {
       task = info;
-      for (const other of cards) other.setAttribute("aria-checked", String(other === card));
+      for (const other of cards) {
+        other.setAttribute("aria-checked", String(other === card));
+        other.tabIndex = other === card ? 0 : -1;
+      }
+    });
+    card.addEventListener("keydown", (event) => {
+      const direction = ["ArrowRight", "ArrowDown"].includes(event.key) ? 1 : ["ArrowLeft", "ArrowUp"].includes(event.key) ? -1 : 0;
+      if (!direction && event.key !== "Home" && event.key !== "End") return;
+      event.preventDefault();
+      const index = event.key === "Home" ? 0 : event.key === "End" ? cards.length - 1 : (cards.indexOf(card) + direction + cards.length) % cards.length;
+      cards[index].click();
+      cards[index].focus();
     });
     return card;
   });
   const first = offered.find((info) => info.id === task.id) ?? offered[0];
   task = first;
-  cards.forEach((card, i) => card.setAttribute("aria-checked", String(offered[i] === first)));
+  cards.forEach((card, i) => {
+    card.setAttribute("aria-checked", String(offered[i] === first));
+    card.tabIndex = offered[i] === first ? 0 : -1;
+  });
   list.append(...cards);
   renderBests(progress);
 }
@@ -404,6 +418,11 @@ function bindUi(): void {
     const target = event.target as Node;
     if ($("hud-menu-panel").contains(target) || $("hud-menu").contains(target) || $("hud-exit").contains(target)) return;
     closeHudMenu();
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape" || $("hud-menu-panel").hidden || !isCoarsePointer()) return;
+    closeHudMenu();
+    $("hud-menu").focus();
   });
   setSticks(isCoarsePointer());
   syncHudMenu();

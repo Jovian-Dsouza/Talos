@@ -3,34 +3,34 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#e8eeeb" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#0e1614" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#cbd0d2" />
     <title>Live | TauNet</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&display=swap" />
+    <link rel="preload" href="/fonts/host-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="stylesheet" href="/src/tokens.css" />
     <link rel="stylesheet" href="/src/site.css" />
   </head>
-  <body>
+  <body class="dashboard-page">
+    <a class="skip-link" href="#main-content">Skip to content</a>
+    <div class="chassis">
     <header class="site-top" id="top"></header>
-    <main class="wrap">
-      <div class="page-head">
+    <main class="wrap dashboard-main" id="main-content" tabindex="-1">
+      <div class="page-head"><p class="eyebrow">01 / NETWORK</p>
         <h1>Live</h1>
-        <p id="meta" class="muted">Connecting to the subnet...</p>
+        <p id="meta" role="status" class="muted">Connecting to the subnet...</p>
       </div>
 
       <section class="panel conveyor-panel" aria-labelledby="conveyor-title">
         <h2 id="conveyor-title">Where every run is right now</h2>
-        <ol class="conveyor" id="conveyor"></ol>
+        <ol class="conveyor" id="conveyor"><li class="empty">Connecting to the verification pipeline…</li></ol>
       </section>
 
-      <section class="readout" id="readout" aria-label="Network totals"></section>
+      <section class="readout" id="readout" aria-label="Network totals"><div><span>Network totals</span><strong>…</strong><small>Connecting to the subnet</small></div></section>
+      <button type="button" class="btn small retry" id="retry-network" hidden>Retry connection</button>
 
       <div class="grid-2">
         <section class="panel" aria-labelledby="outcomes-title">
           <h2 id="outcomes-title">How runs turn out</h2>
-          <div id="outcomes"></div>
+          <div id="outcomes"><p class="loading-panel">Loading outcomes…</p></div>
         </section>
         <section class="panel" aria-labelledby="timeline-title">
           <div class="panel-head">
@@ -40,18 +40,18 @@
               <button type="button" data-window="24h" aria-pressed="false">Last day</button>
             </div>
           </div>
-          <div id="timeline"></div>
+          <div id="timeline"><p class="loading-panel">Loading timeline…</p></div>
         </section>
       </div>
 
       <div class="grid-2">
         <section class="panel" aria-labelledby="reasons-title">
           <h2 id="reasons-title">Why runs get rejected</h2>
-          <div id="reasons"></div>
+          <div id="reasons"><p class="loading-panel">Loading rejection reasons…</p></div>
         </section>
         <section class="panel" aria-labelledby="tasks-title">
           <h2 id="tasks-title">Runs by task</h2>
-          <div id="tasks"></div>
+          <div id="tasks"><p class="loading-panel">Loading task activity…</p></div>
         </section>
       </div>
 
@@ -81,6 +81,7 @@
 
       <footer class="site">Updates every few seconds. Runs are replayed in MuJoCo 3.17 by the subnet's validators.</footer>
     </main>
+    </div>
     <script type="module" src="/src/live.ts"></script>
   </body>
 </html>

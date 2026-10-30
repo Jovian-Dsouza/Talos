@@ -77,8 +77,10 @@ async function refresh(): Promise<void> {
     renderProgress(progress);
     $("wallet").hidden = false;
     $("wallet-error").textContent = "";
+    $("retry-wallet").hidden = true;
   } catch (error) {
-    $("wallet-error").textContent = `Your wallet could not be loaded: ${error instanceof Error ? error.message : String(error)}. Retrying.`;
+    $("wallet-error").textContent = "Your wallet could not be loaded. Retrying the connection.";
+    $("retry-wallet").hidden = false;
   }
 }
 
@@ -105,3 +107,4 @@ async function start(): Promise<void> {
 }
 
 void start();
+$("retry-wallet").addEventListener("click", () => void refresh());

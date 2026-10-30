@@ -2,13 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
-    <meta name="theme-color" content="#e8eeeb" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#0e1614" media="(prefers-color-scheme: dark)" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#cbd0d2" />
     <title>Play | TauNet</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&display=swap" />
+    <link rel="preload" href="/fonts/host-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="stylesheet" href="/src/tokens.css" />
     <link rel="stylesheet" href="/src/style.css" />
   </head>
@@ -23,6 +20,7 @@
 
       <section id="intro" class="card">
         <div id="player" class="player" hidden></div>
+        <p class="eyebrow">TauNet / Teleoperation</p>
         <h1>Teach the arm</h1>
         <p>Pick a job, then drive a simulated SO-101 robot arm through it. Validators replay your run and score it, and the network pays for data that checks out.</p>
         <div id="tasks" class="task-list" role="radiogroup" aria-label="Task"></div>

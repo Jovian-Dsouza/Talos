@@ -13,6 +13,10 @@ const POLL_MS = 15_000;
 const $ = (id: string) => document.getElementById(id) as HTMLElement;
 let filter: string | null = null;
 let next: number | null = null;
+let episodesLoading = false;
+let filterSignature = "";
+let datasetsUnavailable = false;
+let episodesUnavailable = false;
 
 function well(job: Job | undefined): string {
   if (!job) return `<span class="well"></span>`;
@@ -53,6 +57,8 @@ async function renderDatasets(): Promise<Datasets> {
   $("format").textContent = `Every verified run is added to the dataset for its task. Exports are ${data.format} files for the ${data.robot} arm at ${data.fps} fps, with ${data.cameras.join(" and ")} camera video.`;
   $("datasets").innerHTML = data.datasets.map((d, i) => card(d, recent[i].episodes)).join("")
     || `<p class="empty">No datasets yet. They fill up as players finish tasks.</p>`;
+  datasetsUnavailable = false;
+  $("retry-datasets").hidden = !episodesUnavailable;
   return data;
 }
 
@@ -66,20 +72,38 @@ function episodeRow(job: Job): string {
 }
 
 async function loadEpisodes(reset: boolean): Promise<void> {
+  if (episodesLoading) return;
+  episodesLoading = true;
+  const more = $("more") as HTMLButtonElement;
+  more.disabled = true;
+  $("filter").querySelectorAll<HTMLButtonElement>("button").forEach((button) => { button.disabled = true; });
   const body = $("episodes");
+  body.setAttribute("aria-busy", "true");
   try {
     const page = await fetchEpisodes(filter, reset ? null : next);
     next = page.next;
     const rowsHtml = page.episodes.map(episodeRow).join("");
     body.innerHTML = reset ? rowsHtml || `<tr><td colspan="7" class="muted">No episodes for this task yet.</td></tr>` : body.innerHTML + rowsHtml;
     $("more").hidden = next === null;
+    episodesUnavailable = false;
+    $("retry-datasets").hidden = !datasetsUnavailable;
   } catch (error) {
-    body.innerHTML = `<tr><td colspan="7" class="muted">Episodes are unavailable right now (${escapeHtml(String(error))}).</td></tr>`;
+    episodesUnavailable = true;
+    if (reset) body.innerHTML = `<tr><td colspan="7" class="muted">Episodes are unavailable right now. Retry the connection to load them.</td></tr>`;
+    $("retry-datasets").hidden = false;
+  } finally {
+    episodesLoading = false;
+    more.disabled = false;
+    body.removeAttribute("aria-busy");
+    $("filter").querySelectorAll<HTMLButtonElement>("button").forEach((button) => { button.disabled = false; });
   }
 }
 
 function renderFilter(data: Datasets): void {
   const options: [string | null, string][] = [[null, "All tasks"], ...data.datasets.map((d): [string, string] => [d.task_id, taskTitle(d.task_id)])];
+  const signature = JSON.stringify(options);
+  if (signature === filterSignature) return;
+  filterSignature = signature;
   const group = $("filter");
   group.innerHTML = options.map(([id, label]) =>
     `<button type="button" data-task="${id ?? ""}" aria-pressed="${id === filter}">${escapeHtml(label)}</button>`).join("");
@@ -96,12 +120,15 @@ async function start(): Promise<void> {
   try {
     renderFilter(await renderDatasets());
   } catch (error) {
-    $("datasets").innerHTML = `<p class="empty">Datasets are unavailable right now (${escapeHtml(String(error))}). Retrying.</p>`;
+    datasetsUnavailable = true;
+    $("datasets").innerHTML = `<p class="empty">Datasets are unavailable right now. Retrying the connection.</p>`;
+    $("retry-datasets").hidden = false;
   }
   await loadEpisodes(true);
-  window.setInterval(() => void renderDatasets().catch(() => undefined), POLL_MS);
 }
 
 $("more").addEventListener("click", () => void loadEpisodes(false));
+$("retry-datasets").addEventListener("click", () => void start());
+window.setInterval(() => void renderDatasets().then(renderFilter).catch(() => undefined), POLL_MS);
 void mountHeader("datasets");
 void start();

@@ -3,52 +3,85 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#e8eeeb" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#0e1614" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#cbd0d2" />
     <meta name="description" content="Teach robots by playing. Drive a simulated arm, get verified by replay, earn TAO on the taunet subnet." />
     <title>TauNet</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&display=swap" />
+    <link rel="preload" href="/fonts/host-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="stylesheet" href="/src/tokens.css" />
     <link rel="stylesheet" href="/src/site.css" />
   </head>
-  <body>
-    <header class="site-top" id="top"></header>
-    <main class="wrap">
-      <section class="hero">
-        <h1>Teach robots by playing.</h1>
-        <p>Drive a simulated robot arm from your phone. Validators replay every run in the same physics engine, good runs earn TAO on the taunet subnet, and every verified run becomes training data for real robots.</p>
-        <div class="cta">
-          <a class="btn primary" href="/play" data-link>Play now</a>
-          <a class="btn" href="/network" data-link>Watch it live</a>
-        </div>
-      </section>
+  <body class="landing-page">
+    <a class="skip-link" href="#main-content">Skip to content</a>
+    <div class="chassis">
+      <header class="site-top" id="top"></header>
+      <main id="main-content" tabindex="-1">
+        <section class="bay hero-shell" data-bay="01" aria-labelledby="hero-title">
+          <div class="hero-grid">
+            <div class="hero-copy">
+              <p class="eyebrow"><span class="indicator" aria-hidden="true"></span> Bittensor subnet <span class="label-divider">/</span> Simulation-native</p>
+              <h1 id="hero-title">Train robots.<br />Prove every run<span class="accent-dot">.</span></h1>
+              <p class="hero-lede">TauNet turns human teleoperation into trusted robot data. Every contribution is replayed by independent validators before it earns and enters the dataset.</p>
+            </div>
+            <div class="control-assembly">
+              <div class="vents" aria-hidden="true"></div>
+              <a class="dial-action" href="/play" data-link><span class="dial-symbol" aria-hidden="true">↗</span><span>Start a run</span></a>
+              <a class="btn secondary-key" href="#protocol">See how it works <span aria-hidden="true">↓</span></a>
+            </div>
+          </div>
+          <figure class="hero-media">
+            <div class="media-well">
+              <video id="robot-film" width="1280" height="720" poster="/media/teleoperation-poster.jpg" preload="none" controls playsinline aria-label="Reference footage of a human operating a robotic hand">
+                <source src="/media/teleoperation.mp4" type="video/mp4" />
+                <a href="/media/teleoperation.mp4">Watch the robotics demonstration</a>
+              </video>
+              <span class="media-corner" aria-hidden="true">↗</span>
+            </div>
+            <figcaption><span>Human intent. Robot action.</span><span>Teleoperation reference <span class="label-divider">/</span> <a href="https://axisrobotics.ai/" target="_blank" rel="noreferrer">Axis Robotics ↗</a></span></figcaption>
+          </figure>
+          <dl class="hero-facts" aria-label="TauNet capabilities">
+            <div><dt>01 / CONTROL</dt><dd>Browser-based<br />teleoperation</dd></div>
+            <div><dt>02 / VERIFY</dt><dd>Replay-based<br />verification</dd></div>
+            <div><dt>03 / LEARN</dt><dd>Open training<br />data output</dd></div>
+          </dl>
+        </section>
 
-      <section class="panel conveyor-panel" aria-labelledby="live-title">
-        <div class="panel-head">
-          <h2 id="live-title">Happening on taunet now</h2>
-          <span class="muted small" id="live-meta"></span>
-        </div>
-        <ol class="conveyor" id="conveyor"></ol>
-      </section>
+        <section class="bay value-section" id="protocol" data-bay="02" aria-labelledby="verification-title">
+          <p class="eyebrow">The verification layer</p>
+          <div class="section-heading"><h2 id="verification-title">Robot learning needs<br />data it can trust.</h2><p>More demonstrations do not automatically make better models. TauNet makes each run reproducible, reviewable, and useful beyond a single session.</p></div>
+          <div class="proof-deck">
+            <article><div class="proof-top"><span class="proof-number">01</span><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M20 37V20a4 4 0 0 1 8 0v12-19a4 4 0 0 1 8 0v19-14a4 4 0 0 1 8 0v17-8a4 4 0 0 1 8 0v13c0 12-8 19-18 19-8 0-12-5-16-11l-8-11a4 4 0 0 1 6-5l8 9"/></svg></div><h3>Human control</h3><p>Operators complete real tasks through a tactile, browser-based robot interface.</p><span class="engraved">INPUT / HUMAN INTENT</span></article>
+            <article><div class="proof-top"><span class="proof-number">02</span><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M49 21A22 22 0 1 0 53 39M49 9v14H35M24 32l6 6 12-13"/></svg></div><h3>Independent replay</h3><p>Validators re-simulate the recording in the same physics environment, step by step.</p><span class="engraved">PROCESS / REPRODUCIBLE PHYSICS</span></article>
+            <article><div class="proof-top"><span class="proof-number">03</span><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M12 18l20-9 20 9v28l-20 9-20-9V18zm0 0l20 10 20-10M32 28v27M22 36l6 6 13-13"/></svg></div><h3>Verified data</h3><p>Runs that replay exactly earn rewards and become training-ready trajectories.</p><span class="engraved">OUTPUT / TRAINING DATA</span></article>
+          </div>
+        </section>
 
-      <h2 class="section-title">How it works</h2>
-      <ol class="steps">
-        <li><h3>Sign in with Google</h3><p>We create your wallet and pay your miner registration on the subnet. No crypto setup.</p></li>
-        <li><h3>Drive the arm</h3><p>Pick a lab or warehouse job and steer an SO-101 arm with on-screen joysticks, right in your browser.</p></li>
-        <li><h3>Validators replay it</h3><p>Your run is re-simulated step by step. A run that was faked or edited does not replay, and earns nothing.</p></li>
-        <li><h3>Earn and build the dataset</h3><p>Verified runs earn you TAO through validator weights and are exported as LeRobot datasets.</p></li>
-      </ol>
+        <section class="bay live-loop dark-deck" data-bay="03" aria-labelledby="live-title">
+          <p class="eyebrow"><span class="indicator" aria-hidden="true"></span> The compounding loop</p>
+          <div class="section-heading"><h2 id="live-title">From a single move<br />to embodied intelligence.</h2><p>Every verified run is a building block: a measured human decision that can train the next robotic policy.</p></div>
+          <div class="network-ribbon"><p><strong>Network activity</strong><span id="live-meta" role="status">Fetching current network activity…</span></p><a class="inline-link" href="/network" data-link>Open network <span aria-hidden="true">↗</span></a></div>
+          <ol class="conveyor" id="conveyor" aria-label="Run verification pipeline"><li class="empty">Loading the verification pipeline…</li></ol>
+        </section>
 
-      <h2 class="section-title">How a run is scored</h2>
-      <div class="panel formula">
-        score = 0.5 &times; time_score + 0.5 &times; smooth_score
-        <small>Finish within the task's reference time for a full time score; it falls as you take longer. Steady, low-jerk motion earns a high smoothness score. Only runs that replay exactly, finish the task and are not copies of earlier runs are scored.</small>
-      </div>
+        <section class="bay how-section" data-bay="04" aria-labelledby="how-title">
+          <p class="eyebrow">Made for participation</p>
+          <div class="how-layout"><h2 id="how-title">A path from<br />play to proof.</h2>
+            <ol class="steps">
+              <li><span>01</span><div><h3>Open a task</h3><p>Sign in, choose a lab or warehouse scene, and take control in your browser.</p></div></li>
+              <li><span>02</span><div><h3>Move with intent</h3><p>Guide the SO-101 arm with responsive controls built for smooth demonstrations.</p></div></li>
+              <li><span>03</span><div><h3>Let validators replay</h3><p>Independent nodes verify that your exact action sequence completes the task.</p></div></li>
+              <li><span>04</span><div><h3>Earn for good data</h3><p>Accepted runs are rewarded on TauNet and exported for model training.</p></div></li>
+            </ol>
+          </div>
+        </section>
 
-      <footer class="site">Simulation and replay run on MuJoCo 3.17. TauNet is a Bittensor subnet.</footer>
-    </main>
+        <section class="bay score-section" data-bay="05" aria-labelledby="score-title">
+          <div class="score-card"><div><p class="eyebrow">Quality is measurable</p><h2 id="score-title">Replay it.<br />Score it.<br /><span>Reward it.</span></h2></div><div class="score-detail"><div class="score-screen"><span class="engraved">THE SCORING MODEL</span><p class="formula">score = 0.5 × time<br /><span>+ 0.5 × smoothness</span></p></div><p>Runs must replay, complete the task, and be meaningfully original. Fast is valuable; controllable is better.</p><a class="inline-link" href="/datasets" data-link>Explore verified datasets <span aria-hidden="true">↗</span></a></div></div>
+        </section>
+
+        <section class="bay closing-cta" data-bay="06" aria-labelledby="join-title"><div><p class="eyebrow">Build the data layer</p><h2 id="join-title">Ready to teach<br />a robot?</h2></div><a class="btn primary" href="/play" data-link>Run your first task <span aria-hidden="true">↗</span></a></section>
+        <footer class="site landing-footer"><a class="brand" href="/" data-link><span class="mark" aria-hidden="true">τ</span>TauNet</a><span>Simulation and replay run on MuJoCo 3.17.</span><span>A Bittensor subnet.</span><a href="#top">Back to top ↑</a></footer>
+      </main>
+    </div>
     <script type="module" src="/src/landing.ts"></script>
   </body>
 </html>
