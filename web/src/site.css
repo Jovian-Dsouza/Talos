@@ -408,6 +408,8 @@ tbody tr:hover { background: #ffffff40; }
 .badge.earned strong::before { content: "●"; color: var(--nitrile); margin-right: 8px; font-size: 10px; }
 .earnings { background: var(--field); color: var(--on-field); --ink-3: var(--on-field-muted); --ink-2: var(--on-field-muted); --nitrile: var(--dp-color-accent); }
 .earnings .earned { font-weight: 500; letter-spacing: -.06em; }
+.earned-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; }
+.earned-row .btn { background: transparent; color: var(--on-field); border-color: var(--on-field-muted); box-shadow: none; }
 .gate { max-width: 620px; padding: 24px 0 48px; }
 .gate .page-head { padding-top: 20px; }
 .chip-earned { border-radius: var(--radius-s); background: var(--surface); border: 1px solid var(--line); box-shadow: var(--raised-shadow); font-size: 13px; }

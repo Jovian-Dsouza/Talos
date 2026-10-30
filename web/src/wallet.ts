@@ -1,6 +1,6 @@
 // Wallet page: what the player's miner has earned, their addresses, progress, badges and runs.
 import { fetchProgress, fetchWallet } from "./api";
-import { authAvailable, playerName, signIn } from "./auth";
+import { authAvailable, playerName, signIn, signOut } from "./auth";
 import { columns, type Series } from "./charts/bars";
 import { sparkline } from "./charts/spark";
 import { escapeHtml } from "./format";
@@ -107,4 +107,10 @@ async function start(): Promise<void> {
 }
 
 void start();
+$("wallet-sign-out").addEventListener("click", () => {
+  signOut().then(
+    () => window.location.reload(),
+    (error) => console.warn("sign-out failed", error),
+  );
+});
 $("retry-wallet").addEventListener("click", () => void refresh());
