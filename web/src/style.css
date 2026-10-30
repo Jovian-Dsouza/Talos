@@ -24,7 +24,7 @@
   }
 }
 * { box-sizing: border-box; }
-html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); font: 16px/1.4 system-ui, sans-serif; }
+html, body { margin: 0; height: 100%; overscroll-behavior: none; -webkit-touch-callout: none; background: var(--bg); color: var(--text); font: 16px/1.4 system-ui, sans-serif; }
 #app { position: fixed; inset: 0; overflow: hidden; touch-action: none; }
 #stage { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; display: block; }
 .card {
@@ -74,3 +74,56 @@ button.grip.on { background: var(--accent); color: var(--accent-text); }
 #insets { position: absolute; right: 12px; top: 96px; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
 .inset { position: relative; width: clamp(140px, 26vw, 250px); aspect-ratio: 4 / 3; border: 2px solid var(--surface); border-radius: 8px; box-shadow: 0 3px 14px rgb(0 0 0 / 0.25); }
 .inset span { position: absolute; left: 6px; top: 4px; padding: 1px 7px; font-size: 12px; font-weight: 600; background: var(--surface); border-radius: 999px; }
+
+.tip { font-size: 13px; }
+.touch-only { display: none; }
+body.touch .touch-only { display: block; }
+button, .stick, #hud { -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
+
+.tools { pointer-events: none; }
+.tool {
+  pointer-events: auto; min-height: 36px; padding: 6px 12px; border-radius: 999px; font-size: 13px;
+  background: var(--surface); color: var(--text); border: 1px solid var(--line);
+}
+.tool[aria-pressed="true"] { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
+#insets.collapsed { display: none; }
+
+/* Touch layout: transparent dock, a stick in each bottom corner, grip and buttons in between. */
+.stick { display: none; }
+body.touch {
+  --stick: clamp(96px, 28vw, 140px);
+  --edge: max(16px, env(safe-area-inset-left), env(safe-area-inset-right));
+  --floor: max(16px, env(safe-area-inset-bottom));
+}
+body.touch #dock { left: 0; right: 0; transform: none; width: auto; padding: 0; background: none; border: 0; pointer-events: none; }
+body.touch .slider, body.touch .hint, body.touch #tilt { display: none; }
+body.touch .stick {
+  display: block; position: fixed; bottom: var(--floor); width: var(--stick); height: var(--stick); border-radius: 50%;
+  background: color-mix(in srgb, var(--surface) 78%, transparent); border: 2px solid var(--line);
+  box-shadow: 0 4px 16px rgb(0 0 0 / 0.2); pointer-events: auto; touch-action: none;
+}
+body.touch #stick-move { left: var(--edge); }
+body.touch #stick-lift { right: var(--edge); }
+.knob {
+  position: absolute; left: 50%; top: 50%; width: 42%; height: 42%; margin: -21% 0 0 -21%; border-radius: 50%;
+  background: var(--accent); opacity: 0.9; box-shadow: 0 2px 8px rgb(0 0 0 / 0.3); pointer-events: none;
+}
+.a { position: absolute; font-style: normal; font-size: 11px; color: var(--muted); pointer-events: none; }
+.a.n { top: 6px; left: 50%; transform: translateX(-50%); }
+.a.s { bottom: 6px; left: 50%; transform: translateX(-50%); }
+.a.w { left: 8px; top: 50%; transform: translateY(-50%); }
+.a.e { right: 8px; top: 50%; transform: translateY(-50%); }
+body.touch .row {
+  position: fixed; left: 50%; bottom: var(--floor); transform: translateX(-50%); pointer-events: auto;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+  width: min(calc(100vw - 2 * (var(--stick) + var(--edge) + 8px)), 220px);
+}
+body.touch .row button { padding: 0; font-size: 13px; }
+body.touch #grip { grid-column: 1 / -1; grid-row: 2; min-height: 72px; border-radius: 36px; font-size: 15px; font-weight: 600; }
+body.touch #reset { grid-row: 1; }
+body.touch #submit { grid-row: 1; width: auto; }
+body.touch .inset { width: clamp(88px, 24vw, 150px); }
+body.touch #insets { top: 132px; }
+@media (orientation: landscape) and (max-height: 600px) {
+  body.touch #insets { top: 12px; flex-direction: row; }
+}

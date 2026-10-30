@@ -2,7 +2,9 @@ import { fetchLeaderboard, fetchTicket, submitBundle, waitForVerdict } from "./a
 import { EXPLORER_URL, POOL_URL, POOL_URLS } from "./config";
 import { HEIGHT_MAX, HEIGHT_MIN } from "./constants";
 import { Controls } from "./controls";
+import { canFullscreen, haptic, keepAwake, toggleFullscreen } from "./device";
 import { IkSolver } from "./ik";
+import { Joystick } from "./joystick";
 import { Session } from "./session";
 import { getMujoco, Sim } from "./sim";
 import type { LeaderboardEntry, Verdict } from "./types";
@@ -18,6 +20,7 @@ let controls: Controls | null = null;
 let session: Session | null = null;
 let contributor = "anonymous";
 let submitting = false;
+let sticksOn = false;
 let lastFrame = performance.now();
 
 function show(id: string, visible: boolean): void {
@@ -46,6 +49,7 @@ async function beginRound(): Promise<void> {
   const start = { x: tip[0], y: tip[1], z: tip[2] };
   if (controls) controls.restart(start);
   else controls = new Controls(canvas, view, start);
+  controls.useSticks(sticksOn);
   session = new Session(sim, controls, ik, ticket);
   $("instruction").textContent = ticket.instruction;
   $<HTMLInputElement>("height").value = String(Math.min(HEIGHT_MAX, Math.max(HEIGHT_MIN, tip[2])));
@@ -57,6 +61,15 @@ async function beginRound(): Promise<void> {
   show("dock", true);
   show("insets", true);
   submitting = false;
+  keepAwake(true);
+}
+
+function setSticks(on: boolean): void {
+  sticksOn = on;
+  document.body.classList.toggle("touch", on);
+  $("sticks-toggle").setAttribute("aria-pressed", String(on));
+  controls?.useSticks(on);
+  view.setTouchOrbit(on);
 }
 
 function replayAttempt(): void {
@@ -133,6 +146,7 @@ function escapeHtml(text: string): string {
 async function submit(): Promise<void> {
   if (!session || submitting) return;
   submitting = true;
+  keepAwake(false);
   show("dock", false);
   show("insets", false);
   show("result", true);
@@ -178,15 +192,42 @@ function bindUi(): void {
   $("submit").addEventListener("click", () => void submit());
   $<HTMLInputElement>("height").addEventListener("input", (e) => controls?.setHeight(Number((e.target as HTMLInputElement).value)));
   const grip = $("grip");
+  let gripClosed = false;
   const press = (closed: boolean) => {
+    gripClosed = closed;
     grip.classList.toggle("on", closed);
+    grip.textContent = sticksOn ? (closed ? "Release" : "Grip") : "Hold to grip";
     controls?.setGrip(closed);
   };
   grip.addEventListener("pointerdown", (e) => {
     grip.setPointerCapture(e.pointerId);
-    press(true);
+    // Thumbs are busy on the sticks, so touch toggles the grip; a mouse holds it.
+    if (sticksOn && e.pointerType === "touch") {
+      haptic();
+      press(!gripClosed);
+    } else press(true);
   });
-  for (const type of ["pointerup", "pointercancel"]) grip.addEventListener(type, () => press(false));
+  for (const type of ["pointerup", "pointercancel"]) {
+    grip.addEventListener(type, (e) => {
+      if (!(sticksOn && (e as PointerEvent).pointerType === "touch")) press(false);
+    });
+  }
+  new Joystick($("stick-move"), (x, y) => controls?.setStick("move", x, y));
+  new Joystick($("stick-lift"), (x, y) => controls?.setStick("lift", x, y));
+  $("sticks-toggle").addEventListener("click", () => {
+    setSticks(!sticksOn);
+    press(false);
+  });
+  $("camera").addEventListener("click", () => ($("camera").textContent = `Cam: ${view.cyclePreset()}`));
+  $("views").addEventListener("click", () => {
+    const collapsed = $("insets").classList.toggle("collapsed");
+    $("views").setAttribute("aria-pressed", String(!collapsed));
+  });
+  const fullscreen = $("fullscreen");
+  fullscreen.hidden = !canFullscreen();
+  fullscreen.addEventListener("click", () => void toggleFullscreen());
+  setSticks(window.matchMedia("(pointer: coarse)").matches);
+  press(false);
   const tilt = $<HTMLButtonElement>("tilt");
   if ("DeviceOrientationEvent" in window && navigator.maxTouchPoints > 0) tilt.hidden = false;
   tilt.addEventListener("click", async () => {
@@ -194,7 +235,10 @@ function bindUi(): void {
     tilt.textContent = granted ? "Tilt on" : "Tilt blocked";
     tilt.disabled = !!granted;
   });
-  canvas.addEventListener("dblclick", () => view.resetCamera());
+  canvas.addEventListener("dblclick", () => {
+    view.resetCamera();
+    $("camera").textContent = "Cam: Front";
+  });
   window.addEventListener("resize", () => view.resize());
 }
 

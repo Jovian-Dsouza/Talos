@@ -9,6 +9,12 @@ const TILE = 0.05; // metres per checker square
 const FLOOR_SIZE = 6;
 
 export type ViewName = "main" | "top" | "side";
+
+const PRESETS = [
+  { name: "Front", position: [-0.2, -0.42, 0.42] },
+  { name: "Overhead", position: [0.12, -0.05, 0.62] },
+  { name: "Side", position: [0.17, -0.6, 0.1] },
+] as const;
 export interface Point3 {
   x: number;
   y: number;
@@ -27,6 +33,7 @@ export class SceneView {
   private readonly marker = new THREE.Group();
   private readonly ray = new THREE.Raycaster();
   private readonly insets: Record<"top" | "side", HTMLElement>;
+  private preset = 0;
 
   constructor(private readonly canvas: HTMLCanvasElement, insets: Record<"top" | "side", HTMLElement>) {
     this.insets = insets;
@@ -224,6 +231,34 @@ export class SceneView {
 
   resetCamera(): void {
     this.orbit.reset();
+    this.preset = 0;
+  }
+
+  /** Jump to the next camera preset and return its name. */
+  cyclePreset(): string {
+    this.preset = (this.preset + 1) % PRESETS.length;
+    const { name, position } = PRESETS[this.preset];
+    this.camera.position.set(position[0], position[1], position[2]);
+    this.orbit.update();
+    return name;
+  }
+
+  /** With joysticks on, a one finger touch on the main view orbits the camera. */
+  setTouchOrbit(on: boolean): void {
+    this.orbit.touches = { ONE: on ? THREE.TOUCH.ROTATE : null, TWO: THREE.TOUCH.DOLLY_PAN } as typeof this.orbit.touches;
+  }
+
+  /** Ground directions of "away from the camera" and "to the right of the screen", unit length. */
+  groundAxes(): { forward: { x: number; y: number }; right: { x: number; y: number } } {
+    // For a camera pitched down by p, look + screen-up is (cos p + sin p) times the horizontal
+    // heading, so it stays well defined from level to straight down.
+    const look = this.camera.getWorldDirection(new THREE.Vector3());
+    const up = new THREE.Vector3(0, 1, 0).applyQuaternion(this.camera.quaternion);
+    const fx = look.x + up.x;
+    const fy = look.y + up.y;
+    const length = Math.hypot(fx, fy) || 1;
+    const forward = { x: fx / length, y: fy / length };
+    return { forward, right: { x: forward.y, y: -forward.x } };
   }
 
   render(): void {

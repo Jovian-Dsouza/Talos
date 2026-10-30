@@ -15,6 +15,9 @@ export interface Command {
 const KEY_STEP = 0.0035;
 const ROLL_LIMIT = 2.6;
 const TILT_GAIN = 0.035; // rad of wrist roll per degree of phone tilt
+const PLANAR_SPEED = 0.18; // m/s at full stick deflection
+const VERTICAL_SPEED = 0.12; // m/s
+const ROLL_SPEED = 2.5; // rad/s
 const CONTROL_KEYS = new Set(["w", "a", "s", "d", "q", "e", "arrowleft", "arrowright", " "]);
 const EVENT_INTERVAL_MS = 33;
 const MAX_EVENTS = 20_000;
@@ -28,8 +31,16 @@ export function clampWorkspace(x: number, y: number, z: number): { x: number; y:
   return { x: x * scale, y: y * scale, z: clamp(z, HEIGHT_MIN, HEIGHT_MAX) };
 }
 
+export type StickName = "move" | "lift";
+interface StickValue {
+  x: number;
+  y: number;
+}
+
 export class Controls {
   private cmd: Command;
+  private sticks: Record<StickName, StickValue> = { move: { x: 0, y: 0 }, lift: { x: 0, y: 0 } };
+  private sticksOn = false;
   private readonly keys = new Set<string>();
   private tiltBase: number | null = null;
   private tiltOn = false;
@@ -56,6 +67,31 @@ export class Controls {
     this.events.length = 0;
     this.startedAt = performance.now();
     this.tiltBase = null;
+  }
+
+  /** Joystick mode: one finger on the main view orbits the camera instead of steering the gripper. */
+  useSticks(on: boolean): void {
+    this.sticksOn = on;
+  }
+
+  /** Stick input as x right, y up, each -1..1. The move stick is camera relative. */
+  setStick(name: StickName, x: number, y: number): void {
+    this.sticks = { ...this.sticks, [name]: { x, y } };
+    if (x !== 0 || y !== 0) this.set({ active: true });
+  }
+
+  /** Apply the held sticks for one control step of `dt` seconds. */
+  advance(dt: number): void {
+    const { move, lift } = this.sticks;
+    if (move.x === 0 && move.y === 0 && lift.x === 0 && lift.y === 0) return;
+    const { forward, right } = this.view.groundAxes();
+    const planar = PLANAR_SPEED * dt;
+    const x = this.cmd.x + (forward.x * move.y + right.x * move.x) * planar;
+    const y = this.cmd.y + (forward.y * move.y + right.y * move.x) * planar;
+    const target = clampWorkspace(x, y, this.cmd.z + lift.y * VERTICAL_SPEED * dt);
+    const roll = clamp(this.cmd.roll + lift.x * ROLL_SPEED * dt, -ROLL_LIMIT, ROLL_LIMIT);
+    this.set({ ...target, roll, active: true });
+    this.log("joy", target.x, target.y, target.z);
   }
 
   snapshot(): Command {
@@ -104,6 +140,10 @@ export class Controls {
       // Left button moves the gripper; right and middle belong to the camera.
       if (e.button !== 0 || !e.isPrimary) return;
       dragView = this.view.viewAt(e.clientX, e.clientY);
+      if (this.sticksOn && e.pointerType === "touch" && dragView === "main") {
+        dragView = null; // the camera takes this touch
+        return;
+      }
       this.canvas.setPointerCapture(e.pointerId);
       move(e);
     });

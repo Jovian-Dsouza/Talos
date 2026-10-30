@@ -21,6 +21,7 @@
         <p>Drive a simulated SO-101 robot arm. Validators replay your run and score it, and the network pays for data that checks out.</p>
         <label>Nickname<input id="nickname" maxlength="24" autocomplete="off" placeholder="your name" /></label>
         <label>Wallet address (optional)<input id="wallet" maxlength="64" autocomplete="off" placeholder="5F..." /></label>
+        <p class="tip touch-only">Tip: hold your phone sideways for the biggest view.</p>
         <button id="start" class="primary" disabled>Loading simulator...</button>
         <p id="intro-error" class="error" role="alert"></p>
       </section>
@@ -30,6 +31,12 @@
         <div class="chips">
           <span id="timer" class="chip">0.0 s</span>
           <span id="status" class="chip">Touch the scene to begin</span>
+        </div>
+        <div class="chips tools">
+          <button id="sticks-toggle" class="tool" aria-pressed="false">Joysticks</button>
+          <button id="camera" class="tool">Cam: Front</button>
+          <button id="views" class="tool" aria-pressed="true">Views</button>
+          <button id="fullscreen" class="tool" hidden>Full screen</button>
         </div>
       </header>
 
@@ -41,7 +48,15 @@
           <button id="reset" class="secondary">Reset</button>
           <button id="submit" class="primary" disabled>Submit</button>
         </div>
-        <p class="hint">Left-drag in any view moves the gripper (top view: forward and sideways, side view: forward and height). Right-drag orbits, wheel zooms, shift + right-drag pans, double-click resets the camera. Keys: WASD, Q/E, arrows, space.</p>
+        <p class="hint">Left-drag in any view moves the gripper (top view: forward and sideways, side view: forward and height). Right-drag orbits, wheel zooms, shift + right-drag pans, double-click resets the camera. Keys: WASD, Q/E, arrows, space. Joysticks gives on-screen sticks for touch.</p>
+        <div class="stick" id="stick-move" role="group" aria-label="Move the gripper">
+          <i class="a n">▲</i><i class="a s">▼</i><i class="a w">◀</i><i class="a e">▶</i>
+          <div class="knob"></div>
+        </div>
+        <div class="stick" id="stick-lift" role="group" aria-label="Raise or lower the gripper, turn the wrist">
+          <i class="a n">up</i><i class="a s">down</i><i class="a w">↺</i><i class="a e">↻</i>
+          <div class="knob"></div>
+        </div>
       </footer>
 
       <section id="result" class="card" hidden>

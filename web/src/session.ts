@@ -74,6 +74,7 @@ export class Session {
     while (this.accumulator >= CONTROL_DT) {
       this.accumulator -= CONTROL_DT;
       if (this.ctrl.length >= MAX_STEPS) return;
+      this.controls.advance(CONTROL_DT);
       const command = this.controls.snapshot();
       if (!command.active && this.ctrl.length === 0) continue;
       this.controlStep(command);
