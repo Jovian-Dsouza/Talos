@@ -304,8 +304,9 @@ function renderAccount(): void {
   $("account-line").textContent = !authAvailable
     ? "Sign-in is not configured on this build."
     : name === null
-      ? "Sign in with Google to get your own miner on the subnet. Registration is free."
+      ? ""
       : minerLine(name);
+  $("tasks").hidden = name === null;
   updateStartButton();
 }
 
