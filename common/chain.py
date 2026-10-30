@@ -13,6 +13,8 @@ import bittensor as bt
 
 LOCALNET = "ws://127.0.0.1:9944"
 U16_MAX = 65535
+SUBNET_NAME = "taunet"
+SUBNET_DESCRIPTION = "Robot teleoperation data from players, verified by physics replay"
 
 
 def netuid_from_env(chain_endpoint: str) -> int:
@@ -139,6 +141,30 @@ class Chain:
                 netuid=self.netuid, dests=list(uids), weights=scaled, version_key=0
             )
             _must(self._st.submit_call(call, wallet, signer="hotkey"), "set weights (raw)")
+
+    def subnet_name(self) -> str | None:
+        """The subnet's on-chain identity name, or None when the owner never published one."""
+        try:
+            identity = self._st.read("subnet_identity", netuid=self.netuid)
+        except Exception:
+            return None
+        name = (identity or {}).get("subnet_name")
+        return str(name) if name else None
+
+    def set_subnet_identity(self, wallet: "bt.Wallet", name: str, description: str, repo: str = "") -> None:
+        """Publish the subnet's name, owner coldkey signed. Same raw call fallback as set_weights."""
+        intent = bt.SetSubnetIdentity(self.netuid, name, github_repo=repo, description=description)
+        try:
+            _must(self._st.execute(intent, wallet), "set subnet identity")
+        except Exception as exc:
+            if "not found" not in str(exc):
+                raise
+            fields = {k: b"" for k in ("subnet_contact", "subnet_url", "discord", "logo_url", "additional")}
+            call = bt.calls.SubtensorModule.set_subnet_identity(
+                netuid=self.netuid, subnet_name=name.encode(), github_repo=repo.encode(),
+                description=description.encode(), **fields,
+            )
+            _must(self._st.submit_call(call, wallet), "set subnet identity (raw)")
 
     def commit_root(self, wallet: "bt.Wallet", epoch: int, root: str) -> None:
         """Publish the epoch's Merkle root as a hotkey-signed on-chain commitment."""

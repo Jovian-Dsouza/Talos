@@ -4,10 +4,12 @@ Run after setup.py. Needs the dev sudo account (Alice), which exists on developm
 """
 
 import sys
+import time
 
 import bittensor as bt
 
 ENDPOINT = "ws://127.0.0.1:9944"
+ATTEMPTS = 20  # admin calls are refused inside the protected weights window near each tempo
 
 
 def main(netuid: int) -> None:
@@ -18,8 +20,11 @@ def main(netuid: int) -> None:
         admin.sudo_set_commit_reveal_weights_enabled(netuid=netuid, enabled=False),
         admin.sudo_set_weights_set_rate_limit(netuid=netuid, weights_set_rate_limit=0),
     ):
-        inner = st.compose(call)
-        result = st.submit_call(bt.calls.Sudo.sudo(call=inner), alice)
+        for _ in range(ATTEMPTS):
+            result = st.submit_call(bt.calls.Sudo.sudo(call=st.compose(call)), alice)
+            if result.success or "protected weights window" not in str(result.message):
+                break
+            time.sleep(1)
         print(result.success, result.message)
 
 

@@ -1,13 +1,16 @@
 """Create the owner and validator wallets, fund them from the localnet dev account, create the subnet,
-register and stake the validator. Players are registered later by the hosted miner (the treasury is Alice).
+name it taunet on chain, register and stake the validator. Players are registered later by the hosted miner (the treasury is Alice).
 
 Run once per fresh chain, after scripts/localnet/up.sh (it creates a new subnet each run). Uses the well-known public dev seed for Alice, which only
 exists on development chains. Wallets are written unencrypted under ~/.bittensor/wallets.
 """
 
 import os
+from pathlib import Path
 
 import bittensor as bt
+
+from common.chain import SUBNET_DESCRIPTION, SUBNET_NAME, Chain
 
 ENDPOINT = "ws://127.0.0.1:9944"
 ALICE_SEED = "0xe5be9a5092b81bca64be81d212e7f2f9eba183bb7a90954f7b76361f6edb5c0a"
@@ -16,6 +19,7 @@ STAKE_TAO = 500
 
 OWNER = os.environ.get("OWNER_WALLET", "taunet-owner")
 VALIDATOR = os.environ.get("VALIDATOR_WALLET", "taunet-validator")
+NETUID_FILE = Path(__file__).resolve().parents[2] / "data" / "localnet.env"
 
 
 def must(result, what: str):
@@ -72,9 +76,15 @@ def main() -> None:
         hotkey=validator.hotkey.ss58_address, netuid=netuid, amount_staked=STAKE_TAO * 10**9
     )
     must(uncapped.submit_call(stake, validator), "add stake")
+    # A separate client, so it runs after the owner's last call above to keep nonces in order.
+    chain = Chain(ENDPOINT, netuid)
+    chain.set_subnet_identity(owner, SUBNET_NAME, SUBNET_DESCRIPTION)
+    print("subnet named", chain.subnet_name())
     for wallet in (owner, validator):
         print(wallet.name, "uid", st.read("uid", hotkey_ss58=wallet.hotkey.ss58_address, netuid=netuid))
-    print(f"subnet registered. Run: NETUID={netuid} scripts/localnet/run_all.sh")
+    NETUID_FILE.parent.mkdir(exist_ok=True)
+    NETUID_FILE.write_text(f"NETUID={netuid}\n")
+    print(f"subnet registered, NETUID={netuid} saved to {NETUID_FILE}. Run: scripts/localnet/run_all.sh")
 
 
 main()

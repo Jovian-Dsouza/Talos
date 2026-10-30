@@ -13,6 +13,8 @@ import time
 
 import bittensor as bt
 
+from common.chain import SUBNET_DESCRIPTION, SUBNET_NAME, Chain
+
 ENDPOINT = os.environ.get("CHAIN_ENDPOINT", "test")
 VALIDATOR_STAKE_TAO = float(os.environ.get("STAKE_TAO", "0.05"))
 VALIDATOR_FUNDING_TAO = float(os.environ.get("VALIDATOR_FUNDING_TAO", "0.06"))  # burn, fees and the stake
@@ -90,6 +92,9 @@ def main() -> None:
         # Staking and emissions stay off until the owner starts the subnet.
         must(st.submit_call(sub.start_call(netuid=netuid), owner), "start subnet")
 
+    chain = Chain(ENDPOINT, netuid)
+    if chain.subnet_name() != SUBNET_NAME:
+        chain.set_subnet_identity(owner, SUBNET_NAME, SUBNET_DESCRIPTION)
     tune_subnet(st, owner, netuid)
     wait_for_low_burn(st, netuid)
     if balance(st, validator) < VALIDATOR_FUNDING_TAO / 2:
