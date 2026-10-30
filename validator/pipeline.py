@@ -1,4 +1,4 @@
-"""Per-recording validation: ticket, replay, success, duplicate, quality, score."""
+"""Per-recording validation: ticket, replay, success, duplicate, score."""
 
 import json
 from dataclasses import dataclass, replace
@@ -9,13 +9,13 @@ import mujoco
 
 from common.bundle import BundleError, parse_bundle
 from common.mjcf import model_hash
+from common.scene import task_config
 from common.schema import Verdict, rejected
 from common.ticket import TICKET_TTL_BLOCKS, ticket_problem
 from validator import scoring
 from validator.merkle import merkle_root
-from validator.quality import home_end_effector, score_quality
 from validator.replay import replay
-from validator.signature import DUPLICATE_DISTANCE, nearest_distance, novelty, path_signature
+from validator.signature import DUPLICATE_DISTANCE, nearest_distance, path_signature
 from validator.store import AcceptedRow, Store
 
 
@@ -38,7 +38,6 @@ class Context:
     config: PipelineConfig
     store: Store
     chain: ChainView
-    demand: Mapping[str, float]
     accepted_dir: Path | None = None
 
 
@@ -84,27 +83,16 @@ def _evaluate(bundle, bundle_id: str, miner_hotkey: str, ctx: Context) -> Verdic
     if nearest is not None and nearest < DUPLICATE_DISTANCE:
         return rejected("near duplicate of an accepted episode", drift, True)
 
-    quality = score_quality(result.ee_path, bundle.ctrl, ticket.scene_spec,
-                            result.arm_contact_steps, _HOME_EE())
-    novelty_score = novelty(nearest)
+    ref_seconds = float(task_config(ticket.task_id)["ref_seconds"])
+    episode = scoring.score_episode(result.ee_path, bundle.steps, ref_seconds)
     epoch = current // cfg.tempo_blocks
-    prior = ctx.store.accepted_count(ticket.hotkey, ticket.task_id, epoch)
-    value = scoring.episode_value(ctx.demand, ticket.task_id, quality.score, novelty_score, prior)
     ctx.store.add_accepted(
-        AcceptedRow(bundle_id, ticket.hotkey, ticket.task_id, epoch, bundle.contributor,
-                    bundle_id, quality.score, novelty_score, value),
+        AcceptedRow(bundle_id, ticket.hotkey, ticket.task_id, epoch, bundle.contributor, bundle_id,
+                    episode.time_score, episode.smooth_score, episode.duration_s, episode.score),
         signature,
     )
-    return Verdict(True, "accepted", drift, True, quality.score, novelty_score, value)
-
-
-_home_cache: list = []
-
-
-def _HOME_EE():
-    if not _home_cache:
-        _home_cache.append(home_end_effector())
-    return _home_cache[0]
+    return Verdict(True, "accepted", drift, True, episode.time_score, episode.smooth_score,
+                   episode.duration_s, episode.score)
 
 
 def epoch_root(store: Store, epoch: int) -> tuple[str, int]:

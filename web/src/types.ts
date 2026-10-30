@@ -37,8 +37,9 @@ export interface Verdict {
   reason: string;
   replay_drift: number;
   success: boolean;
-  quality: number;
-  novelty: number;
+  time_score: number;
+  smooth_score: number;
+  duration_s: number;
   score: number;
 }
 

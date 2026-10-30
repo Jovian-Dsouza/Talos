@@ -20,7 +20,8 @@ CREATE TABLE IF NOT EXISTS tickets_used (
 CREATE TABLE IF NOT EXISTS accepted (
   bundle_id TEXT PRIMARY KEY, hotkey TEXT NOT NULL, task_id TEXT NOT NULL, epoch INTEGER NOT NULL,
   contributor TEXT NOT NULL, signature BLOB NOT NULL, leaf TEXT NOT NULL,
-  quality REAL NOT NULL, novelty REAL NOT NULL, value REAL NOT NULL, accepted_at REAL NOT NULL
+  time_score REAL NOT NULL, smooth_score REAL NOT NULL, duration_s REAL NOT NULL,
+  value REAL NOT NULL, accepted_at REAL NOT NULL
 );
 CREATE TABLE IF NOT EXISTS verdicts (
   bundle_id TEXT PRIMARY KEY, hotkey TEXT NOT NULL, verdict TEXT NOT NULL, created_at REAL NOT NULL
@@ -40,8 +41,9 @@ class AcceptedRow:
     epoch: int
     contributor: str
     leaf: str
-    quality: float
-    novelty: float
+    time_score: float
+    smooth_score: float
+    duration_s: float
     value: float
 
 
@@ -73,21 +75,15 @@ class Store:
         return [np.frombuffer(row[0], dtype="<f8") for row in rows]
 
     @locked
-    def accepted_count(self, hotkey: str, task_id: str, epoch: int) -> int:
-        row = self._db.execute(
-            "SELECT COUNT(*) FROM accepted WHERE hotkey=? AND task_id=? AND epoch=?",
-            (hotkey, task_id, epoch),
-        ).fetchone()
-        return int(row[0])
-
-    @locked
     def add_accepted(self, row: AcceptedRow, signature: np.ndarray) -> None:
         with self._db:
             self._db.execute(
-                "INSERT OR REPLACE INTO accepted VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+                "INSERT OR REPLACE INTO accepted (bundle_id, hotkey, task_id, epoch, contributor, signature,"
+                " leaf, time_score, smooth_score, duration_s, value, accepted_at)"
+                " VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
                 (row.bundle_id, row.hotkey, row.task_id, row.epoch, row.contributor,
-                 signature.astype("<f8").tobytes(), row.leaf, row.quality, row.novelty,
-                 row.value, time.time()),
+                 signature.astype("<f8").tobytes(), row.leaf, row.time_score, row.smooth_score,
+                 row.duration_s, row.value, time.time()),
             )
 
     @locked

@@ -208,8 +208,8 @@ function renderVerdict(verdict: Verdict): void {
   $("metrics").innerHTML = verdict.accepted
     ? metric("Replay", "matches") +
       metric("Task", verdict.success ? "completed" : "failed") +
-      metric("Quality", verdict.quality.toFixed(2)) +
-      metric("Novelty", verdict.novelty.toFixed(2)) +
+      metric("Time", `${verdict.duration_s.toFixed(1)} s (${verdict.time_score.toFixed(2)})`) +
+      metric("Smoothness", verdict.smooth_score.toFixed(2)) +
       metric("Score", verdict.score.toFixed(2))
     : metric("Task", verdict.success ? "completed" : "not completed");
 }

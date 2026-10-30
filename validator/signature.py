@@ -1,4 +1,4 @@
-"""Path signatures for duplicate detection and novelty.
+"""Path signatures for duplicate detection.
 
 Absolute end-effector paths differ between seeds, so each path is expressed in a frame built from
 the scene: origin at the picked object, first axis toward the place point, lengths divided by the
@@ -12,7 +12,6 @@ import numpy as np
 POINTS = 32
 MIN_SCALE = 0.05
 DUPLICATE_DISTANCE = 0.05
-NOVELTY_SCALE = 0.5
 
 
 def path_signature(ee_path: np.ndarray, spec: Mapping[str, Any]) -> np.ndarray:
@@ -39,9 +38,3 @@ def nearest_distance(signature: np.ndarray, others: list[np.ndarray]) -> float |
     if not others:
         return None
     return min(distance(signature, other) for other in others)
-
-
-def novelty(nearest: float | None) -> float:
-    if nearest is None:
-        return 1.0
-    return float(min(nearest / NOVELTY_SCALE, 1.0))

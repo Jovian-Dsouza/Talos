@@ -69,8 +69,9 @@ class Verdict:
     reason: str
     replay_drift: float
     success: bool
-    quality: float
-    novelty: float
+    time_score: float
+    smooth_score: float
+    duration_s: float
     score: float
 
     def to_dict(self) -> dict[str, Any]:
@@ -78,4 +79,4 @@ class Verdict:
 
 
 def rejected(reason: str, drift: float = 0.0, success: bool = False) -> Verdict:
-    return Verdict(False, reason, drift, success, 0.0, 0.0, 0.0)
+    return Verdict(False, reason, drift, success, 0.0, 0.0, 0.0, 0.0)

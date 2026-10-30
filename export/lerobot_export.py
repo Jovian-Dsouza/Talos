@@ -3,7 +3,7 @@
 Usage: python -m export.lerobot_export ACCEPTED_DIR OUT_DIR [REPO_ID] [MAPPING_JSON]
 
 Frames are rendered during native replay, so the browser never has to produce video. Joint values
-are converted with realarm/mapping.py. Per-episode provenance (seed, pool, contributor, quality) is
+are converted with realarm/mapping.py. Per-episode provenance (seed, pool, contributor, scores) is
 written to meta/teleop_provenance.jsonl next to the standard LeRobot metadata.
 """
 

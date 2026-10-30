@@ -1,7 +1,7 @@
 """Practice server: play the teleop demo on one machine with no chain, miner or validator.
 
 It serves the same HTTP API as the miner (ticket, submit, status, leaderboard) and judges each run
-with the real validator pipeline (native MuJoCo replay, success check, quality, novelty). Block
+with the real validator pipeline (native MuJoCo replay, success check, time and smoothness score). Block
 numbers and hashes are fixed stand-ins, so nothing here touches Bittensor and nothing is scored
 for real.
 
@@ -39,7 +39,7 @@ class PracticeChain:
 def create_app() -> FastAPI:
     app = FastAPI(title="bittesnor practice server")
     app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["GET", "POST"], allow_headers=["*"])
-    ctx = Context(PipelineConfig(), Store(":memory:"), PracticeChain(), {})
+    ctx = Context(PipelineConfig(), Store(":memory:"), PracticeChain())
     state: dict[str, Any] = {"counter": 0, "verdicts": {}, "runs": []}
 
     @app.get("/tasks")
