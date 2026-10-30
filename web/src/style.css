@@ -47,7 +47,10 @@ button.grip { flex: 2; touch-action: none; user-select: none; -webkit-user-selec
 button.grip.on { background: var(--accent); color: var(--accent-text); }
 .error { color: var(--bad) !important; min-height: 1.4em; }
 #hud { position: absolute; left: 0; right: 0; top: 0; padding: max(12px, env(safe-area-inset-top)) 16px 0; pointer-events: none; }
-#instruction { margin: 0; font-size: 20px; font-weight: 700; text-shadow: 0 1px 0 var(--bg); }
+#instruction {
+  display: inline-block; margin: 0; padding: 4px 12px; font-size: 20px; font-weight: 700; border-radius: var(--radius);
+  background: color-mix(in srgb, var(--surface) 82%, transparent);
+}
 .chips { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
 .chip { background: var(--surface); padding: 4px 10px; border-radius: 999px; font-size: 13px; border: 1px solid var(--line); }
 .chip.ok { color: var(--good); border-color: var(--good); }

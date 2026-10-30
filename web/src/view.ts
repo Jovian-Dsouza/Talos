@@ -1,12 +1,11 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+import { benchMaterial, BENCH_DEPTH, BENCH_WIDTH, buildEnvironment, ENV_LAYER, ROOM_COLOR } from "./environment";
 import type { Sim } from "./sim";
 
 const GEOM = { plane: 0, sphere: 2, capsule: 3, cylinder: 5, box: 6, mesh: 7 } as const;
 const MAX_VISIBLE_GROUP = 2; // groups 3 and 4 hold collision geometry
-const SKY = 0xdfe3e7;
-const TILE = 0.05; // metres per checker square
-const FLOOR_SIZE = 6;
+const SHADOW_MAP = 1024;
 
 export type ViewName = "main" | "top" | "side";
 
@@ -33,23 +32,34 @@ export class SceneView {
   private readonly marker = new THREE.Group();
   private readonly ray = new THREE.Raycaster();
   private readonly insets: Record<"top" | "side", HTMLElement>;
+  private readonly sun = new THREE.DirectionalLight(0xffffff, 1.6);
+  private decor: THREE.Object3D | null = null;
   private preset = 0;
 
   constructor(private readonly canvas: HTMLCanvasElement, insets: Record<"top" | "side", HTMLElement>) {
     this.insets = insets;
     this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    this.scene.background = new THREE.Color(SKY);
-    this.scene.fog = new THREE.Fog(SKY, 1.4, 3.6);
+    this.renderer.shadowMap.enabled = true;
+    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    this.scene.background = new THREE.Color(ROOM_COLOR);
+    this.scene.fog = new THREE.Fog(ROOM_COLOR, 3, 8);
     this.scene.add(new THREE.HemisphereLight(0xffffff, 0x8899aa, 1.1));
-    const sun = new THREE.DirectionalLight(0xffffff, 1.6);
-    sun.position.set(0.4, -0.3, 1.0);
-    this.scene.add(sun);
+    this.sun.position.set(0.4, -0.3, 1.0);
+    this.sun.target.position.set(0.15, 0, 0);
+    this.sun.castShadow = true;
+    this.sun.shadow.mapSize.set(SHADOW_MAP, SHADOW_MAP);
+    Object.assign(this.sun.shadow.camera, { left: -0.45, right: 0.45, top: 0.45, bottom: -0.45, near: 0.1, far: 3 });
+    this.sun.shadow.bias = -0.0004;
+    this.sun.shadow.normalBias = 0.002;
+    this.scene.add(this.sun, this.sun.target);
 
-    // A thin slab under the floor shows the ground as a line in the edge-on side view.
-    const slab = new THREE.Mesh(new THREE.BoxGeometry(FLOOR_SIZE, FLOOR_SIZE, 0.02), new THREE.MeshBasicMaterial({ color: 0x6b7683 }));
+    // A thin slab under the bench top shows the ground as a line in the edge-on side view.
+    const slab = new THREE.Mesh(new THREE.BoxGeometry(BENCH_WIDTH, BENCH_DEPTH, 0.02), new THREE.MeshBasicMaterial({ color: 0x6b7683 }));
     slab.position.z = -0.0105;
     this.scene.add(slab);
+    this.scene.add(buildEnvironment());
+    this.camera.layers.enable(ENV_LAYER);
 
     this.camera.up.set(0, 0, 1);
     this.camera.position.set(-0.2, -0.42, 0.42);
@@ -113,6 +123,7 @@ export class SceneView {
       if (!geometry) continue;
       const object = new THREE.Mesh(geometry, this.materialFor(sim, g));
       object.matrixAutoUpdate = false;
+      object.castShadow = object.receiveShadow = true;
       this.scene.add(object);
       this.meshes.push({ object, geom: g });
     }
@@ -121,9 +132,13 @@ export class SceneView {
 
   private materialFor(sim: Sim, g: number): THREE.Material {
     const { model } = sim;
-    if (model.geom_type[g] === GEOM.plane) return floorMaterial();
+    if (model.geom_type[g] === GEOM.plane) return benchTop();
     const matId = model.geom_matid[g];
     const rgba = matId >= 0 ? model.mat_rgba.slice(4 * matId, 4 * matId + 4) : model.geom_rgba.slice(4 * g, 4 * g + 4);
+    if (String(model.geom(g).name).endsWith("_glass")) {
+      // Vial body: clear and glossy, and it must not hide the cap or the rack behind it.
+      return new THREE.MeshStandardMaterial({ color: 0xdceaf2, roughness: 0.08, metalness: 0, transparent: true, opacity: 0.4, depthWrite: false });
+    }
     return new THREE.MeshStandardMaterial({
       color: new THREE.Color(rgba[0], rgba[1], rgba[2]),
       side: THREE.DoubleSide,
@@ -139,7 +154,7 @@ export class SceneView {
     const size = [model.geom_size[3 * g], model.geom_size[3 * g + 1], model.geom_size[3 * g + 2]];
     switch (model.geom_type[g]) {
       case GEOM.plane:
-        return new THREE.PlaneGeometry(FLOOR_SIZE, FLOOR_SIZE);
+        return new THREE.PlaneGeometry(BENCH_WIDTH, BENCH_DEPTH);
       case GEOM.sphere:
         return new THREE.SphereGeometry(size[0], 16, 12);
       case GEOM.capsule:
@@ -183,6 +198,23 @@ export class SceneView {
       object.matrix.copy(matrix);
       object.matrixWorldNeedsUpdate = true;
     }
+  }
+
+  /** Decals that belong to the current scene, such as slot labels. Replaces the previous set. */
+  setDecor(decor: THREE.Object3D | null): void {
+    if (this.decor) this.scene.remove(this.decor);
+    this.decor = decor;
+    if (decor) this.scene.add(decor);
+  }
+
+  /** Soft shadows read well but cost GPU time; the app switches them off on slow devices. */
+  setShadows(on: boolean): void {
+    if (this.renderer.shadowMap.enabled === on) return;
+    this.renderer.shadowMap.enabled = on;
+    this.scene.traverse((object) => {
+      const material = (object as THREE.Mesh).material as THREE.Material | undefined;
+      if (material) material.needsUpdate = true;
+    });
   }
 
   setMarker(x: number, y: number, z: number): void {
@@ -291,27 +323,8 @@ export class SceneView {
   }
 }
 
-let floorMaterialCache: THREE.MeshStandardMaterial | null = null;
-
-/** Checkerboard floor, one square per 5 cm, so distances read at a glance in every view. */
-function floorMaterial(): THREE.Material {
-  if (floorMaterialCache) return floorMaterialCache;
-  const size = 128;
-  const canvas = document.createElement("canvas");
-  canvas.width = canvas.height = size;
-  const ctx = canvas.getContext("2d");
-  if (ctx) {
-    ctx.fillStyle = "#c5ccd4";
-    ctx.fillRect(0, 0, size, size);
-    ctx.fillStyle = "#aeb7c1";
-    ctx.fillRect(0, 0, size / 2, size / 2);
-    ctx.fillRect(size / 2, size / 2, size / 2, size / 2);
-  }
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-  texture.repeat.set(FLOOR_SIZE / (2 * TILE), FLOOR_SIZE / (2 * TILE));
-  texture.anisotropy = 8;
-  texture.colorSpace = THREE.SRGBColorSpace;
-  floorMaterialCache = new THREE.MeshStandardMaterial({ map: texture, roughness: 0.95, metalness: 0 });
-  return floorMaterialCache;
+let benchTopCache: THREE.Material | null = null;
+function benchTop(): THREE.Material {
+  benchTopCache ??= benchMaterial();
+  return benchTopCache;
 }

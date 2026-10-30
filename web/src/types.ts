@@ -1,10 +1,19 @@
 export interface SceneObject {
   id: string;
-  kind: "cube" | "bowl";
+  kind: "cube" | "bowl" | "vial" | "rack";
   color: string;
   x: number;
   y: number;
   yaw: number;
+}
+
+export interface SceneSpec {
+  task_id: string;
+  instruction: string;
+  pick: string;
+  place: { x: number; y: number; z: number };
+  target_slot?: string;
+  objects: SceneObject[];
 }
 
 export interface Ticket {
@@ -15,7 +24,7 @@ export interface Ticket {
   counter: number;
   // 64-bit seed as a decimal string; JavaScript numbers cannot hold it.
   seed: string;
-  scene_spec: { task_id: string; instruction: string; objects: SceneObject[] };
+  scene_spec: SceneSpec;
   scene_xml: string;
   instruction: string;
   expires_block: number;

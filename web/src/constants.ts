@@ -14,3 +14,7 @@ export const REACH_MIN = 0.14;
 export const REACH_MAX = 0.29;
 export const HEIGHT_MIN = 0.012;
 export const HEIGHT_MAX = 0.11;
+
+// Rack layout for rack_vial. Mirrors common/scene.py (RACK_ROWS, RACK_COLS).
+export const RACK_ROWS = "AB";
+export const RACK_COLS = 4;

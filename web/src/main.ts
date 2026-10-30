@@ -4,6 +4,7 @@ import { HEIGHT_MAX, HEIGHT_MIN } from "./constants";
 import { Controls } from "./controls";
 import { canFullscreen, haptic, keepAwake, toggleFullscreen } from "./device";
 import { IkSolver } from "./ik";
+import { buildSlotLabels } from "./labels";
 import { Joystick } from "./joystick";
 import { Session } from "./session";
 import { getMujoco, Sim } from "./sim";
@@ -22,6 +23,11 @@ let contributor = "anonymous";
 let submitting = false;
 let sticksOn = false;
 let lastFrame = performance.now();
+let frameAverage = 1 / 60;
+let slowSeconds = 0;
+
+const SLOW_FRAME_S = 0.035; // drop shadows when frames stay slower than ~28 fps
+const SLOW_LIMIT_S = 2;
 
 function show(id: string, visible: boolean): void {
   $(id).hidden = !visible;
@@ -44,6 +50,7 @@ async function beginRound(): Promise<void> {
   const [mujoco, ticket] = await Promise.all([getMujoco(), fetchTicket(POOL_URL, "put_cube_in_bowl")]);
   sim = new Sim(mujoco, ticket.scene_xml);
   view.build(sim);
+  view.setDecor(buildSlotLabels(sim, ticket.scene_spec));
   ik = new IkSolver(sim);
   const tip = sim.tip();
   const start = { x: tip[0], y: tip[1], z: tip[2] };
@@ -85,6 +92,9 @@ function replayAttempt(): void {
 function frame(now: number): void {
   const dt = (now - lastFrame) / 1000;
   lastFrame = now;
+  frameAverage += (Math.min(dt, 0.25) - frameAverage) * 0.05;
+  slowSeconds = frameAverage > SLOW_FRAME_S ? slowSeconds + dt : 0;
+  if (slowSeconds > SLOW_LIMIT_S) view.setShadows(false);
   if (sim && session && !submitting) {
     session.tick(dt);
     const [tx, ty, tz] = session.currentTarget();
