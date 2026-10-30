@@ -1,5 +1,6 @@
-# Render blueprint: hosted miner (web), validator (worker) and Postgres. Secrets marked sync: false
-# are pasted in the Render dashboard (values come from scripts/testnet/export_secrets.py).
+# Render blueprint: hosted miner (web), validator (worker) and Postgres. Values marked sync: false
+# are pasted in the Render dashboard (secrets come from scripts/testnet/export_secrets.py). CHAIN_ENDPOINT
+# is a wss URL: a Cloudflare tunnel to the local chain (scripts/demo/chain_tunnel.sh), or a public node.
 databases:
   - name: taunet-db
     plan: basic-256mb
@@ -20,7 +21,7 @@ services:
       sizeGB: 2
     envVars:
       - key: CHAIN_ENDPOINT
-        value: test
+        sync: false
       - key: NETUID
         sync: false
       - key: MINER_DATA_DIR
@@ -63,7 +64,7 @@ services:
       sizeGB: 5
     envVars:
       - key: CHAIN_ENDPOINT
-        value: test
+        sync: false
       - key: NETUID
         sync: false
       - key: HOSTED_MINER_URL
@@ -73,10 +74,10 @@ services:
       - key: ACCEPTED_DIR
         value: /data/accepted
       - key: TEMPO_BLOCKS
-        value: "360"
+        value: "10"
       - key: WEIGHTS_EVERY_BLOCKS
-        value: "60"
+        value: "10"
       - key: POLL_SECONDS
-        value: "5"
+        value: "3"
       - key: VALIDATOR_MNEMONIC
         sync: false
