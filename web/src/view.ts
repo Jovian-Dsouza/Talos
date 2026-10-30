@@ -1,11 +1,12 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-import { benchMaterial, BENCH_DEPTH, BENCH_WIDTH, buildEnvironment, ENV_LAYER, ROOM_COLOR } from "./environment";
+import { benchMaterial, BENCH_DEPTH, BENCH_WIDTH, buildEnvironment, ENV_LAYER, ROOM_COLOR, SLAB_TOP } from "./environment";
 import type { Sim } from "./sim";
 
 const GEOM = { plane: 0, sphere: 2, capsule: 3, cylinder: 5, box: 6, mesh: 7 } as const;
 const MAX_VISIBLE_GROUP = 2; // groups 3 and 4 hold collision geometry
 const SHADOW_MAP = 1024;
+const MARKER_LIFT = 0.002; // keeps the ring from z-fighting with the slab
 
 export type ViewName = "main" | "top" | "side";
 
@@ -217,8 +218,9 @@ export class SceneView {
     });
   }
 
-  setMarker(x: number, y: number, z: number): void {
-    this.marker.position.set(x, y, z);
+  /** The marker is the target's shadow on the table, so dragging it sideways moves the arm without changing height. */
+  setMarker(x: number, y: number): void {
+    this.marker.position.set(x, y, SLAB_TOP + MARKER_LIFT);
   }
 
   /** Which view is under the pointer: an inset if it is over one, otherwise the main view. */

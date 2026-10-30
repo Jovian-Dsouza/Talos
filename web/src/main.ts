@@ -217,8 +217,8 @@ function frame(now: number): void {
   if (slowSeconds > SLOW_LIMIT_S) view.setShadows(false);
   if (sim && session && !submitting) {
     session.tick(dt);
-    const [tx, ty, tz] = session.currentTarget();
-    view.setMarker(tx, ty, tz);
+    const [tx, ty] = session.currentTarget();
+    view.setMarker(tx, ty);
     $("timer").textContent = `${(session.steps * CONTROL_DT).toFixed(1)} s`;
     if (session.phase === "full") setStatus(practiceMode ? "Time limit reached, finish or reset" : "Time limit reached, submit or reset");
     else if (session.readyToSubmit) setStatus(task.done, true);

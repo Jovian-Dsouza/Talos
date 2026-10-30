@@ -8,7 +8,7 @@ export const ROOM_COLOR = 0xcfd6db;
 
 const FLOOR_Z = -0.72;
 const DOT_PITCH = 0.025; // mounting plate hole spacing, so distances read at a glance
-const SLAB_TOP = -0.0205; // just under the thin slab that gives the side inset its ground line
+export const SLAB_TOP = -0.0205; // just under the thin slab that gives the side inset its ground line
 
 interface BoxSpec {
   size: [number, number, number];
