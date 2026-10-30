@@ -39,7 +39,7 @@ export async function mountHeader(current: Page): Promise<void> {
   if (!header) return;
   const nav = LINKS.map(([page, path, label]) =>
     `<a href="${link(path)}"${page === current ? ' aria-current="page"' : ""}>${label}</a>`).join("");
-  header.innerHTML = `<a class="brand" href="${link("/")}"><span class="mark" aria-hidden="true">τ</span>TauNet</a>
+  header.innerHTML = `<a class="brand" href="${link("/")}"><span class="mark" aria-hidden="true">τ</span>Talos</a>
     <nav aria-label="Main">${nav}</nav><div class="account" id="account"></div>`;
   const slot = header.querySelector<HTMLElement>("#account")!;
   try {
