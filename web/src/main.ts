@@ -2,7 +2,7 @@ import { fetchLeaderboard, fetchTasks, fetchTicket, submitBundle, waitForVerdict
 import { EXPLORER_URL, POOL_URL, POOL_URLS } from "./config";
 import { HEIGHT_MAX, HEIGHT_MIN } from "./constants";
 import { Controls } from "./controls";
-import { canFullscreen, haptic, keepAwake, toggleFullscreen } from "./device";
+import { canFullscreen, enterFullscreen, exitFullscreen, haptic, isCoarsePointer, keepAwake, toggleFullscreen } from "./device";
 import { IkSolver } from "./ik";
 import { buildSlotLabels } from "./labels";
 import { Joystick } from "./joystick";
@@ -113,9 +113,37 @@ async function loadTasks(): Promise<void> {
 function backToIntro(): void {
   cleanup();
   keepAwake(false);
+  void exitFullscreen();
+  closeHudMenu();
   for (const id of ["result", "hud", "dock", "insets"]) show(id, false);
   show("intro", true);
   $<HTMLButtonElement>("start").disabled = false;
+}
+
+function closeHudMenu(): void {
+  if (!isCoarsePointer()) return;
+  const panel = $("hud-menu-panel");
+  const toggle = $<HTMLButtonElement>("hud-menu");
+  panel.hidden = true;
+  toggle.setAttribute("aria-expanded", "false");
+}
+
+function toggleHudMenu(): void {
+  const panel = $("hud-menu-panel");
+  const toggle = $<HTMLButtonElement>("hud-menu");
+  const open = panel.hidden;
+  panel.hidden = !open;
+  toggle.setAttribute("aria-expanded", String(open));
+}
+
+function syncHudMenu(): void {
+  const menu = $<HTMLButtonElement>("hud-menu");
+  const exit = $<HTMLButtonElement>("hud-exit");
+  const panel = $("hud-menu-panel");
+  const coarse = isCoarsePointer();
+  menu.hidden = !coarse;
+  exit.hidden = !coarse;
+  panel.hidden = coarse;
 }
 
 function setSticks(on: boolean): void {
@@ -151,6 +179,8 @@ function frame(now: number): void {
     else if (session.readyToSubmit) setStatus(task.done, true);
     else if (session.phase === "recording") setStatus("Recording");
     $<HTMLButtonElement>("submit").disabled = !session.canSubmit;
+    const menuSubmit = document.querySelector<HTMLButtonElement>('[data-for="submit"]');
+    if (menuSubmit) menuSubmit.disabled = !session.canSubmit;
     syncHeightSlider();
   }
   if (sim) view.update(sim);
@@ -236,6 +266,7 @@ function bindUi(): void {
     const nickname = $<HTMLInputElement>("nickname").value.trim() || `player-${Math.floor(Math.random() * 9000 + 1000)}`;
     const wallet = $<HTMLInputElement>("wallet").value.trim();
     contributor = wallet ? `${nickname} (${wallet})` : nickname;
+    if (isCoarsePointer()) void enterFullscreen();
     start.disabled = true;
     try {
       await beginRound();
@@ -251,7 +282,10 @@ function bindUi(): void {
     }
   });
   $("switch").addEventListener("click", backToIntro);
-  $("again").addEventListener("click", () => void beginRound().catch((e) => ($("verdict-detail").textContent = String(e))));
+  $("again").addEventListener("click", () => {
+    if (isCoarsePointer()) void enterFullscreen();
+    void beginRound().catch((e) => ($("verdict-detail").textContent = String(e)));
+  });
   $("reset").addEventListener("click", replayAttempt);
   $("submit").addEventListener("click", () => void submit());
   $<HTMLInputElement>("height").addEventListener("input", (e) => controls?.setHeight(Number((e.target as HTMLInputElement).value)));
@@ -290,7 +324,26 @@ function bindUi(): void {
   const fullscreen = $("fullscreen");
   fullscreen.hidden = !canFullscreen();
   fullscreen.addEventListener("click", () => void toggleFullscreen());
-  setSticks(window.matchMedia("(pointer: coarse)").matches);
+  $<HTMLButtonElement>("hud-exit").addEventListener("click", () => void exitFullscreen());
+  $<HTMLButtonElement>("hud-menu").addEventListener("click", (event) => {
+    event.stopPropagation();
+    toggleHudMenu();
+  });
+  for (const proxy of document.querySelectorAll<HTMLButtonElement>("[data-for]")) {
+    proxy.addEventListener("click", () => {
+      $(proxy.dataset.for!).click();
+      closeHudMenu();
+    });
+  }
+  document.addEventListener("click", (event) => {
+    if ($("hud-menu-panel").hidden) return;
+    const target = event.target as Node;
+    if ($("hud-menu-panel").contains(target) || $("hud-menu").contains(target) || $("hud-exit").contains(target)) return;
+    closeHudMenu();
+  });
+  setSticks(isCoarsePointer());
+  syncHudMenu();
+  window.matchMedia("(pointer: coarse)").addEventListener("change", () => syncHudMenu());
   press(false);
   const tilt = $<HTMLButtonElement>("tilt");
   if ("DeviceOrientationEvent" in window && navigator.maxTouchPoints > 0) tilt.hidden = false;

@@ -7,16 +7,36 @@ export function haptic(ms = 15): void {
 
 export const canFullscreen = (): boolean => document.fullscreenEnabled === true;
 
+export const isCoarsePointer = (): boolean => window.matchMedia("(pointer: coarse)").matches;
+
 type LockableOrientation = ScreenOrientation & { lock?: (orientation: string) => Promise<void> };
+
+export async function enterFullscreen(): Promise<void> {
+  if (!canFullscreen() || document.fullscreenElement) return;
+  try {
+    await document.documentElement.requestFullscreen();
+    await (screen.orientation as LockableOrientation).lock?.("landscape");
+  } catch (error) {
+    console.debug("fullscreen or orientation lock not available", error);
+  }
+}
+
+export async function exitFullscreen(): Promise<void> {
+  if (!document.fullscreenElement) return;
+  try {
+    await document.exitFullscreen();
+  } catch (error) {
+    console.debug("exit fullscreen failed", error);
+  }
+}
 
 export async function toggleFullscreen(): Promise<void> {
   try {
     if (document.fullscreenElement) {
-      await document.exitFullscreen();
+      await exitFullscreen();
       return;
     }
-    await document.documentElement.requestFullscreen();
-    await (screen.orientation as LockableOrientation).lock?.("landscape");
+    await enterFullscreen();
   } catch (error) {
     console.debug("fullscreen or orientation lock not available", error);
   }

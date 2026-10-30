@@ -46,14 +46,31 @@ button.secondary, button.grip { background: var(--surface); color: var(--text); 
 button.grip { flex: 2; touch-action: none; user-select: none; -webkit-user-select: none; }
 button.grip.on { background: var(--accent); color: var(--accent-text); }
 .error { color: var(--bad) !important; min-height: 1.4em; }
-#hud { position: absolute; left: 0; right: 0; top: 0; padding: max(12px, env(safe-area-inset-top)) 16px 0; pointer-events: none; }
+#hud { position: absolute; left: 0; right: 0; top: 0; padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) 0 max(12px, env(safe-area-inset-left)); pointer-events: none; }
+.hud-bar { display: flex; align-items: flex-start; gap: 8px; pointer-events: none; }
+.hud-copy { flex: 1; min-width: 0; }
 #instruction {
   display: inline-block; margin: 0; padding: 4px 12px; font-size: 20px; font-weight: 700; border-radius: var(--radius);
   background: color-mix(in srgb, var(--surface) 82%, transparent);
 }
-.chips { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+.hud-stats { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; align-items: center; }
 .chip { background: var(--surface); padding: 4px 10px; border-radius: 999px; font-size: 13px; border: 1px solid var(--line); }
+.chip-timer { font-variant-numeric: tabular-nums; }
 .chip.ok { color: var(--good); border-color: var(--good); }
+.hud-menu { pointer-events: auto; min-height: 36px; padding: 6px 12px; }
+.hud-exit { pointer-events: auto; min-height: 36px; padding: 6px 12px; }
+.hud-nav { display: none; gap: 8px; flex-wrap: wrap; margin-top: 6px; pointer-events: auto; }
+.hud-menu-panel {
+  margin-top: 8px; padding: 10px; border-radius: var(--radius);
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
+  border: 1px solid var(--line); box-shadow: 0 8px 24px rgb(0 0 0 / 0.18); pointer-events: auto;
+}
+.menu-actions { display: none; gap: 8px; margin-top: 10px; }
+.menu-action {
+  flex: 1; min-height: 40px; padding: 8px 10px; border-radius: 10px; font-size: 13px;
+  background: var(--surface); color: var(--text); border: 1px solid var(--line);
+}
+.menu-action.menu-primary { background: var(--accent); color: var(--accent-text); border-color: var(--accent); font-weight: 600; }
 #dock {
   position: absolute; left: 0; right: 0; bottom: 0; padding: 12px 16px max(12px, env(safe-area-inset-bottom));
   background: var(--surface); border-top: 1px solid var(--line);
@@ -83,7 +100,7 @@ button.grip.on { background: var(--accent); color: var(--accent-text); }
 body.touch .touch-only { display: block; }
 button, .stick, #hud { -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
 
-.tools { pointer-events: none; }
+.tools { pointer-events: none; display: flex; flex-wrap: wrap; gap: 8px; }
 .tool {
   pointer-events: auto; min-height: 36px; padding: 6px 12px; border-radius: 999px; font-size: 13px;
   background: var(--surface); color: var(--text); border: 1px solid var(--line);
@@ -91,12 +108,51 @@ button, .stick, #hud { -webkit-user-select: none; user-select: none; -webkit-tap
 .tool[aria-pressed="true"] { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
 #insets.collapsed { display: none; }
 
-/* Touch layout: transparent dock, a stick in each bottom corner, grip and buttons in between. */
+body:not(.touch) .menu-actions { display: none; }
+body:not(.touch) .hud-nav { display: none; }
+body:not(.touch) #hud-menu-panel { display: block; margin-top: 8px; }
+body:not(.touch) #hud-menu-panel[hidden] { display: block; }
+
+/* Touch layout: compact HUD, menu for secondary actions, corner joysticks. */
 .stick { display: none; }
+.knob {
+  position: absolute; left: 50%; top: 50%; width: 42%; height: 42%; margin: -21% 0 0 -21%; border-radius: 50%;
+  background: var(--accent); opacity: 0.9; box-shadow: 0 2px 8px rgb(0 0 0 / 0.3); pointer-events: none;
+}
+.a { position: absolute; font-style: normal; font-size: 11px; color: var(--muted); pointer-events: none; }
+.a.n { top: 6px; left: 50%; transform: translateX(-50%); }
+.a.s { bottom: 6px; left: 50%; transform: translateX(-50%); }
+.a.w { left: 8px; top: 50%; transform: translateY(-50%); }
+.a.e { right: 8px; top: 50%; transform: translateY(-50%); }
 body.touch {
-  --stick: clamp(96px, 28vw, 140px);
-  --edge: max(16px, env(safe-area-inset-left), env(safe-area-inset-right));
-  --floor: max(16px, env(safe-area-inset-bottom));
+  --stick: clamp(88px, 24vw, 120px);
+  --edge: max(12px, env(safe-area-inset-left), env(safe-area-inset-right));
+  --floor: max(10px, env(safe-area-inset-bottom));
+}
+body.touch .card h1 { font-size: 1.35rem; }
+body.touch .hud-nav { display: flex; }
+body.touch .hud-stats { margin-top: 0; margin-bottom: 6px; }
+body.touch #instruction {
+  display: block; max-width: min(72vw, 520px); padding: 4px 10px; font-size: 13px; font-weight: 600; line-height: 1.25;
+}
+body.touch .chip-timer {
+  font-size: 24px; font-weight: 700; padding: 2px 14px; letter-spacing: 0.02em;
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+}
+body.touch .chip-status { font-size: 11px; padding: 3px 8px; max-width: 42vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+body.touch #hud-menu-panel:not([hidden]) {
+  display: block; position: static; margin-top: 8px; width: min(280px, 100%); z-index: 5;
+}
+body.touch #hud-menu-panel[hidden] { display: none !important; }
+body.touch .menu-actions { display: flex; }
+body.touch #dock .row { display: contents; }
+body.touch #dock .row #reset,
+body.touch #dock .row #submit,
+body.touch #dock .row #tilt { display: none; }
+body.touch #grip {
+  position: fixed; right: var(--edge); bottom: calc(var(--floor) + var(--stick) + 10px);
+  width: var(--stick); min-height: 40px; max-width: none; margin: 0; padding: 0 8px;
+  border-radius: 20px; font-size: 13px; font-weight: 600; pointer-events: auto; z-index: 2;
 }
 body.touch #dock { left: 0; right: 0; transform: none; width: auto; padding: 0; background: none; border: 0; pointer-events: none; }
 body.touch .slider, body.touch .hint, body.touch #tilt { display: none; }
@@ -107,28 +163,13 @@ body.touch .stick {
 }
 body.touch #stick-move { left: var(--edge); }
 body.touch #stick-lift { right: var(--edge); }
-.knob {
-  position: absolute; left: 50%; top: 50%; width: 42%; height: 42%; margin: -21% 0 0 -21%; border-radius: 50%;
-  background: var(--accent); opacity: 0.9; box-shadow: 0 2px 8px rgb(0 0 0 / 0.3); pointer-events: none;
-}
-.a { position: absolute; font-style: normal; font-size: 11px; color: var(--muted); pointer-events: none; }
-.a.n { top: 6px; left: 50%; transform: translateX(-50%); }
-.a.s { bottom: 6px; left: 50%; transform: translateX(-50%); }
-.a.w { left: 8px; top: 50%; transform: translateY(-50%); }
-.a.e { right: 8px; top: 50%; transform: translateY(-50%); }
-body.touch .row {
-  position: fixed; left: 50%; bottom: var(--floor); transform: translateX(-50%); pointer-events: auto;
-  display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
-  width: min(calc(100vw - 2 * (var(--stick) + var(--edge) + 8px)), 220px);
-}
-body.touch .row button { padding: 0; font-size: 13px; }
-body.touch #grip { grid-column: 1 / -1; grid-row: 2; min-height: 72px; border-radius: 36px; font-size: 15px; font-weight: 600; }
-body.touch #reset { grid-row: 1; }
-body.touch #submit { grid-row: 1; width: auto; }
-body.touch .inset { width: clamp(88px, 24vw, 150px); }
-body.touch #insets { top: 132px; }
+body.touch .inset { width: clamp(72px, 18vw, 120px); }
+body.touch #insets { top: 88px; right: max(8px, env(safe-area-inset-right)); gap: 6px; }
 @media (orientation: landscape) and (max-height: 600px) {
-  body.touch #insets { top: 12px; flex-direction: row; }
+  body.touch #insets { top: max(8px, env(safe-area-inset-top)); flex-direction: row; }
+  body.touch #instruction { font-size: 12px; }
+  body.touch .chip-timer { font-size: 20px; }
+  body.touch #grip { bottom: calc(var(--floor) + var(--stick) + 6px); min-height: 36px; }
 }
 
 .task-list { display: grid; gap: 8px; margin: 0 0 12px; }
