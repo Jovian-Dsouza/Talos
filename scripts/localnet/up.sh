@@ -2,7 +2,7 @@
 # Start a fast-block Subtensor localnet in Docker (arm64 supported) and wait for RPC.
 set -euo pipefail
 
-NAME=bittesnor-localnet
+NAME=taunet-localnet
 IMAGE=${LOCALNET_IMAGE:-ghcr.io/opentensor/subtensor-localnet:latest}
 
 if docker ps -a --format '{{.Names}}' | grep -qx "$NAME"; then

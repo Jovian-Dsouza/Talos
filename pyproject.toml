@@ -1,5 +1,5 @@
 [project]
-name = "bittesnor"
+name = "taunet"
 version = "0.1.0"
 description = "Bittensor subnet for verified sim robot teleop data"
 requires-python = ">=3.12"

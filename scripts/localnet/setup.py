@@ -5,6 +5,8 @@ Run once per fresh chain, after scripts/localnet/up.sh (it creates a new subnet 
 exists on development chains. Wallets are written unencrypted under ~/.bittensor/wallets.
 """
 
+import os
+
 import bittensor as bt
 
 ENDPOINT = "ws://127.0.0.1:9944"
@@ -12,8 +14,8 @@ ALICE_SEED = "0xe5be9a5092b81bca64be81d212e7f2f9eba183bb7a90954f7b76361f6edb5c0a
 FUND_TAO = 2000
 STAKE_TAO = 500
 
-OWNER = "bittesnor-owner"
-VALIDATOR = "bittesnor-validator"
+OWNER = os.environ.get("OWNER_WALLET", "taunet-owner")
+VALIDATOR = os.environ.get("VALIDATOR_WALLET", "taunet-validator")
 
 
 def must(result, what: str):

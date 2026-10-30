@@ -107,7 +107,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Export accepted recordings as a LeRobotDataset")
     parser.add_argument("accepted_dir", type=Path)
     parser.add_argument("out_dir", type=Path)
-    parser.add_argument("repo_id", nargs="?", default="bittesnor/teleop-so101-sim-sample")
+    parser.add_argument("repo_id", nargs="?", default="taunet/teleop-so101-sim-sample")
     parser.add_argument("--db", type=Path, help="validator database, adds scores to the provenance file")
     parser.add_argument("--mapping", help="sim to real joint mapping JSON")
     parser.add_argument("--push", action="store_true", help="upload to the Hugging Face Hub (needs HF_TOKEN)")

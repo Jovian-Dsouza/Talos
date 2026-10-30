@@ -1,4 +1,4 @@
-# bittesnor
+# TauNet
 
 A Bittensor subnet for verified simulated robot teleoperation data. People drive a simulated SO-101
 arm in a lab automation cell on a phone (twin joysticks) or laptop (MuJoCo in the browser), on jobs

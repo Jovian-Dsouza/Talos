@@ -4,6 +4,6 @@
   "outputDirectory": "dist",
   "cleanUrls": true,
   "rewrites": [
-    { "source": "/pool/:path*", "destination": "https://bittesnor-miner.onrender.com/:path*" }
+    { "source": "/pool/:path*", "destination": "https://taunet-miner.onrender.com/:path*" }
   ]
 }

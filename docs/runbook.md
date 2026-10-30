@@ -47,7 +47,7 @@ uv run --python 3.12 python scripts/localnet/tune.py 2
 netuid, normally 2 on a fresh chain), registers the owner (uid 0), validator (uid 1), open pool
 (uid 2) and second pool (uid 3), starts the subnet and stakes the validator. `tune.py` turns off
 commit-reveal and the weights rate limit, which the Docker localnet needs for plain set_weights.
-Run `setup.py` once per fresh chain. To reset: `docker rm -f bittesnor-localnet`, then repeat.
+Run `setup.py` once per fresh chain. To reset: `docker rm -f taunet-localnet`, then repeat.
 
 ## 2. Miners
 
@@ -57,7 +57,7 @@ loopback address (the chain rejects 127.0.0.1), so use the machine's LAN or publ
 ```
 export NETUID=2 MINER_PUBLIC_IP=<lan or public ip> MINER_VALIDATOR_ALLOWLIST=<validator hotkey ss58>
 MINER_DATA_DIR=data/miner-open uv run --python 3.12 python -m miner.main
-MINER_WALLET=bittesnor-pool-two MINER_PORT=8092 MINER_DATA_DIR=data/miner-two uv run --python 3.12 python -m miner.main
+MINER_WALLET=taunet-pool-two MINER_PORT=8092 MINER_DATA_DIR=data/miner-two uv run --python 3.12 python -m miner.main
 ```
 
 Environment: `CHAIN_ENDPOINT` (default `ws://127.0.0.1:9944`, use `test` for testnet),
@@ -121,7 +121,7 @@ dedup working as intended.
 ## 7. Export and real arm
 
 ```
-uv run --python 3.12 --extra export python -m export.lerobot_export data/accepted out/sample bittesnor/teleop-so101-sim-sample
+uv run --python 3.12 --extra export python -m export.lerobot_export data/accepted out/sample taunet/teleop-so101-sim-sample
 ```
 
 Writes a LeRobotDataset (state, action, front camera video, task string per episode) plus

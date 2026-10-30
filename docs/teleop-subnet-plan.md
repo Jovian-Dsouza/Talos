@@ -1,6 +1,6 @@
 # Teleop Data Subnet: Plan v1
 
-*October 26, 2026. Builds on [robotics.md](robotics.md) and [bittesnor.md](bittesnor.md). Decisions are recorded in Section 9.*
+*October 26, 2026. Builds on [robotics.md](robotics.md) and [research.md](research.md). Decisions are recorded in Section 9.*
 
 ---
 

@@ -1,6 +1,6 @@
 """Create the subnet on Bittensor testnet and register and stake the validator.
 
-The owner coldkey (bittesnor-owner) also acts as the treasury that pays player registrations, so
+The owner coldkey (taunet-owner, or OWNER_WALLET) also acts as the treasury that pays player registrations, so
 this script only spends what the budget allows and prints what is left. Wallets are created if
 missing and are written unencrypted so services can run unattended; use encrypted wallets for
 anything that holds real value.
@@ -18,8 +18,8 @@ VALIDATOR_STAKE_TAO = float(os.environ.get("STAKE_TAO", "0.05"))
 VALIDATOR_FUNDING_TAO = float(os.environ.get("VALIDATOR_FUNDING_TAO", "0.06"))  # burn, fees and the stake
 MAX_BURN_RAO = 100_000_000  # 0.1 TAO, chain minimum for max_burn
 TARGET_BURN_TAO = 0.002
-OWNER = "bittesnor-owner"
-VALIDATOR = "bittesnor-validator"
+OWNER = os.environ.get("OWNER_WALLET", "taunet-owner")
+VALIDATOR = os.environ.get("VALIDATOR_WALLET", "taunet-validator")
 
 
 def must(result, what: str):

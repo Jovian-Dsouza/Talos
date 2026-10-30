@@ -17,6 +17,8 @@ import bittensor as bt
 from cryptography.fernet import Fernet
 
 OUT = Path("deploy/secrets.env")
+OWNER = os.environ.get("OWNER_WALLET", "taunet-owner")
+VALIDATOR = os.environ.get("VALIDATOR_WALLET", "taunet-validator")
 
 
 def phrase(path: str) -> str:
@@ -29,11 +31,11 @@ def main() -> None:
     netuid = os.environ.get("NETUID")
     if not netuid:
         raise SystemExit("set NETUID to the subnet setup.py created")
-    validator = bt.Wallet(name="bittesnor-validator", hotkey="default").hotkey.ss58_address
+    validator = bt.Wallet(name=VALIDATOR, hotkey="default").hotkey.ss58_address
     lines = {
         "NETUID": netuid,
-        "TREASURY_MNEMONIC": phrase("bittesnor-owner/coldkey"),
-        "VALIDATOR_MNEMONIC": phrase("bittesnor-validator/hotkeys/default"),
+        "TREASURY_MNEMONIC": phrase(f"{OWNER}/coldkey"),
+        "VALIDATOR_MNEMONIC": phrase(f"{VALIDATOR}/hotkeys/default"),
         "MINER_VALIDATOR_ALLOWLIST": validator,
         "WALLET_ENCRYPTION_KEY": Fernet.generate_key().decode(),
     }

@@ -8,7 +8,7 @@ from miner.deps import AppState
 
 
 def create_app(state: AppState) -> FastAPI:
-    app = FastAPI(title="bittesnor hosted miner")
+    app = FastAPI(title="taunet hosted miner")
     app.add_middleware(
         CORSMiddleware, allow_origins=list(state.config.allowed_origins), allow_methods=["GET", "POST"],
         allow_headers=["*"],

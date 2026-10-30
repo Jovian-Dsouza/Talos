@@ -11,7 +11,7 @@ set +a
 MINER_PORT="${MINER_PORT:-8091}"
 export NETUID MINER_PORT AUTH_DEV_LOGIN="${AUTH_DEV_LOGIN:-1}" CHAIN_ENDPOINT="${CHAIN_ENDPOINT:-ws://127.0.0.1:9944}"
 export HOSTED_MINER_URL="http://127.0.0.1:${MINER_PORT}" POLL_SECONDS="${POLL_SECONDS:-2}"
-export MINER_VALIDATOR_ALLOWLIST="$(uv run --python 3.12 python -c "import bittensor as bt; print(bt.Wallet(name='bittesnor-validator', hotkey='default').hotkey.ss58_address)")"
+export MINER_VALIDATOR_ALLOWLIST="$(uv run --python 3.12 python -c "import bittensor as bt; print(bt.Wallet(name='${VALIDATOR_WALLET:-taunet-validator}', hotkey='default').hotkey.ss58_address)")"
 
 mkdir -p data/logs
 uv run --python 3.12 python -m miner.main >data/logs/miner.log 2>&1 &

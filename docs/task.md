@@ -26,19 +26,17 @@ chain weights and Merkle root, LeRobot sample on Hugging Face, optional real SO-
 ### P0.1 Testnet TAO and wallets
 
 - [ ] Request **testnet TAO** from the Bittensor Discord faucet (budget about **8 to 10 TAO** on the owner for subnet, registrations, and validator stake).
-- [ ] Primary deposit address (owner coldkey, wallet name `bittesnor-owner`):
+- [ ] Primary deposit address (owner coldkey, wallet name `taunet-owner`):
   - `5Hq2QyfvUjdK6yi5ms2N1E8LLenEvvjmQPkTR5kSMLbfQENw`
 - [ ] Confirm wallet files exist locally (private keys stay on disk, never commit or paste):
-  - `~/.bittensor/wallets/bittesnor-owner/`
-  - `~/.bittensor/wallets/bittesnor-validator/`
-  - `~/.bittensor/wallets/bittesnor-pool-open/`
-  - `~/.bittensor/wallets/bittesnor-pool-two/`
+  - `~/.bittensor/wallets/taunet-owner/`
+  - `~/.bittensor/wallets/taunet-validator/`
 - [ ] Check owner balance before subnet creation:
 
 ```bash
 uv run --python 3.12 python -c "
 import bittensor as bt
-w = bt.Wallet(name='bittesnor-owner', hotkey='default')
+w = bt.Wallet(name='taunet-owner', hotkey='default')
 print(bt.Subtensor('test').read('balance', coldkey_ss58=w.coldkeypub.ss58_address))
 "
 ```
@@ -105,19 +103,19 @@ iOS and Android need HTTPS for tilt; an HTTPS page cannot call an HTTP miner.
 
 ### P0.6 Hugging Face public sample (submission artifact)
 
-- [ ] Create Hugging Face account and dataset repo (example id: `bittesnor/teleop-so101-sim-demo`).
+- [ ] Create Hugging Face account and dataset repo (example id: `taunet/teleop-so101-sim-demo`).
 - [ ] Export accepted episodes:
 
 ```bash
 uv run --python 3.12 --extra export python -m export.lerobot_export \
-  <ACCEPTED_DIR> out/hf-export bittesnor/teleop-so101-sim-demo
+  <ACCEPTED_DIR> out/hf-export taunet/teleop-so101-sim-demo
 ```
 
 - [ ] Upload:
 
 ```bash
 huggingface-cli login
-huggingface-cli upload bittesnor/teleop-so101-sim-demo out/hf-export . --repo-type dataset
+huggingface-cli upload taunet/teleop-so101-sim-demo out/hf-export . --repo-type dataset
 ```
 
 - [ ] Add dataset **README** (task description, SO-101, Bittensor verification, license, link to repo).
@@ -243,9 +241,9 @@ Run once on testnet or localnet (runbook section 9):
 
 | Item | Value |
 |------|--------|
-| Wallet name | `bittesnor-owner` |
+| Wallet name | `taunet-owner` |
 | Coldkey (fund here first) | `5Hq2QyfvUjdK6yi5ms2N1E8LLenEvvjmQPkTR5kSMLbfQENw` |
-| On disk | `~/.bittensor/wallets/bittesnor-owner/` |
+| On disk | `~/.bittensor/wallets/taunet-owner/` |
 
 Never share the `coldkey` file or seed. Only share the public SS58 for faucet deposits.
 

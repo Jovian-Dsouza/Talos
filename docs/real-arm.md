@@ -8,7 +8,7 @@ The simulator's joint zero is not the real arm's calibrated zero, so each joint 
 offset in `realarm/mapping.json`. The gripper maps linearly: simulator closed (0.05 rad) to 0 and
 open (1.3 rad) to 100.
 
-1. Calibrate the follower with LeRobot as usual (`lerobot-calibrate`, id `bittesnor_follower`).
+1. Calibrate the follower with LeRobot as usual (`lerobot-calibrate`, id `taunet_follower`).
 2. Put the real arm in the simulator's start pose: shoulder_pan 0, shoulder_lift -1.2 rad (-68.8 deg),
    elbow_flex 1.2 rad (68.8 deg), wrist_flex 0.8 rad (45.8 deg), wrist_roll 0. Read the real joint
    values (`robot.get_observation()`).

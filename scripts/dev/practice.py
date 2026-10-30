@@ -37,7 +37,7 @@ class PracticeChain:
 
 
 def create_app() -> FastAPI:
-    app = FastAPI(title="bittesnor practice server")
+    app = FastAPI(title="taunet practice server")
     app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["GET", "POST"], allow_headers=["*"])
     ctx = Context(PipelineConfig(require_miner_signature=False), Store(":memory:"), PracticeChain())
     state: dict[str, Any] = {"counter": 0, "verdicts": {}, "runs": []}

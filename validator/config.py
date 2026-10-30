@@ -33,7 +33,7 @@ class ValidatorConfig:
         return ValidatorConfig(
             chain_endpoint=chain_endpoint,
             netuid=netuid_from_env(chain_endpoint),
-            wallet_name=os.environ.get("VALIDATOR_WALLET", "bittesnor-validator"),
+            wallet_name=os.environ.get("VALIDATOR_WALLET", "taunet-validator"),
             hotkey_name=os.environ.get("VALIDATOR_HOTKEY", "default"),
             db_path=Path(os.environ.get("VALIDATOR_DB", "data/validator.db")),
             poll_seconds=float(os.environ.get("POLL_SECONDS", "3")),

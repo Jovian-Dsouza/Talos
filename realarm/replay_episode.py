@@ -55,7 +55,7 @@ def main() -> None:
 
     from lerobot.robots.so_follower import SO101Follower, SO101FollowerConfig
 
-    config = SO101FollowerConfig(port=port, id="bittesnor_follower", use_degrees=True,
+    config = SO101FollowerConfig(port=port, id="taunet_follower", use_degrees=True,
                                  max_relative_target=max_step)
     robot = SO101Follower(config)
     robot.connect()

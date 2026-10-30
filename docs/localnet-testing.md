@@ -40,7 +40,7 @@ uv run --python 3.12 python -c "import bittensor as bt; print('block:', bt.Subte
 
 ## 3. Create and Tune the Subnet (Run Once per Fresh Chain)
 
-Fund `bittesnor-owner` and `bittesnor-validator` from the local `//Alice` dev account, register the subnet (`netuid 2` on a fresh chain), start emissions, register the validator, and add stake:
+Fund `taunet-owner` and `taunet-validator` from the local `//Alice` dev account, register the subnet (`netuid 2` on a fresh chain), start emissions, register the validator, and add stake:
 
 ```bash
 uv run --python 3.12 python scripts/localnet/setup.py
@@ -146,7 +146,7 @@ curl -s http://127.0.0.1:8091/leaderboard | python3 -m json.tool
 Export all validator-accepted episodes from `data/accepted` into a LeRobot v0.6.1 dataset:
 
 ```bash
-uv run --python 3.12 --extra export python -m export.lerobot_export data/accepted out/sample bittesnor/teleop-so101-sim-sample
+uv run --python 3.12 --extra export python -m export.lerobot_export data/accepted out/sample taunet/teleop-so101-sim-sample
 ```
 
 ---
@@ -157,7 +157,7 @@ To wipe the local chain and all local miner/validator databases and start fresh:
 
 ```bash
 pkill -f "miner.main|validator.main|run_all.sh" || true
-docker rm -f bittesnor-localnet
+docker rm -f taunet-localnet
 rm -rf data/hosted data/accepted data/validator.db data/logs
 
 scripts/localnet/up.sh
