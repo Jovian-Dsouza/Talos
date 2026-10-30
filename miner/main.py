@@ -18,6 +18,7 @@ from miner.deps import AppState
 def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(message)s")
     config = MinerConfig.from_env()
+    config.data_dir.mkdir(parents=True, exist_ok=True)
     chain = Chain(config.chain_endpoint, config.netuid)
     vault = KeyVault(config.wallet_encryption_key)
     accounts = AccountStore(config.database_url)

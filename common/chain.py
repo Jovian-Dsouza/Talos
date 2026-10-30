@@ -98,13 +98,16 @@ class Chain:
         call = bt.calls.SubtensorModule.burned_register(netuid=self.netuid, hotkey=hotkey_ss58)
         _must(self._st.submit_call(call, wallet), "burned register")
 
-    def latest_commitment(self, hotkey_ss58: str) -> str | None:
-        """The hotkey's most recent on-chain commitment (the validator's epoch Merkle root)."""
+    def latest_commitment(self, hotkey_ss58: str) -> dict | None:
+        """The hotkey's latest on-chain commitment, the validator's epoch Merkle root ("e<epoch>:<root>")."""
         try:
             found = self._st.read("commitment", netuid=self.netuid, hotkey_ss58=hotkey_ss58)
         except Exception:
             return None
-        return None if found is None else str(found)
+        epoch, _, root = str(getattr(found, "data", "") or "").partition(":")
+        if found is None or not root or not epoch.startswith("e"):
+            return None
+        return {"epoch": int(epoch[1:]), "root": root, "block": int(found.block)}
 
     def serve_endpoint(self, wallet: "bt.Wallet", ip: str, port: int) -> None:
         _must(self._st.execute(bt.ServeAxon(self.netuid, ip, port), wallet), "serve endpoint")

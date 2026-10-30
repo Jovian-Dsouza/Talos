@@ -1,4 +1,5 @@
-"""Create wallets, fund them from the localnet dev account, create the subnet and register neurons.
+"""Create the owner and validator wallets, fund them from the localnet dev account, create the subnet,
+register and stake the validator. Players are registered later by the hosted miner (the treasury is Alice).
 
 Run once per fresh chain, after scripts/localnet/up.sh (it creates a new subnet each run). Uses the well-known public dev seed for Alice, which only
 exists on development chains. Wallets are written unencrypted under ~/.bittensor/wallets.
@@ -13,7 +14,6 @@ STAKE_TAO = 500
 
 OWNER = "bittesnor-owner"
 VALIDATOR = "bittesnor-validator"
-POOLS = ("pool-open", "pool-two")
 
 
 def must(result, what: str):
@@ -47,9 +47,8 @@ def main() -> None:
     alice = alice_wallet()
     owner = ensure_wallet(OWNER, "default")
     validator = ensure_wallet(VALIDATOR, "default")
-    pools = [ensure_wallet(f"bittesnor-{p}", "default") for p in POOLS]
 
-    for wallet in (owner, validator, *pools):
+    for wallet in (owner, validator):
         if st.read("balance", coldkey_ss58=wallet.coldkeypub.ss58_address).tao < FUND_TAO / 2:
             must(st.execute(bt.Transfer(wallet.coldkeypub.ss58_address, FUND_TAO), alice), "transfer")
     print("funded wallets")
@@ -63,18 +62,17 @@ def main() -> None:
 
     # The intent preflight reads storage the localnet runtime lacks, so submit raw calls.
     sub = bt.calls.SubtensorModule
-    for wallet in (validator, *pools):
-        call = sub.burned_register(netuid=netuid, hotkey=wallet.hotkey.ss58_address)
-        must(uncapped.submit_call(call, wallet), "burned register")
+    call = sub.burned_register(netuid=netuid, hotkey=validator.hotkey.ss58_address)
+    must(uncapped.submit_call(call, validator), "burned register")
     # Staking and emissions stay disabled until the owner starts the subnet.
     must(uncapped.submit_call(sub.start_call(netuid=netuid), owner), "start subnet")
     stake = sub.add_stake(
         hotkey=validator.hotkey.ss58_address, netuid=netuid, amount_staked=STAKE_TAO * 10**9
     )
     must(uncapped.submit_call(stake, validator), "add stake")
-    for wallet in (owner, validator, *pools):
+    for wallet in (owner, validator):
         print(wallet.name, "uid", st.read("uid", hotkey_ss58=wallet.hotkey.ss58_address, netuid=netuid))
-    print("subnet registered")
+    print(f"subnet registered. Run: NETUID={netuid} scripts/localnet/run_all.sh")
 
 
 main()

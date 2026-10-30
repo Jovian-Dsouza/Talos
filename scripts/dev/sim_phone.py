@@ -1,8 +1,12 @@
 """Dev tool: act like phones. Fetch a ticket, solve it with the scripted policy, submit, poll the verdict.
 
-Usage: python scripts/dev/sim_phone.py BASE_URL [COUNT] [CONCURRENCY] [NAME]
+Each simulated phone signs in as its own dev player (the server needs AUTH_DEV_LOGIN=1), so every
+one gets its own custodial wallet and registered miner.
+
+Usage: [TASK=put_cube_in_bowl] python scripts/dev/sim_phone.py BASE_URL [COUNT] [CONCURRENCY] [NAME]
 """
 
+import os
 import sys
 import time
 from concurrent.futures import ThreadPoolExecutor
@@ -12,14 +16,16 @@ import httpx
 from common.schema import Ticket
 from scripts.dev.scripted_demo import build_payload
 
+TASK = os.environ.get("TASK", "put_cube_in_bowl")  # the scripted solver is tuned for this task
 POLL_SECONDS = 1.0
 POLL_LIMIT_SECONDS = 120.0
 
 
 def run_one(base_url: str, name: str) -> dict:
     started = time.monotonic()
-    with httpx.Client(timeout=30.0) as client:
-        ticket = Ticket.from_dict(client.get(f"{base_url}/ticket").json())
+    headers = {"Authorization": f"Bearer dev:{name}"}
+    with httpx.Client(timeout=30.0, headers=headers) as client:
+        ticket = Ticket.from_dict(client.get(f"{base_url}/ticket", params={"task": TASK}).json())
         payload = build_payload(ticket, name)
         response = client.post(f"{base_url}/submit", json=payload)
         if response.status_code != 200:

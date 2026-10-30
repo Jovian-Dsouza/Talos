@@ -46,9 +46,12 @@ def build_router(state: AppState) -> APIRouter:
     def network(request: Request) -> dict[str, Any]:
         limit(state, "read", request)
         names = state.accounts.display_names()
+        permitted = [n for n in state.neurons() if n.validator_permit]
+        top_stake = max((n.stake for n in permitted), default=0.0)
+        # A local chain gives every neuron a permit, so keep only those with a meaningful stake.
         validators = [
             {"uid": n.uid, "hotkey": n.hotkey, "stake": n.stake, "root": state.chain.latest_commitment(n.hotkey)}
-            for n in state.neurons() if n.validator_permit
+            for n in sorted(permitted, key=lambda n: n.stake, reverse=True) if n.stake >= 0.1 * top_stake
         ]
         feed = [{**item, "contributor": names.get(item["hotkey"], item["contributor"])}
                 for item in state.db.recent_verdicts(FEED_LIMIT)]
