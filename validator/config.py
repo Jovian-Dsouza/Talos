@@ -4,6 +4,7 @@ import os
 from dataclasses import dataclass
 from pathlib import Path
 
+from common.chain import netuid_from_env
 from validator.pipeline import PipelineConfig
 
 
@@ -28,9 +29,10 @@ class ValidatorConfig:
 
     @staticmethod
     def from_env() -> "ValidatorConfig":
+        chain_endpoint = os.environ.get("CHAIN_ENDPOINT", "ws://127.0.0.1:9944")
         return ValidatorConfig(
-            chain_endpoint=os.environ.get("CHAIN_ENDPOINT", "ws://127.0.0.1:9944"),
-            netuid=int(os.environ.get("NETUID", "2")),
+            chain_endpoint=chain_endpoint,
+            netuid=netuid_from_env(chain_endpoint),
             wallet_name=os.environ.get("VALIDATOR_WALLET", "bittesnor-validator"),
             hotkey_name=os.environ.get("VALIDATOR_HOTKEY", "default"),
             db_path=Path(os.environ.get("VALIDATOR_DB", "data/validator.db")),

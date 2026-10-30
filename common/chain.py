@@ -4,6 +4,7 @@ Everything chain related goes through this module so SDK changes stay in one pla
 """
 
 import ipaddress
+import os
 from dataclasses import dataclass
 from functools import lru_cache
 from typing import Sequence
@@ -12,6 +13,16 @@ import bittensor as bt
 
 LOCALNET = "ws://127.0.0.1:9944"
 U16_MAX = 65535
+
+
+def netuid_from_env(chain_endpoint: str) -> int:
+    """NETUID is mandatory off a local chain, so a missing value can never point at someone else's subnet."""
+    raw = os.environ.get("NETUID")
+    if raw:
+        return int(raw)
+    if chain_endpoint.startswith(("ws://127.0.0.1", "ws://localhost")):
+        return 2
+    raise RuntimeError("NETUID is required when CHAIN_ENDPOINT is not a local chain")
 
 
 class ChainCallError(RuntimeError):

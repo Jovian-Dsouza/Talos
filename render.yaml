@@ -28,7 +28,7 @@ services:
       - key: MINER_TRUST_PROXY
         value: "1"
       - key: MAX_BURN_TAO
-        value: "0.5"
+        value: "0.05"
       - key: MAX_SIGNUPS_PER_DAY
         value: "20"
       - key: DATABASE_URL

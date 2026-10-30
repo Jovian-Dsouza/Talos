@@ -4,6 +4,7 @@ import os
 from dataclasses import dataclass
 from pathlib import Path
 
+from common.chain import netuid_from_env
 from common.scene import DEFAULT_TASKS, SCENE_BUILDERS
 
 
@@ -54,7 +55,7 @@ class MinerConfig:
         data_dir = Path(os.environ.get("MINER_DATA_DIR", "data/hosted"))
         return MinerConfig(
             chain_endpoint=chain_endpoint,
-            netuid=int(os.environ.get("NETUID", "2")),
+            netuid=netuid_from_env(chain_endpoint),
             host=os.environ.get("MINER_HOST", "0.0.0.0"),
             port=int(os.environ.get("PORT", os.environ.get("MINER_PORT", "8091"))),
             data_dir=data_dir,
