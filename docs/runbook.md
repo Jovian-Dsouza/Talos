@@ -13,11 +13,27 @@ cd web && npm install && npm run dev                        # app on http://loca
 Open `http://localhost:5173/?pool=http://127.0.0.1:8091`. The practice server hands out tasks and
 judges each run with the real replay, success check and scoring, with no Bittensor involved.
 
-Controls: drag on the scene to move the blue target ring and the arm follows. Height slider or Q
-and E raise and lower the gripper. Hold the Hold to grip button or Space to close the gripper.
-Left and right arrows roll the wrist. W, S, A, D nudge the target. Nothing records until your first
-input. Typical run: hover over the cube, lower to the table, grip, lift, move over the bowl, lower
-a little, release, then Submit.
+Pick a task on the start card. Vial racking (lab automation) asks for a named sample vial to be seated
+in a named slot of a 2 by 4 rack among vials already racked. Parts to tote (logistics) moves a named
+part into the matching tote. Both are judged by the same replay pipeline.
+
+Controls on a phone, or on a desktop after pressing Joysticks:
+
+- Left stick moves the gripper over the bench, relative to the camera, so up is away from you.
+- Right stick up and down raises and lowers the gripper, left and right rolls the wrist.
+- Grip toggles the gripper closed and open. A mouse can still hold the button.
+- One finger on the scene orbits the camera, two fingers zoom and pan. Cam cycles Front, Overhead
+  and Side, Views hides the two inset views, Full screen helps on tablets. Hold a phone sideways
+  for the biggest view.
+
+Controls on a desktop without sticks: drag on the scene to move the blue target ring and the arm
+follows. Height slider or Q and E raise and lower the gripper. Hold the Hold to grip button or
+Space to close the gripper. Left and right arrows roll the wrist. W, S, A, D nudge the target.
+
+Nothing records until your first input. Typical run: hover over the part, lower to the bench, grip,
+lift, move over the goal, lower a little, release, then Submit. For vials, grip about mid height and
+lower the vial straight into the hole before releasing. The yellow arc on the bench marks the arm's
+reach, and the shelving, signal tower and bench are scenery only: they never affect the physics.
 
 ## 1. Local chain and subnet
 
@@ -45,6 +61,8 @@ MINER_WALLET=bittesnor-pool-two MINER_PORT=8092 MINER_DATA_DIR=data/miner-two uv
 ```
 
 Environment: `CHAIN_ENDPOINT` (default `ws://127.0.0.1:9944`, use `test` for testnet),
+`TASK_IDS` (comma list of tasks this pool serves, the first is the default, default
+`rack_vial,put_cube_in_bowl`; the app reads `GET /tasks` and `GET /ticket?task=ID`),
 `MINER_ALLOWED_ORIGINS` (comma list, default any), `MINER_TRUST_PROXY=1` behind a tunnel or CDN so
 rate limits key on the real client address. Validators are recognized by validator permit on chain,
 plus anything in `MINER_VALIDATOR_ALLOWLIST` (needed on localnet until the permit appears).

@@ -1,7 +1,8 @@
 # bittesnor
 
 A Bittensor subnet for verified simulated robot teleoperation data. People drive a simulated SO-101
-arm on a phone or laptop (MuJoCo in the browser). Validators replay every recording in native
+arm in a lab automation cell on a phone (twin joysticks) or laptop (MuJoCo in the browser), on jobs
+such as racking sample vials. Validators replay every recording in native
 MuJoCo, check that it really succeeded, score quality and novelty, and set weights. Accepted
 episodes export as LeRobot datasets for VLA labs.
 

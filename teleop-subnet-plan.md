@@ -251,6 +251,8 @@ Built and verified on a local chain with real browser recordings: see [README.md
 | Miner (tickets, uploads, signed serving, verdict feed, leaderboard, rate limits) | Done. Two pools run side by side on localnet. |
 | Validator (ticket checks, strict and windowed replay, dedup, quality, scoring, weights, epoch Merkle commitments) | Done. Weights and roots landed on the localnet chain. |
 | Web app (SO-101 in WASM, IK, drag, height slider, hold to grip, tilt, keyboard, recorder, verdict and leaderboard screens) | Done and driven end to end in headless Chromium. Not yet tried on a physical iPhone or Android phone. |
+| Phone controls (Oct 30): twin joysticks, grip toggle, camera orbit and presets, wake lock, fullscreen | Done and driven with emulated multi touch in headless Chromium. Needs a real phone pass for feel and frame rate. |
+| Industrial task and look (Oct 30): `rack_vial` lab vial racking, lab cell scenery, task picker, `TASK_IDS` and `/tasks` on the miner | Done. Scripted solver passes 99 of 100 seeds, and a run recorded in browser physics was accepted by native replay with drift 0.11 of the limit. |
 | LeRobot export with rendered frames, real-arm replay script | Done. The export loads with the LeRobot loader. The real-arm script is untested on hardware and needs the calibration in docs/real-arm.md. |
 | Load: 20 simultaneous simulated phones | All answered in about 12 seconds on one validator process. |
 | Testnet deployment, 24 hour run, Hugging Face upload, phone and real-arm tests, outreach sending | Not done. They need testnet TAO, a VM, accounts and hardware. Scripts and docs are ready. |
@@ -264,5 +266,9 @@ Deviations from the decisions above:
   hold it.
 - **Episode cap:** 3,000 control steps (60 seconds), not 1,500.
 - **Palette:** teal replaced yellow so a bowl never matches the yellow arm.
+- **POC task (Oct 30):** `rack_vial` (seat a named vial in a named rack slot) is the default and
+  `put_cube_in_bowl` stays selectable. The vial is 25 mm wide, the width the SO-101 jaws are proven
+  on, because an 18 mm vial would not grip reliably. Rack holes have 6 mm of clearance per side so
+  phone precision is enough. Scenery lives on a three.js layer that never reaches the replay.
 - **No tests, no TDD:** per CLAUDE.md. Verification was by running the real flow and tampering with
   real recordings.
