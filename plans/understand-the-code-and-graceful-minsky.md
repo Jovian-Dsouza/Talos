@@ -18,7 +18,7 @@ First proven end to end on localnet on the Mac, then deployed: frontend on Verce
 
 Decisions from the user (Oct 30):
 - Score = time + jerk (smoothness). Nothing else in the value.
-- Web2 onboarding: Google sign-in, custodial wallet per player, keys encrypted in our Postgres.
+- Web2 onboarding: Google sign-in through **Clerk**, custodial wallet per player, keys encrypted in our Postgres.
 - Every player is registered as a real miner (own hotkey, own UID). **The backend treasury pays the
   registration** (transfer plus burn), the player pays nothing.
 - Vercel for the frontend, Render for the backend.
@@ -28,10 +28,10 @@ Decisions from the user (Oct 30):
 
 ```
  Phone / desktop (Vercel static site)
-   |  Google ID token, then Bearer session
+   |  Clerk session JWT as Bearer
    v
  Hosted miner service (Render web service, FastAPI)            Postgres (Render)
-   - /auth/google, /me, /ticket, /submit  (per player)  <--->  users, sessions, encrypted keys
+   - /me, /ticket, /submit  (per player)  <--->  users, encrypted keys
    - /m/{hotkey}/trajectories|verdicts  (validator, http_auth signed)
    - /network, /leaderboard  (public read)
    - registrar thread: treasury -> transfer -> burned_register (one per block)
@@ -75,13 +75,15 @@ New package `accounts/` (kept small, one concern per file):
   `http_auth` accept it without wallet files. Mnemonics are encrypted with Fernet
   (`WALLET_ENCRYPTION_KEY`, `cryptography` dependency) before they touch the database.
 - `accounts/store.py`: SQLAlchemy Core on `DATABASE_URL` (Postgres on Render, Postgres in Docker
-  locally). Tables: `users` (id, google_sub unique, email, display_name, coldkey_ss58, hotkey_ss58,
+  locally). Tables: `users` (id, clerk_user_id unique, email, display_name, coldkey_ss58, hotkey_ss58,
   enc_coldkey, enc_hotkey, uid, reg_status `pending|funding|registering|registered|failed`,
-  reg_error, created_at) and `sessions` (sha256 of token, user_id, expires_at). Opaque random
-  session tokens, 7 day expiry.
-- `accounts/google.py`: verify the Google ID token with `google.oauth2.id_token.verify_oauth2_token`
-  against `GOOGLE_CLIENT_ID`. A dev login (`AUTH_DEV_LOGIN=1`) exists for localnet scripts only and
-  refuses to start when `CHAIN_ENDPOINT` is `test` or `finney`.
+  reg_error, created_at) (no sessions table, Clerk owns sessions).
+- `accounts/clerk.py`: verify the Clerk session JWT (RS256) with PyJWT `PyJWKClient` against
+  `CLERK_JWKS_URL`, checking `iss == CLERK_ISSUER`, `exp`/`nbf`, and `azp` in the allowed origins.
+  `sub` is the Clerk user id. Display name and email come from the Clerk Backend API
+  (`GET /v1/users/{id}` with `CLERK_SECRET_KEY`) once, on first login. A dev login
+  (`AUTH_DEV_LOGIN=1`) exists for localnet scripts only and refuses to start when `CHAIN_ENDPOINT`
+  is `test` or `finney`. No local session table: Clerk owns sessions.
 - `accounts/registrar.py`: one background thread, one registration at a time:
   1. read the current subnet burn; stop with a clear `reg_error` if it is above `MAX_BURN_TAO`
      or the treasury balance is short;
@@ -101,7 +103,7 @@ New package `accounts/` (kept small, one concern per file):
 [miner/app.py](miner/app.py) (split into routers so no file passes ~300 lines:
 `miner/routes_player.py`, `miner/routes_validator.py`, `miner/routes_public.py`):
 
-- `POST /auth/google` -> upsert user, create wallet on first login, queue registration, return token.
+- The first authenticated call (`GET /me`) upserts the user, creates the wallet and queues registration.
   `GET /me` -> name, ss58 addresses, UID, registration status, accepted runs, total score, on-chain
   incentive and emission.
 - `GET /ticket` and `POST /submit` require a session. Tickets are built with the player's hotkey
@@ -143,10 +145,10 @@ SO-101 feature names, front camera video and the task string. Changes:
   right env, logs to `data/logs/`.
 - [scripts/dev/sim_phone.py](scripts/dev/sim_phone.py): log in through the dev login so it acts as
   several distinct players (several registrations, several miners).
-- A Google OAuth client with `http://localhost:5173` as an authorized origin (user creates it).
+- A Clerk application (dev instance) with Google enabled as a social connection and `http://localhost:5173` allowed. The dev instance uses Clerk's shared Google credentials, so no Google OAuth client is needed. User supplies `CLERK_PUBLISHABLE_KEY` and `CLERK_SECRET_KEY`.
 
 E2E checklist, all must pass:
-1. Google sign-in on localhost creates a user, encrypted keys appear in Postgres, the treasury
+1. Clerk Google sign-in on localhost creates a user, encrypted keys appear in Postgres, the treasury
    balance drops by burn plus fee, and the player's hotkey gets a UID.
 2. Play a `rack_vial` run, submit, verdict shows time, smoothness and score.
 3. Tampered run (edited ctrl) and reused ticket are rejected with reasons.
@@ -159,7 +161,7 @@ E2E checklist, all must pass:
 Run the frontend-design skill first for direction. Keep vanilla TS + Vite (no framework change) as
 a Vite multi-page build:
 - `index.html` landing: what the subnet does, 3 step how-it-works, live stats strip from `/network`,
-  Sign in with Google (Google Identity Services script).
+  Sign in with Google via `@clerk/clerk-js`.
 - `play.html`: the current simulator, restyled. Signed-in header with miner status chip
   ("Registering your miner", "Miner UID 12"). Result screen shows the formula breakdown
   (time, smoothness, score) and the player's rank. Split [web/src/main.ts](web/src/main.ts) into
@@ -178,11 +180,11 @@ a Vite multi-page build:
   [deploy/Dockerfile](deploy/Dockerfile), persistent disk for bundles), background worker
   `bittesnor-validator` (same image, disk for its SQLite and accepted runs), Postgres
   `bittesnor-db`. Starter plans, since free instances sleep and the validator must stay up.
-  Secrets: `WALLET_ENCRYPTION_KEY`, `GOOGLE_CLIENT_ID`, treasury and validator mnemonics,
+  Secrets: `WALLET_ENCRYPTION_KEY`, `CLERK_SECRET_KEY`, `CLERK_JWKS_URL`, `CLERK_ISSUER`, treasury and validator mnemonics,
   `HF_TOKEN`. Validator gets `HOSTED_MINER_URL` = the Render miner URL.
 - `web/vercel.json`: build `npm run build`, output `dist`, rewrite `/pool/:path*` to the Render
   miner (same origin, so no CORS or mixed content), rewrites for `/play` and `/network`. Add the
-  Vercel domain to the Google OAuth origins and `MINER_ALLOWED_ORIGINS`.
+  Vercel domain to the Clerk allowed origins (production instance on testnet) and `MINER_ALLOWED_ORIGINS`.
 - [scripts/testnet/setup.py](scripts/testnet/setup.py): owner, validator, treasury; check the
   subnet lock cost before creating; set owner hyperparameters (weights rate limit, registrations
   per block, burn bounds) where the owner is allowed to.
