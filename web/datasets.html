@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#e8eeeb" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0e1614" media="(prefers-color-scheme: dark)" />
+    <title>Datasets | TauNet</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&display=swap" />
+    <link rel="stylesheet" href="/src/tokens.css" />
+    <link rel="stylesheet" href="/src/site.css" />
+  </head>
+  <body>
+    <header class="site-top" id="top"></header>
+    <main class="wrap">
+      <div class="page-head">
+        <h1>Datasets</h1>
+        <p class="muted" id="format">Every verified run is added to the dataset for its task.</p>
+      </div>
+
+      <div class="datasets" id="datasets"><p class="empty">Loading datasets...</p></div>
+
+      <div class="episodes-head">
+        <h2>Episodes</h2>
+        <div class="seg" role="group" aria-label="Filter by task" id="filter"></div>
+      </div>
+      <div class="scroll"><table class="episodes-table">
+        <thead><tr><th>When</th><th>Player</th><th>Task</th><th>Result</th><th class="num">Time</th><th class="num">Smoothness</th><th class="num">Score</th></tr></thead>
+        <tbody id="episodes"><tr><td colspan="7" class="muted">Loading...</td></tr></tbody>
+      </table></div>
+      <button type="button" class="btn small load-more" id="more" hidden>Load older episodes</button>
+
+      <footer class="site">Exports keep a provenance file per episode: miner hotkey, ticket block and seed, and the validator's scores.</footer>
+    </main>
+    <script type="module" src="/src/datasets.ts"></script>
+  </body>
+</html>

@@ -26,6 +26,8 @@ export default defineConfig({
         main: resolve(__dirname, "index.html"),
         play: resolve(__dirname, "play.html"),
         network: resolve(__dirname, "network.html"),
+        datasets: resolve(__dirname, "datasets.html"),
+        wallet: resolve(__dirname, "wallet.html"),
       },
     },
   },
