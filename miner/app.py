@@ -11,6 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from common.bundle import BundleError, parse_bundle
 from common.chain import Chain
 from common.mjcf import model_hash
+from common.scene import pick_task
 from common.ticket import TICKET_TTL_BLOCKS, build_ticket
 from miner.config import MinerConfig
 from miner.db import MinerDb
@@ -70,15 +71,24 @@ def create_app(config: MinerConfig, hotkey: str, chain: Chain) -> FastAPI:
     def health() -> dict[str, Any]:
         return {"ok": True, "hotkey": hotkey, "block": chain.current_block()}
 
+    @app.get("/tasks")
+    def tasks(request: Request) -> dict[str, Any]:
+        limit("read", request)
+        return {"tasks": list(config.task_ids)}
+
     @app.get("/ticket")
-    def ticket(request: Request) -> dict[str, Any]:
+    def ticket(request: Request, task: str | None = None) -> dict[str, Any]:
         limit("ticket", request)
+        try:
+            task_id = pick_task(task, config.task_ids)
+        except ValueError as exc:
+            raise HTTPException(400, str(exc)) from exc
         block = chain.current_block()
         block_hash = chain.block_hash(block)
         if block_hash is None:
             raise HTTPException(503, "chain not ready")
         counter = db.issue_ticket_slot(block, block_hash)
-        issued = build_ticket(block, block_hash, hotkey, config.task_id, counter)
+        issued = build_ticket(block, block_hash, hotkey, task_id, counter)
         db.set_seed(counter, issued.seed)
         return {**issued.to_dict(), "model_hash": model_hash(issued.scene_xml)}
 

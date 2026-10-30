@@ -38,7 +38,7 @@ function cleanup(): void {
 
 async function beginRound(): Promise<void> {
   cleanup();
-  const [mujoco, ticket] = await Promise.all([getMujoco(), fetchTicket(POOL_URL)]);
+  const [mujoco, ticket] = await Promise.all([getMujoco(), fetchTicket(POOL_URL, "put_cube_in_bowl")]);
   sim = new Sim(mujoco, ticket.scene_xml);
   view.build(sim);
   ik = new IkSolver(sim);

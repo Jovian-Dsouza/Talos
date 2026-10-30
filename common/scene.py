@@ -11,7 +11,7 @@ import math
 import random
 from functools import lru_cache
 from importlib import resources
-from typing import Any, Callable
+from typing import Any, Callable, Sequence
 
 TASK_ID = "put_cube_in_bowl"
 
@@ -171,6 +171,18 @@ SCENE_BUILDERS: dict[str, Callable[[random.Random], dict[str, Any]]] = {
     TASK_ID: _cube_scene,
     VIAL_TASK_ID: _vial_scene,
 }
+
+
+DEFAULT_TASKS = (VIAL_TASK_ID, TASK_ID)  # the headline task is the default and listed first
+
+
+def pick_task(requested: str | None, allowed: Sequence[str]) -> str:
+    """Task for a new ticket: the first allowed one, or the requested one when it is allowed."""
+    if requested is None:
+        return allowed[0]
+    if requested not in allowed:
+        raise ValueError(f"unknown task: {requested}")
+    return requested
 
 
 def make_scene(task_id: str, seed: int) -> dict[str, Any]:

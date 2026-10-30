@@ -14,8 +14,8 @@ async function json<T>(response: Response): Promise<T> {
   return (await response.json()) as T;
 }
 
-export async function fetchTicket(pool: string): Promise<Ticket> {
-  return json<Ticket>(await fetch(`${pool}/ticket`));
+export async function fetchTicket(pool: string, task: string): Promise<Ticket> {
+  return json<Ticket>(await fetch(`${pool}/ticket?task=${encodeURIComponent(task)}`));
 }
 
 export async function submitBundle(pool: string, bundle: unknown): Promise<{ bundle_id: string }> {

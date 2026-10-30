@@ -17,12 +17,12 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 from common.mjcf import model_hash
+from common.scene import DEFAULT_TASKS, pick_task
 from common.ticket import build_ticket
 from validator.pipeline import Context, PipelineConfig, process
 from validator.store import Store
 
 HOTKEY = "practice"
-TASK_ID = "put_cube_in_bowl"
 FAKE_BLOCK = 1000
 FAKE_HASH = "ab" * 32
 MAX_BODY_BYTES = 4_000_000
@@ -42,10 +42,18 @@ def create_app() -> FastAPI:
     ctx = Context(PipelineConfig(), Store(":memory:"), PracticeChain(), {})
     state: dict[str, Any] = {"counter": 0, "verdicts": {}, "runs": []}
 
+    @app.get("/tasks")
+    def tasks() -> dict[str, Any]:
+        return {"tasks": list(DEFAULT_TASKS)}
+
     @app.get("/ticket")
-    def ticket() -> dict[str, Any]:
+    def ticket(task: str | None = None) -> dict[str, Any]:
+        try:
+            task_id = pick_task(task, DEFAULT_TASKS)
+        except ValueError as exc:
+            raise HTTPException(400, str(exc)) from exc
         state["counter"] += 1
-        issued = build_ticket(FAKE_BLOCK, FAKE_HASH, HOTKEY, TASK_ID, state["counter"])
+        issued = build_ticket(FAKE_BLOCK, FAKE_HASH, HOTKEY, task_id, state["counter"])
         return {**issued.to_dict(), "model_hash": model_hash(issued.scene_xml)}
 
     @app.post("/submit")
