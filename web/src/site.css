@@ -590,4 +590,4 @@ tbody tr:hover { background: #ffffff40; }
   .rj-frames { grid-template-columns: repeat(5, minmax(0, 1fr)); }
 }
 .sim-section { padding-top: 56px; }
-.sim-section .hero-media { margin-top: 0; }
+.sim-section .hero-media { margin-top: 40px; }

@@ -4,8 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#cbd0d2" />
-    <meta name="description" content="Teach robots by playing. Drive a simulated arm, get verified by replay, earn TAO on the taunet subnet." />
-    <title>TauNet</title>
+    <meta name="description" content="Teach robots from your phone. Drive a simulated robot arm, get your run checked by RoboJev, and earn on the Talos Bittensor subnet." />
+    <title>Talos</title>
     <link rel="preload" href="/fonts/host-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="stylesheet" href="/src/tokens.css" />
     <link rel="stylesheet" href="/src/site.css" />
@@ -18,9 +18,9 @@
         <section class="bay hero-shell" data-bay="01" aria-labelledby="hero-title">
           <div class="hero-grid">
             <div class="hero-copy">
-              <p class="eyebrow"><span class="indicator" aria-hidden="true"></span> Bittensor subnet <span class="label-divider">/</span> Simulation-native</p>
-              <h1 id="hero-title">Train robots.<br />Prove every run<span class="accent-dot">.</span></h1>
-              <p class="hero-lede">TauNet turns human teleoperation into trusted robot data. Every contribution is replayed by independent validators before it earns and enters the dataset.</p>
+              <p class="eyebrow"><span class="indicator" aria-hidden="true"></span> Bittensor subnet <span class="label-divider">/</span> Robot data from your phone</p>
+              <h1 id="hero-title">Teach robots.<br />From your phone<span class="accent-dot">.</span></h1>
+              <p class="hero-lede">Robots learn by being shown what to do, and that data is hard to get cheaply. Talos lets anyone with a phone drive a simulated robot arm, earn for good runs, and help build open training data for robots.</p>
             </div>
             <div class="control-assembly">
               <div class="vents" aria-hidden="true"></div>
@@ -50,26 +50,40 @@
             <p class="rj-task">Task <span>Insert the colourful ring into the central wooden peg.</span></p>
             <p id="rj-frame-note" class="rj-meta">Play the attempt to see the frames RoboJev uses.</p>
             <div class="rj-frames" id="rj-frames" aria-label="Ten front-camera input frames"><img src="/media/robojev/frames/success-0.webp" alt="Input frame 1 of 10" width="120" height="68" /><img src="/media/robojev/frames/success-0.webp" alt="Input frame 2 of 10" width="120" height="68" /><img src="/media/robojev/frames/success-0.webp" alt="Input frame 3 of 10" width="120" height="68" /><img src="/media/robojev/frames/success-0.webp" alt="Input frame 4 of 10" width="120" height="68" /><img src="/media/robojev/frames/success-0.webp" alt="Input frame 5 of 10" width="120" height="68" /><img src="/media/robojev/frames/success-0.webp" alt="Input frame 6 of 10" width="120" height="68" /><img src="/media/robojev/frames/success-0.webp" alt="Input frame 7 of 10" width="120" height="68" /><img src="/media/robojev/frames/success-0.webp" alt="Input frame 8 of 10" width="120" height="68" /><img src="/media/robojev/frames/success-0.webp" alt="Input frame 9 of 10" width="120" height="68" /><img src="/media/robojev/frames/success-0.webp" alt="Input frame 10 of 10" width="120" height="68" /></div>
-            <figcaption><span>Recorded model outputs, queried every 0.5 s on a task held out from training.</span><span>Footage and scores from <a href="https://robo-jev.com/" target="_blank" rel="noreferrer">RoboJev ↗</a></span></figcaption>
+            <figcaption><span>RoboJev checks how good a run was. It scores the attempt every 0.5 s, on a task it never saw in training.</span><span>Footage and scores from <a href="https://robo-jev.com/" target="_blank" rel="noreferrer">RoboJev ↗</a></span></figcaption>
           </figure>
-          <dl class="hero-facts" aria-label="TauNet capabilities">
-            <div><dt>01 / CONTROL</dt><dd>Browser-based<br />teleoperation</dd></div>
-            <div><dt>02 / VERIFY</dt><dd>Replay-based<br />verification</dd></div>
-            <div><dt>03 / LEARN</dt><dd>Open training<br />data output</dd></div>
+          <dl class="hero-facts" aria-label="What Talos offers">
+            <div><dt>01 / ANYONE</dt><dd>Just a phone,<br />no robot needed</dd></div>
+            <div><dt>02 / REAL PHYSICS</dt><dd>Same physics as<br />a real robot</dd></div>
+            <div><dt>03 / CHECKED</dt><dd>Every run scored<br />by RoboJev</dd></div>
           </dl>
         </section>
 
-        <section class="bay value-section" id="protocol" data-bay="02" aria-labelledby="verification-title">
-          <p class="eyebrow">The verification layer</p>
-          <div class="section-heading"><h2 id="verification-title">Robot learning needs<br />data it can trust.</h2><p>More demonstrations do not automatically make better models. TauNet makes each run reproducible, reviewable, and useful beyond a single session.</p></div>
+        <section class="bay value-section" id="protocol" data-bay="02" aria-labelledby="problem-title">
+          <p class="eyebrow">The problem</p>
+          <div class="section-heading"><h2 id="problem-title">Robot data is hard<br />to get cheaply.</h2><p>Chatbots learn from text on the internet. Robots cannot. Someone has to show a robot each move, and today that means real robots, trained operators and a big budget.</p></div>
           <div class="proof-deck">
-            <article><div class="proof-top"><span class="proof-number">01</span><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M20 37V20a4 4 0 0 1 8 0v12-19a4 4 0 0 1 8 0v19-14a4 4 0 0 1 8 0v17-8a4 4 0 0 1 8 0v13c0 12-8 19-18 19-8 0-12-5-16-11l-8-11a4 4 0 0 1 6-5l8 9"/></svg></div><h3>Human control</h3><p>Operators complete real tasks through a tactile, browser-based robot interface.</p><span class="engraved">INPUT / HUMAN INTENT</span></article>
-            <article><div class="proof-top"><span class="proof-number">02</span><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M49 21A22 22 0 1 0 53 39M49 9v14H35M24 32l6 6 12-13"/></svg></div><h3>Independent replay</h3><p>Validators re-simulate the recording in the same physics environment, step by step.</p><span class="engraved">PROCESS / REPRODUCIBLE PHYSICS</span></article>
-            <article><div class="proof-top"><span class="proof-number">03</span><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M12 18l20-9 20 9v28l-20 9-20-9V18zm0 0l20 10 20-10M32 28v27M22 36l6 6 13-13"/></svg></div><h3>Verified data</h3><p>Runs that replay exactly earn rewards and become training-ready trajectories.</p><span class="engraved">OUTPUT / TRAINING DATA</span></article>
+            <article><div class="proof-top"><span class="proof-number">01</span><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 10a22 22 0 1 0 0 44 22 22 0 0 0 0-44zM32 20v13l9 6"/></svg></div><h3>Scarce</h3><p>There is very little robot training data in the world, and it cannot be copied from the web.</p><span class="engraved">SUPPLY / LIMITED</span></article>
+            <article><div class="proof-top"><span class="proof-number">02</span><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 10a22 22 0 1 0 0 44 22 22 0 0 0 0-44zM39 24c-2-3-5-4-8-4-4 0-7 2-7 5 0 8 16 5 16 13 0 3-3 6-8 6-4 0-7-2-9-5M32 16v4M32 44v4"/></svg></div><h3>Expensive</h3><p>Collecting it needs a robot lab and paid operators, at up to $200 for one usable hour.</p><span class="engraved">COST / HIGH</span></article>
+            <article><div class="proof-top"><span class="proof-number">03</span><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M18 28h28v24H18zM24 28v-8a8 8 0 0 1 16 0v8M32 37v6"/></svg></div><h3>Closed</h3><p>A few companies collect the data and check their own work. Everyone else has to take their word for it.</p><span class="engraved">ACCESS / CENTRALIZED</span></article>
           </div>
         </section>
 
-        <section class="bay sim-section" data-bay="03" aria-label="Interactive robot arm">
+        <section class="bay how-section" data-bay="03" aria-labelledby="how-title">
+          <p class="eyebrow">The solution</p>
+          <div class="how-layout"><h2 id="how-title">A decentralized<br />data network.</h2>
+            <ol class="steps">
+              <li><span>01</span><div><h3>Drive on your phone</h3><p>Open a task and steer a simulated robot arm. It moves just like the real one.</p></div></li>
+              <li><span>02</span><div><h3>Send your run</h3><p>When you finish, your run goes to the network to be checked.</p></div></li>
+              <li><span>03</span><div><h3>RoboJev checks it</h3><p>Validators use RoboJev to score how good the run was. Bad or fake runs are rejected.</p></div></li>
+              <li><span>04</span><div><h3>Earn and build the dataset</h3><p>Good runs earn rewards and join a dataset that companies use to train robots.</p></div></li>
+            </ol>
+          </div>
+        </section>
+
+        <section class="bay sim-section" data-bay="04" aria-labelledby="phone-title">
+          <p class="eyebrow">Why a phone</p>
+          <div class="section-heading"><h2 id="phone-title">A real robot,<br />in your pocket.</h2><p>The phone runs the same physics as a real SO-101 robot arm. Anyone with a phone can make useful robot data and earn from it, without owning a robot.</p></div>
           <figure class="hero-media sim-figure">
             <div class="media-well">
               <div class="demo-panel" id="demo-panel" aria-label="Interactive SO-101 robot arm">
@@ -92,35 +106,33 @@
                 </div>
               </div>
             </div>
-            <figcaption><span>Human intent. Robot action.</span><span>Interactive SO-101 arm / drag to explore</span></figcaption>
+            <figcaption><span>The same SO-101 arm you drive in Talos.</span><span>Interactive SO-101 arm / drag to explore</span></figcaption>
           </figure>
         </section>
 
-        <section class="bay live-loop dark-deck" data-bay="04" aria-labelledby="live-title">
-          <p class="eyebrow"><span class="indicator" aria-hidden="true"></span> The compounding loop</p>
-          <div class="section-heading"><h2 id="live-title">From a single move<br />to embodied intelligence.</h2><p>Every verified run is a building block: a measured human decision that can train the next robotic policy.</p></div>
+        <section class="bay value-section" data-bay="05" aria-labelledby="bittensor-title">
+          <p class="eyebrow">Why Bittensor</p>
+          <div class="section-heading"><h2 id="bittensor-title">Everyone is paid<br />for their part.</h2><p>Bittensor rewards people for doing useful work and other people for checking it. That lets Talos run with no single company in charge.</p></div>
+          <div class="proof-deck">
+            <article><div class="proof-top"><span class="proof-number">01</span><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M20 37V20a4 4 0 0 1 8 0v12-19a4 4 0 0 1 8 0v19-14a4 4 0 0 1 8 0v17-8a4 4 0 0 1 8 0v13c0 12-8 19-18 19-8 0-12-5-16-11l-8-11a4 4 0 0 1 6-5l8 9"/></svg></div><h3>Miners</h3><p>Collect robot data by playing tasks on a phone, and earn for every run that passes.</p><span class="engraved">COLLECT / EARN</span></article>
+            <article><div class="proof-top"><span class="proof-number">02</span><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M49 21A22 22 0 1 0 53 39M49 9v14H35M24 32l6 6 12-13"/></svg></div><h3>Validators</h3><p>Check each run with RoboJev and earn for scoring fairly.</p><span class="engraved">CHECK / EARN</span></article>
+            <article><div class="proof-top"><span class="proof-number">03</span><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M12 18l20-9 20 9v28l-20 9-20-9V18zm0 0l20 10 20-10M32 28v27M22 36l6 6 13-13"/></svg></div><h3>Companies</h3><p>Buy checked, ready-to-train robot data without running their own robot lab.</p><span class="engraved">BUY / TRAIN</span></article>
+          </div>
+        </section>
+
+        <section class="bay live-loop dark-deck" data-bay="06" aria-labelledby="live-title">
+          <p class="eyebrow"><span class="indicator" aria-hidden="true"></span> Live network</p>
+          <div class="section-heading"><h2 id="live-title">Watch runs<br />get checked.</h2><p>These are real runs from players, moving through the network as they are checked.</p></div>
           <div class="network-ribbon"><p><strong>Network activity</strong><span id="live-meta" role="status">Fetching current network activity…</span></p><a class="inline-link" href="/network" data-link>Open network <span aria-hidden="true">↗</span></a></div>
           <ol class="conveyor" id="conveyor" aria-label="Run verification pipeline"><li class="empty">Loading the verification pipeline…</li></ol>
         </section>
 
-        <section class="bay how-section" data-bay="05" aria-labelledby="how-title">
-          <p class="eyebrow">Made for participation</p>
-          <div class="how-layout"><h2 id="how-title">A path from<br />play to proof.</h2>
-            <ol class="steps">
-              <li><span>01</span><div><h3>Open a task</h3><p>Sign in, choose a lab or warehouse scene, and take control in your browser.</p></div></li>
-              <li><span>02</span><div><h3>Move with intent</h3><p>Guide the SO-101 arm with responsive controls built for smooth demonstrations.</p></div></li>
-              <li><span>03</span><div><h3>Let validators replay</h3><p>Independent nodes verify that your exact action sequence completes the task.</p></div></li>
-              <li><span>04</span><div><h3>Earn for good data</h3><p>Accepted runs are rewarded on TauNet and exported for model training.</p></div></li>
-            </ol>
-          </div>
-        </section>
-
-        <section class="bay score-section" data-bay="06" aria-labelledby="score-title">
+        <section class="bay score-section" data-bay="07" aria-labelledby="score-title">
           <div class="score-card"><div><p class="eyebrow">Quality is measurable</p><h2 id="score-title">Replay it.<br />Score it.<br /><span>Reward it.</span></h2></div><div class="score-detail"><div class="score-screen"><span class="engraved">VALIDATED BY ROBOJEV</span><p class="formula">input &nbsp;= video + robot motion<br /><span>output = quality score, 0 to 1</span></p></div><p><a href="https://robo-jev.com/" target="_blank" rel="noreferrer">RoboJev</a> watches the recorded video and the robot movement across each dataset, then scores how good the teleoperation data is from 0 to 1. Runs must also replay and be meaningfully original.</p><a class="inline-link" href="/datasets" data-link>Explore verified datasets <span aria-hidden="true">↗</span></a></div></div>
         </section>
 
-        <section class="bay closing-cta" data-bay="07" aria-labelledby="join-title"><div><p class="eyebrow">Build the data layer</p><h2 id="join-title">Ready to teach<br />a robot?</h2></div><a class="btn primary" href="/play" data-link>Run your first task <span aria-hidden="true">↗</span></a></section>
-        <footer class="site landing-footer"><a class="brand" href="/" data-link><span class="mark" aria-hidden="true">τ</span>TauNet</a><span>Simulation and replay run on MuJoCo 3.17.<br /><span class="media-credit">Reference footage: <a href="https://axisrobotics.ai/" target="_blank" rel="noreferrer">Axis Robotics ↗</a></span></span><span>A Bittensor subnet.</span><a href="#top">Back to top ↑</a></footer>
+        <section class="bay closing-cta" data-bay="08" aria-labelledby="join-title"><div><p class="eyebrow">Get started</p><h2 id="join-title">Ready to teach<br />a robot?</h2></div><a class="btn primary" href="/play" data-link>Run your first task <span aria-hidden="true">↗</span></a></section>
+        <footer class="site landing-footer"><a class="brand" href="/" data-link><span class="mark" aria-hidden="true">τ</span>Talos</a><span>Simulation and replay run on MuJoCo 3.17.<br /><span class="media-credit">Reference footage: <a href="https://axisrobotics.ai/" target="_blank" rel="noreferrer">Axis Robotics ↗</a></span></span><span>A Bittensor subnet.</span><a href="#top">Back to top ↑</a></footer>
       </main>
     </div>
     <script type="module" src="/src/landing.ts"></script>
