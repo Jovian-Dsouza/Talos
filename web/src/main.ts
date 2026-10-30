@@ -383,7 +383,7 @@ function bindUi(): void {
     onlineEnabled = !practice;
     $("intro-error").textContent = "";
     show("live-strip", false);
-    if (isCoarsePointer()) void enterFullscreen();
+    void enterFullscreen();
     updateStartButton();
     try {
       if (!practice) await loadTasks();
@@ -410,7 +410,7 @@ function bindUi(): void {
     starting = true;
     const again = $<HTMLButtonElement>("again");
     again.disabled = true;
-    if (isCoarsePointer()) void enterFullscreen();
+    void enterFullscreen();
     try {
       await beginRound();
     } catch (error) {

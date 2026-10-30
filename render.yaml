@@ -74,9 +74,9 @@ services:
       - key: ACCEPTED_DIR
         value: /data/accepted
       - key: TEMPO_BLOCKS
-        value: "10"
+        value: "360"
       - key: WEIGHTS_EVERY_BLOCKS
-        value: "10"
+        value: "360"
       - key: POLL_SECONDS
         value: "3"
       - key: VALIDATOR_MNEMONIC
