@@ -4,6 +4,7 @@ import { Conveyor } from "./charts/conveyor";
 import { link, mountHeader } from "./header";
 import { count, pluralize } from "./words";
 import { mountHeroMedia } from "./landing/media";
+import { mountRoboJev } from "./landing/robojev";
 
 const POLL_MS = 5000;
 const conveyor = new Conveyor(document.getElementById("conveyor") as HTMLElement);
@@ -31,5 +32,6 @@ for (const anchor of document.querySelectorAll<HTMLAnchorElement>("a[data-link]"
 }
 void mountHeader("home");
 mountHeroMedia();
+void mountRoboJev();
 void refresh();
 window.setInterval(() => void refresh(), POLL_MS);

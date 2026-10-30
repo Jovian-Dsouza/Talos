@@ -28,7 +28,49 @@
               <a class="btn secondary-key" href="#protocol">See how it works <span aria-hidden="true">↓</span></a>
             </div>
           </div>
-          <figure class="hero-media">
+          <figure class="hero-media rj" id="robojev" data-attempt="success" data-likely="false">
+            <div class="seg rj-tabs" role="group" aria-label="Choose a recorded attempt">
+              <button type="button" data-attempt="success" aria-pressed="true">Ring stays on</button>
+              <button type="button" data-attempt="failure" aria-pressed="false">Ring slips off</button>
+            </div>
+            <div class="media-well">
+              <div class="rj-stage">
+                <video id="rj-video" width="1024" height="576" poster="/media/robojev/success-poster.webp" preload="metadata" autoplay loop muted playsinline controls aria-label="Recorded successful ring-on-peg attempt"><source src="/media/robojev/success.mp4" type="video/mp4" /></video>
+                <div class="rj-verdict">
+                  <div class="rj-trace">
+                    <span class="rj-label">P(success) over time</span>
+                    <svg id="rj-trace" viewBox="0 0 300 80" preserveAspectRatio="none" role="img" aria-label="Recorded model probability up to the current video time"><path class="rj-mid" d="M8 40H292"/><path id="rj-trace-path" d=""/><circle id="rj-trace-dot" cx="8" cy="72" r="4" style="display:none"/></svg>
+                    <span id="rj-sample-time" class="rj-meta">First score at 0.5 s</span>
+                  </div>
+                  <div class="rj-score" role="status" aria-live="off"><span class="rj-label">P(success)</span><strong id="rj-probability">&mdash;</strong><span id="rj-verdict" class="rj-meta">Waiting for frames</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="rj-playback" id="rj-playback" hidden><button type="button" class="btn small" id="rj-play" aria-label="Play the recorded attempt">Play</button><input id="rj-seek" type="range" min="0" max="12" value="0" step="0.05" aria-label="Seek the recorded attempt" /><span id="rj-time" class="rj-meta">0.0 / 12.0 s</span></div>
+            <p class="rj-task">Task <span>Insert the colourful ring into the central wooden peg.</span></p>
+            <p id="rj-frame-note" class="rj-meta">Play the attempt to see the frames RoboJev uses.</p>
+            <div class="rj-frames" id="rj-frames" aria-label="Ten front-camera input frames"><img src="/media/robojev/frames/success-0.webp" alt="Input frame 1 of 10" width="120" height="68" /><img src="/media/robojev/frames/success-0.webp" alt="Input frame 2 of 10" width="120" height="68" /><img src="/media/robojev/frames/success-0.webp" alt="Input frame 3 of 10" width="120" height="68" /><img src="/media/robojev/frames/success-0.webp" alt="Input frame 4 of 10" width="120" height="68" /><img src="/media/robojev/frames/success-0.webp" alt="Input frame 5 of 10" width="120" height="68" /><img src="/media/robojev/frames/success-0.webp" alt="Input frame 6 of 10" width="120" height="68" /><img src="/media/robojev/frames/success-0.webp" alt="Input frame 7 of 10" width="120" height="68" /><img src="/media/robojev/frames/success-0.webp" alt="Input frame 8 of 10" width="120" height="68" /><img src="/media/robojev/frames/success-0.webp" alt="Input frame 9 of 10" width="120" height="68" /><img src="/media/robojev/frames/success-0.webp" alt="Input frame 10 of 10" width="120" height="68" /></div>
+            <figcaption><span>Recorded model outputs, queried every 0.5 s on a task held out from training.</span><span>Footage and scores from <a href="https://robo-jev.com/" target="_blank" rel="noreferrer">RoboJev ↗</a></span></figcaption>
+          </figure>
+          <dl class="hero-facts" aria-label="TauNet capabilities">
+            <div><dt>01 / CONTROL</dt><dd>Browser-based<br />teleoperation</dd></div>
+            <div><dt>02 / VERIFY</dt><dd>Replay-based<br />verification</dd></div>
+            <div><dt>03 / LEARN</dt><dd>Open training<br />data output</dd></div>
+          </dl>
+        </section>
+
+        <section class="bay value-section" id="protocol" data-bay="02" aria-labelledby="verification-title">
+          <p class="eyebrow">The verification layer</p>
+          <div class="section-heading"><h2 id="verification-title">Robot learning needs<br />data it can trust.</h2><p>More demonstrations do not automatically make better models. TauNet makes each run reproducible, reviewable, and useful beyond a single session.</p></div>
+          <div class="proof-deck">
+            <article><div class="proof-top"><span class="proof-number">01</span><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M20 37V20a4 4 0 0 1 8 0v12-19a4 4 0 0 1 8 0v19-14a4 4 0 0 1 8 0v17-8a4 4 0 0 1 8 0v13c0 12-8 19-18 19-8 0-12-5-16-11l-8-11a4 4 0 0 1 6-5l8 9"/></svg></div><h3>Human control</h3><p>Operators complete real tasks through a tactile, browser-based robot interface.</p><span class="engraved">INPUT / HUMAN INTENT</span></article>
+            <article><div class="proof-top"><span class="proof-number">02</span><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M49 21A22 22 0 1 0 53 39M49 9v14H35M24 32l6 6 12-13"/></svg></div><h3>Independent replay</h3><p>Validators re-simulate the recording in the same physics environment, step by step.</p><span class="engraved">PROCESS / REPRODUCIBLE PHYSICS</span></article>
+            <article><div class="proof-top"><span class="proof-number">03</span><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M12 18l20-9 20 9v28l-20 9-20-9V18zm0 0l20 10 20-10M32 28v27M22 36l6 6 13-13"/></svg></div><h3>Verified data</h3><p>Runs that replay exactly earn rewards and become training-ready trajectories.</p><span class="engraved">OUTPUT / TRAINING DATA</span></article>
+          </div>
+        </section>
+
+        <section class="bay sim-section" data-bay="03" aria-label="Interactive robot arm">
+          <figure class="hero-media sim-figure">
             <div class="media-well">
               <div class="demo-panel" id="demo-panel" aria-label="Interactive SO-101 robot arm">
                 <div class="demo-viewport" id="demo-viewport">
@@ -52,31 +94,16 @@
             </div>
             <figcaption><span>Human intent. Robot action.</span><span>Interactive SO-101 arm / drag to explore</span></figcaption>
           </figure>
-          <dl class="hero-facts" aria-label="TauNet capabilities">
-            <div><dt>01 / CONTROL</dt><dd>Browser-based<br />teleoperation</dd></div>
-            <div><dt>02 / VERIFY</dt><dd>Replay-based<br />verification</dd></div>
-            <div><dt>03 / LEARN</dt><dd>Open training<br />data output</dd></div>
-          </dl>
         </section>
 
-        <section class="bay value-section" id="protocol" data-bay="02" aria-labelledby="verification-title">
-          <p class="eyebrow">The verification layer</p>
-          <div class="section-heading"><h2 id="verification-title">Robot learning needs<br />data it can trust.</h2><p>More demonstrations do not automatically make better models. TauNet makes each run reproducible, reviewable, and useful beyond a single session.</p></div>
-          <div class="proof-deck">
-            <article><div class="proof-top"><span class="proof-number">01</span><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M20 37V20a4 4 0 0 1 8 0v12-19a4 4 0 0 1 8 0v19-14a4 4 0 0 1 8 0v17-8a4 4 0 0 1 8 0v13c0 12-8 19-18 19-8 0-12-5-16-11l-8-11a4 4 0 0 1 6-5l8 9"/></svg></div><h3>Human control</h3><p>Operators complete real tasks through a tactile, browser-based robot interface.</p><span class="engraved">INPUT / HUMAN INTENT</span></article>
-            <article><div class="proof-top"><span class="proof-number">02</span><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M49 21A22 22 0 1 0 53 39M49 9v14H35M24 32l6 6 12-13"/></svg></div><h3>Independent replay</h3><p>Validators re-simulate the recording in the same physics environment, step by step.</p><span class="engraved">PROCESS / REPRODUCIBLE PHYSICS</span></article>
-            <article><div class="proof-top"><span class="proof-number">03</span><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M12 18l20-9 20 9v28l-20 9-20-9V18zm0 0l20 10 20-10M32 28v27M22 36l6 6 13-13"/></svg></div><h3>Verified data</h3><p>Runs that replay exactly earn rewards and become training-ready trajectories.</p><span class="engraved">OUTPUT / TRAINING DATA</span></article>
-          </div>
-        </section>
-
-        <section class="bay live-loop dark-deck" data-bay="03" aria-labelledby="live-title">
+        <section class="bay live-loop dark-deck" data-bay="04" aria-labelledby="live-title">
           <p class="eyebrow"><span class="indicator" aria-hidden="true"></span> The compounding loop</p>
           <div class="section-heading"><h2 id="live-title">From a single move<br />to embodied intelligence.</h2><p>Every verified run is a building block: a measured human decision that can train the next robotic policy.</p></div>
           <div class="network-ribbon"><p><strong>Network activity</strong><span id="live-meta" role="status">Fetching current network activity…</span></p><a class="inline-link" href="/network" data-link>Open network <span aria-hidden="true">↗</span></a></div>
           <ol class="conveyor" id="conveyor" aria-label="Run verification pipeline"><li class="empty">Loading the verification pipeline…</li></ol>
         </section>
 
-        <section class="bay how-section" data-bay="04" aria-labelledby="how-title">
+        <section class="bay how-section" data-bay="05" aria-labelledby="how-title">
           <p class="eyebrow">Made for participation</p>
           <div class="how-layout"><h2 id="how-title">A path from<br />play to proof.</h2>
             <ol class="steps">
@@ -88,17 +115,8 @@
           </div>
         </section>
 
-        <section class="bay score-section" data-bay="05" aria-labelledby="score-title">
+        <section class="bay score-section" data-bay="06" aria-labelledby="score-title">
           <div class="score-card"><div><p class="eyebrow">Quality is measurable</p><h2 id="score-title">Replay it.<br />Score it.<br /><span>Reward it.</span></h2></div><div class="score-detail"><div class="score-screen"><span class="engraved">THE SCORING MODEL</span><p class="formula">score = 0.5 × time<br /><span>+ 0.5 × smoothness</span></p></div><p>Runs must replay, complete the task, and be meaningfully original. Fast is valuable; controllable is better.</p><a class="inline-link" href="/datasets" data-link>Explore verified datasets <span aria-hidden="true">↗</span></a></div></div>
-        </section>
-
-        <section class="bay real-section" data-bay="06" aria-labelledby="real-title">
-          <p class="eyebrow">Real robot footage</p>
-          <div class="section-heading"><h2 id="real-title">The task, as the<br />robot sees it.</h2><p>Insert the colourful ring into the central wooden peg. This is the kind of attempt a replayed run has to reproduce.</p></div>
-          <figure class="real-film">
-            <video width="1024" height="576" poster="/media/ring-success-poster.webp" preload="metadata" autoplay loop muted playsinline controls aria-label="A robot arm inserting a yellow ring onto a wooden peg"><source src="/media/ring-success.mp4" type="video/mp4" /></video>
-            <figcaption>Front-camera recording of an SO-101 ring-on-peg attempt. Footage from <a href="https://robo-jev.com/" target="_blank" rel="noreferrer">RoboJev ↗</a>.</figcaption>
-          </figure>
         </section>
 
         <section class="bay closing-cta" data-bay="07" aria-labelledby="join-title"><div><p class="eyebrow">Build the data layer</p><h2 id="join-title">Ready to teach<br />a robot?</h2></div><a class="btn primary" href="/play" data-link>Run your first task <span aria-hidden="true">↗</span></a></section>
