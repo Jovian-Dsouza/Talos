@@ -1,3 +1,4 @@
+import { resolve } from "node:path";
 import { defineConfig } from "vite";
 
 export default defineConfig({
@@ -14,6 +15,16 @@ export default defineConfig({
       "/pool": { target: "http://127.0.0.1:8091", changeOrigin: true, rewrite: (path) => path.replace(/^\/pool/, "") },
     },
   },
-  build: { target: "es2022", chunkSizeWarningLimit: 4000 },
+  build: {
+    target: "es2022",
+    chunkSizeWarningLimit: 4000,
+    rollupOptions: {
+      input: {
+        main: resolve(__dirname, "index.html"),
+        play: resolve(__dirname, "play.html"),
+        network: resolve(__dirname, "network.html"),
+      },
+    },
+  },
   optimizeDeps: { exclude: ["@mujoco/mujoco"] },
 });

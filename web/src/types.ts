@@ -51,6 +51,7 @@ export interface Status {
 
 export interface LeaderboardEntry {
   contributor: string;
+  uid?: number;
   submitted: number;
   accepted: number;
   value: number;
@@ -62,4 +63,38 @@ export interface InputEvent {
   x?: number;
   y?: number;
   v?: number;
+}
+
+export interface Me {
+  name: string;
+  coldkey: string;
+  hotkey: string;
+  uid: number | null;
+  registration: "pending" | "funding" | "registering" | "registered" | "failed";
+  registration_note: string;
+  submitted: number;
+  accepted: number;
+  score: number;
+  incentive: number;
+  emission: number;
+  netuid: number;
+}
+
+export interface NetworkMiner {
+  uid: number;
+  hotkey: string;
+  contributor: string;
+  submitted: number;
+  accepted: number;
+  value: number;
+  incentive: number;
+  emission: number;
+}
+
+export interface Network {
+  netuid: number;
+  block: number;
+  miners: NetworkMiner[];
+  validators: { uid: number; hotkey: string; stake: number; root: { epoch: number; root: string; block: number } | null }[];
+  feed: { hotkey: string; contributor: string; verdict: Verdict; at: number }[];
 }

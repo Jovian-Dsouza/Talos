@@ -1,5 +1,6 @@
-import { STATUS_POLL_LIMIT_MS, STATUS_POLL_MS } from "./config";
-import type { LeaderboardEntry, Status, Ticket, Verdict } from "./types";
+import { authHeaders } from "./auth";
+import { POOL_URL, STATUS_POLL_LIMIT_MS, STATUS_POLL_MS } from "./config";
+import type { LeaderboardEntry, Me, Network, Status, Ticket, Verdict } from "./types";
 
 async function json<T>(response: Response): Promise<T> {
   if (!response.ok) {
@@ -14,35 +15,34 @@ async function json<T>(response: Response): Promise<T> {
   return (await response.json()) as T;
 }
 
-export async function fetchTicket(pool: string, task: string): Promise<Ticket> {
-  return json<Ticket>(await fetch(`${pool}/ticket?task=${encodeURIComponent(task)}`));
+async function call<T>(path: string, init: RequestInit = {}, signedIn = false): Promise<T> {
+  const headers = { ...(init.headers as Record<string, string>), ...(signedIn ? await authHeaders() : {}) };
+  return json<T>(await fetch(`${POOL_URL}${path}`, { ...init, headers }));
 }
 
-export async function submitBundle(pool: string, bundle: unknown): Promise<{ bundle_id: string }> {
-  const response = await fetch(`${pool}/submit`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(bundle),
-  });
-  return json(response);
-}
+export const fetchTicket = (task: string) =>
+  call<Ticket>(`/ticket?task=${encodeURIComponent(task)}`, {}, true);
 
-export async function waitForVerdict(pool: string, bundleId: string): Promise<Verdict> {
+export const submitBundle = (bundle: unknown) =>
+  call<{ bundle_id: string; registration: string }>(
+    "/submit",
+    { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(bundle) },
+    true,
+  );
+
+export const fetchMe = () => call<Me>("/me", {}, true);
+export const fetchNetwork = () => call<Network>("/network");
+export const fetchTasks = async () => (await call<{ tasks: string[] }>("/tasks")).tasks;
+export const fetchLeaderboard = async () => (await call<{ contributors: LeaderboardEntry[] }>("/leaderboard")).contributors;
+
+export async function waitForVerdict(bundleId: string, onWaiting?: () => void): Promise<Verdict> {
   const started = performance.now();
   while (performance.now() - started < STATUS_POLL_LIMIT_MS) {
-    const status = await json<Status>(await fetch(`${pool}/status/${bundleId}`));
+    const status = await call<Status>(`/status/${bundleId}`);
     const verdicts = Object.values(status.verdicts);
     if (verdicts.length > 0) return verdicts[0];
+    onWaiting?.();
     await new Promise((resolve) => setTimeout(resolve, STATUS_POLL_MS));
   }
   throw new Error("The validators have not answered yet. Check back in a moment.");
-}
-
-export async function fetchLeaderboard(pool: string): Promise<LeaderboardEntry[]> {
-  const body = await json<{ contributors: LeaderboardEntry[] }>(await fetch(`${pool}/leaderboard`));
-  return body.contributors;
-}
-
-export async function fetchTasks(pool: string): Promise<string[]> {
-  return (await json<{ tasks: string[] }>(await fetch(`${pool}/tasks`))).tasks;
 }

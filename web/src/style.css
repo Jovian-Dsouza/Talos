@@ -182,3 +182,10 @@ body.touch #insets { top: 88px; right: max(8px, env(safe-area-inset-right)); gap
 .task em { font-style: normal; font-size: 12px; color: var(--accent); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
 .task span { display: block; font-size: 13px; color: var(--muted); }
 button.wide { width: 100%; margin-top: 8px; }
+.account { margin: 0 0 12px; }
+.account p { margin: 0 0 8px; font-size: 14px; }
+button.link { background: none; color: var(--muted); padding: 4px 0; min-height: 0; font-size: 13px; text-decoration: underline; }
+button.wide { width: 100%; }
+.nav { margin: 12px 0 0 !important; font-size: 13px; display: flex; gap: 16px; }
+.nav a { color: var(--accent); }
+#leaderboard small { color: var(--muted); }

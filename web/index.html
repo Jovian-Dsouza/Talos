@@ -2,92 +2,51 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
-    <meta name="theme-color" content="#e9ecef" />
-    <title>Teach the Arm</title>
-    <link rel="stylesheet" href="/src/style.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#0b7a66" />
+    <meta name="description" content="Teach robots by playing. Drive a simulated arm, get verified, earn on Bittensor." />
+    <title>Bittesnor</title>
+    <link rel="stylesheet" href="/src/site.css" />
   </head>
   <body>
-    <main id="app">
-      <canvas id="stage" aria-label="Robot arm simulation"></canvas>
-
-      <div id="insets" hidden>
-        <div class="inset" id="inset-top"><span>Top</span></div>
-        <div class="inset" id="inset-side"><span>Side</span></div>
-      </div>
-
-      <section id="intro" class="card">
-        <h1>Teach the arm</h1>
-        <p>Pick a job, then drive a simulated SO-101 robot arm through it. Validators replay your run and score it, and the network pays for data that checks out.</p>
-        <div id="tasks" class="task-list" role="radiogroup" aria-label="Task"></div>
-        <label>Nickname<input id="nickname" maxlength="24" autocomplete="off" placeholder="your name" /></label>
-        <label>Wallet address (optional)<input id="wallet" maxlength="64" autocomplete="off" placeholder="5F..." /></label>
-        <p class="tip touch-only">Tip: hold your phone sideways for the biggest view.</p>
-        <button id="start" class="primary" disabled>Loading simulator...</button>
-        <p id="intro-error" class="error" role="alert"></p>
-      </section>
-
-      <header id="hud" hidden>
-        <div class="hud-bar">
-          <div class="hud-copy">
-            <div class="hud-stats">
-              <span id="timer" class="chip chip-timer">0.0 s</span>
-              <div class="hud-nav">
-                <button type="button" id="hud-menu" class="tool hud-menu" aria-expanded="false" aria-controls="hud-menu-panel" hidden>
-                  Menu
-                </button>
-                <button type="button" id="hud-exit" class="tool hud-exit" hidden>Exit</button>
-              </div>
-              <span id="status" class="chip chip-status">Touch the scene to begin</span>
-            </div>
-            <p id="instruction"></p>
-            <div id="hud-menu-panel" class="hud-menu-panel" hidden>
-              <div class="chips tools">
-                <button id="sticks-toggle" class="tool" aria-pressed="false">Joysticks</button>
-                <button id="camera" class="tool">Cam: Front</button>
-                <button id="views" class="tool" aria-pressed="true">Views</button>
-                <button id="fullscreen" class="tool" hidden>Full screen</button>
-              </div>
-              <div class="menu-actions">
-                <button type="button" class="menu-action" data-for="reset">Reset run</button>
-                <button type="button" class="menu-action menu-primary" data-for="submit">Submit run</button>
-              </div>
-            </div>
-          </div>
-        </div>
+    <div class="wrap">
+      <header class="top">
+        <a class="brand" href="/">bitte<b>snor</b></a>
+        <nav class="links"><a href="/play">Play</a><a href="/network">Network</a></nav>
       </header>
 
-      <footer id="dock" hidden>
-        <label class="slider">Height<input id="height" type="range" min="0.012" max="0.11" step="0.002" value="0.08" /></label>
-        <div class="row">
-          <button id="grip" class="grip">Hold to grip</button>
-          <button id="tilt" class="secondary" hidden>Enable tilt</button>
-          <button id="reset" class="secondary">Reset</button>
-          <button id="submit" class="primary" disabled>Submit</button>
+      <section class="hero">
+        <h1>Teach robots by playing.</h1>
+        <p>Drive a simulated robot arm from your phone. Validators replay every run, score it for speed and smoothness, and the best demonstrations earn TAO on Bittensor. The verified data ships in LeRobot format.</p>
+        <div class="cta">
+          <a class="btn primary" href="/play">Play now</a>
+          <a class="btn" href="/network">See the live network</a>
         </div>
-        <p class="hint">Left-drag in any view moves the gripper (top view: forward and sideways, side view: forward and height). Right-drag orbits, wheel zooms, shift + right-drag pans, double-click resets the camera. Keys: WASD, Q/E, arrows, space. Joysticks gives on-screen sticks for touch.</p>
-        <div class="stick" id="stick-move" role="group" aria-label="Move the gripper">
-          <i class="a n">▲</i><i class="a s">▼</i><i class="a w">◀</i><i class="a e">▶</i>
-          <div class="knob"></div>
-        </div>
-        <div class="stick" id="stick-lift" role="group" aria-label="Raise or lower the gripper, turn the wrist">
-          <i class="a n">up</i><i class="a s">down</i><i class="a w">↺</i><i class="a e">↻</i>
-          <div class="knob"></div>
-        </div>
-      </footer>
-
-      <section id="result" class="card" hidden>
-        <h2 id="verdict-title"></h2>
-        <p id="verdict-detail"></p>
-        <dl id="metrics"></dl>
-        <h3>Leaderboard</h3>
-        <ol id="leaderboard"></ol>
-        <p id="pools"></p>
-        <p><a id="explorer" target="_blank" rel="noreferrer" hidden>See the validator's weights on chain</a></p>
-        <button id="again" class="primary">Same task, new scene</button>
-        <button id="switch" class="secondary wide">Switch task</button>
       </section>
-    </main>
-    <script type="module" src="/src/main.ts"></script>
+
+      <section class="stats" id="stats" aria-label="Live network">
+        <div class="stat"><span>Miners</span><strong id="s-miners">-</strong></div>
+        <div class="stat"><span>Runs verified</span><strong id="s-runs">-</strong></div>
+        <div class="stat"><span>Validators</span><strong id="s-validators">-</strong></div>
+        <div class="stat"><span>Chain block</span><strong id="s-block">-</strong></div>
+      </section>
+
+      <h2>How it works</h2>
+      <ol class="steps">
+        <li><h3>Sign in with Google</h3><p>We create your wallet and pay for your miner registration on the subnet. No crypto knowledge needed.</p></li>
+        <li><h3>Teleoperate the arm</h3><p>Pick a lab task and drive an SO-101 arm with on-screen joysticks. Runs in your browser, on any phone.</p></li>
+        <li><h3>Validators replay it</h3><p>Every run is replayed in the same physics engine. Fake or tampered data fails the replay and earns nothing.</p></li>
+        <li><h3>Data earns, buyers get LeRobot</h3><p>Validators set weights on chain by score. Accepted runs are exported as a LeRobot dataset for robot learning.</p></li>
+      </ol>
+
+      <h2>The score</h2>
+      <div class="formula">
+        score = 0.5 &times; time_score + 0.5 &times; smooth_score
+        <small>time_score is 1 when you finish within the task's reference time and falls as you take longer. smooth_score is higher for steady, low-jerk motion. Only runs that replay exactly, complete the task and are not duplicates are scored.</small>
+      </div>
+
+      <footer class="site">Runs on Bittensor testnet. Simulation and replay use MuJoCo 3.17.</footer>
+    </div>
+    <script type="module" src="/src/landing.ts"></script>
   </body>
 </html>

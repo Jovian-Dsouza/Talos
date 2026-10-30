@@ -32,6 +32,7 @@ class NeuronView:
     endpoint: tuple[str, int] | None
     incentive: float = 0.0  # share of subnet incentive, 0..1
     emission: int = 0  # rao per tempo
+    sets_weights: bool = False  # only validators ever set weights
 
 
 def _endpoint(axon: dict) -> tuple[str, int] | None:
@@ -73,6 +74,7 @@ class Chain:
                     endpoint=_endpoint(raw.get("axon_info", {})),
                     incentive=float(raw.get("incentive", 0)) / U16_MAX,
                     emission=int(raw.get("emission", 0)),
+                    sets_weights=bool(raw.get("weights")),
                 )
             )
         return views

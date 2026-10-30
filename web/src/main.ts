@@ -1,5 +1,6 @@
-import { fetchLeaderboard, fetchTasks, fetchTicket, submitBundle, waitForVerdict } from "./api";
-import { EXPLORER_URL, POOL_URL, POOL_URLS } from "./config";
+import { fetchLeaderboard, fetchMe, fetchTasks, fetchTicket, submitBundle, waitForVerdict } from "./api";
+import { authAvailable, initAuth, onAuthChange, playerName, signIn, signOut } from "./auth";
+import { EXPLORER_URL, POOL_URL } from "./config";
 import { CONTROL_DT, HEIGHT_MAX, HEIGHT_MIN } from "./constants";
 import { Controls } from "./controls";
 import { canFullscreen, enterFullscreen, exitFullscreen, haptic, isCoarsePointer, keepAwake, toggleFullscreen } from "./device";
@@ -9,7 +10,7 @@ import { Joystick } from "./joystick";
 import { Session } from "./session";
 import { getMujoco, Sim } from "./sim";
 import { TASKS, taskInfo, type TaskInfo } from "./tasks";
-import type { LeaderboardEntry, Verdict } from "./types";
+import type { LeaderboardEntry, Me, Verdict } from "./types";
 import { SceneView } from "./view";
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
@@ -20,7 +21,8 @@ let sim: Sim | null = null;
 let ik: IkSolver | null = null;
 let controls: Controls | null = null;
 let session: Session | null = null;
-let contributor = "anonymous";
+let me: Me | null = null;
+let simReady = false;
 let submitting = false;
 let sticksOn = false;
 let task: TaskInfo = TASKS[0];
@@ -49,7 +51,7 @@ function cleanup(): void {
 
 async function beginRound(): Promise<void> {
   cleanup();
-  const [mujoco, ticket] = await Promise.all([getMujoco(), fetchTicket(POOL_URL, task.id)]);
+  const [mujoco, ticket] = await Promise.all([getMujoco(), fetchTicket(task.id)]);
   sim = new Sim(mujoco, ticket.scene_xml);
   view.build(sim);
   view.setDecor(buildSlotLabels(sim, ticket.scene_spec));
@@ -101,7 +103,7 @@ function renderTasks(offered: readonly TaskInfo[]): void {
 /** Offer the tasks the pool serves, in its order; fall back to the full catalog if it cannot say. */
 async function loadTasks(): Promise<void> {
   try {
-    const served = await fetchTasks(POOL_URL);
+    const served = await fetchTasks();
     const offered = served.map(taskInfo).filter((info, i) => info.id === served[i]);
     renderTasks(offered.length > 0 ? offered : TASKS);
   } catch (error) {
@@ -117,7 +119,7 @@ function backToIntro(): void {
   closeHudMenu();
   for (const id of ["result", "hud", "dock", "insets"]) show(id, false);
   show("intro", true);
-  $<HTMLButtonElement>("start").disabled = false;
+  updateStartButton();
 }
 
 function closeHudMenu(): void {
@@ -214,16 +216,16 @@ function renderVerdict(verdict: Verdict): void {
     : metric("Task", verdict.success ? "completed" : "not completed");
 }
 
-function renderLeaderboards(boards: LeaderboardEntry[][]): void {
+function renderLeaderboard(entries: LeaderboardEntry[]): void {
   const list = $("leaderboard");
-  const merged = boards[0] ?? [];
-  list.innerHTML = merged
-    .slice(0, 8)
-    .map((e) => `<li><strong>${escapeHtml(e.contributor)}</strong>: ${e.value.toFixed(2)} (${e.accepted}/${e.submitted} accepted)</li>`)
-    .join("") || "<li>No scores yet</li>";
-  const totals = boards.map((b) => b.reduce((sum, e) => sum + e.value, 0));
-  $("pools").textContent =
-    boards.length > 1 ? totals.map((t, i) => `Pool ${i + 1}: ${t.toFixed(2)}`).join("   ") : "";
+  list.innerHTML =
+    entries
+      .slice(0, 8)
+      .map((e) => {
+        const rank = e.uid === undefined ? "" : ` <small>UID ${e.uid}</small>`;
+        return `<li><strong>${escapeHtml(e.contributor)}</strong>${rank}: ${e.value.toFixed(2)} (${e.accepted}/${e.submitted} accepted)</li>`;
+      })
+      .join("") || "<li>No scores yet</li>";
 }
 
 function escapeHtml(text: string): string {
@@ -244,12 +246,14 @@ async function submit(): Promise<void> {
   $("leaderboard").innerHTML = "";
   $("pools").textContent = "";
   try {
-    const { bundle_id } = await submitBundle(POOL_URL, session.bundle(contributor));
+    const { bundle_id, registration } = await submitBundle(session.bundle(playerName() ?? ""));
     $("verdict-title").textContent = "Waiting for validators...";
-    const verdict = await waitForVerdict(POOL_URL, bundle_id);
+    if (registration !== "registered") {
+      $("verdict-detail").textContent = "Your miner is still being registered on the subnet. Validators score this run as soon as it is.";
+    }
+    const verdict = await waitForVerdict(bundle_id);
     renderVerdict(verdict);
-    const boards = await Promise.all(POOL_URLS.map((url) => fetchLeaderboard(url).catch(() => [])));
-    renderLeaderboards(boards);
+    renderLeaderboard(await fetchLeaderboard().catch(() => []));
     const link = $<HTMLAnchorElement>("explorer");
     link.hidden = !EXPLORER_URL;
     if (EXPLORER_URL) link.href = EXPLORER_URL;
@@ -260,12 +264,48 @@ async function submit(): Promise<void> {
   }
 }
 
+function updateStartButton(): void {
+  const start = $<HTMLButtonElement>("start");
+  if (!simReady) {
+    start.disabled = true;
+    start.textContent = "Loading simulator...";
+    return;
+  }
+  const signedIn = playerName() !== null;
+  start.disabled = !signedIn;
+  start.textContent = signedIn ? "Start" : "Sign in to start";
+}
+
+function minerLine(name: string): string {
+  if (!me) return `Signed in as ${name}.`;
+  if (me.registration === "registered") return `${name}: miner UID ${me.uid} on subnet ${me.netuid}`;
+  if (me.registration === "failed") return `${name}: miner registration failed. ${me.registration_note}`;
+  return `${name}: registering your miner on the subnet...`;
+}
+
+function renderAccount(): void {
+  const name = playerName();
+  $("sign-in").hidden = name !== null || !authAvailable;
+  $("sign-out").hidden = name === null;
+  $("account-line").textContent = !authAvailable
+    ? "Sign-in is not configured on this build."
+    : name === null
+      ? "Sign in with Google to get your own miner on the subnet. Registration is free."
+      : minerLine(name);
+  updateStartButton();
+}
+
+async function refreshMe(): Promise<void> {
+  if (playerName() === null) me = null;
+  else me = await fetchMe().catch(() => me);
+  renderAccount();
+}
+
 function bindUi(): void {
+  $("sign-in").addEventListener("click", signIn);
+  $("sign-out").addEventListener("click", () => void signOut().then(() => refreshMe()));
   const start = $<HTMLButtonElement>("start");
   start.addEventListener("click", async () => {
-    const nickname = $<HTMLInputElement>("nickname").value.trim() || `player-${Math.floor(Math.random() * 9000 + 1000)}`;
-    const wallet = $<HTMLInputElement>("wallet").value.trim();
-    contributor = wallet ? `${nickname} (${wallet})` : nickname;
     if (isCoarsePointer()) void enterFullscreen();
     start.disabled = true;
     try {
@@ -275,10 +315,10 @@ function bindUi(): void {
       const tunnelHint =
         message === "Failed to fetch" &&
         (POOL_URL.startsWith("http://127.0.0.1") || POOL_URL.endsWith("/pool"))
-          ? " Make sure practice.py (or the miner) is running on port 8091. For two tunnels, use the URL from scripts/demo/tunnels.sh."
+          ? " Make sure the backend is running and reachable."
           : "";
       $("intro-error").textContent = `Could not start: ${message}${tunnelHint}`;
-      start.disabled = false;
+      updateStartButton();
     }
   });
   $("switch").addEventListener("click", backToIntro);
@@ -366,11 +406,21 @@ if (new URLSearchParams(window.location.search).has("debug")) {
   // Test hook for automated browser runs: lets a script read the live session and view.
   Object.assign(window, { teach: { session: () => session, view, controls: () => controls } });
 }
+initAuth()
+  .then(() => {
+    onAuthChange(() => void refreshMe());
+    void refreshMe();
+    window.setInterval(() => {
+      if (!$("intro").hidden) void refreshMe();
+    }, 4000);
+  })
+  .catch((error) => {
+    $("intro-error").textContent = `Sign-in failed to load: ${error instanceof Error ? error.message : String(error)}`;
+  });
 getMujoco()
   .then(() => {
-    const start = $<HTMLButtonElement>("start");
-    start.disabled = false;
-    start.textContent = "Start";
+    simReady = true;
+    updateStartButton();
   })
   .catch((error) => {
     $("intro-error").textContent = `Simulator failed to load: ${error instanceof Error ? error.message : String(error)}`;

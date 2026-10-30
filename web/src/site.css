@@ -1,0 +1,55 @@
+:root {
+  --bg: #f4f6f5; --surface: #ffffff; --text: #14201c; --muted: #5a6a63; --line: #d9e0dc;
+  --accent: #0b7a66; --accent-ink: #ffffff; --accent-soft: #dff3ed; --good: #1d7a3a; --bad: #b42323;
+  --radius: 16px; --mono: ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1513; --surface: #151e1b; --text: #e8f0ed; --muted: #8fa39b; --line: #25332e;
+    --accent: #3ec9a7; --accent-ink: #06201a; --accent-soft: #14312a; --good: #5fd486; --bad: #ff8c8c;
+  }
+}
+* { box-sizing: border-box; }
+html { background: var(--bg); }
+body { margin: 0; color: var(--text); background: var(--bg); font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+a { color: var(--accent); }
+.wrap { max-width: 1040px; margin: 0 auto; padding: 0 16px; }
+header.top { display: flex; align-items: center; justify-content: space-between; padding: 18px 0; }
+.brand { font-weight: 800; letter-spacing: -0.02em; font-size: 20px; color: var(--text); text-decoration: none; }
+.brand b { color: var(--accent); }
+nav.links { display: flex; gap: 20px; font-size: 15px; }
+nav.links a { color: var(--muted); text-decoration: none; }
+nav.links a:hover, nav.links a[aria-current] { color: var(--text); }
+.hero { padding: 56px 0 40px; }
+.hero h1 { font-size: clamp(36px, 7vw, 64px); line-height: 1.02; letter-spacing: -0.035em; margin: 0 0 18px; max-width: 14ch; }
+.hero p { font-size: clamp(17px, 2.4vw, 20px); color: var(--muted); max-width: 56ch; margin: 0 0 28px; }
+.cta { display: flex; gap: 12px; flex-wrap: wrap; }
+.btn { display: inline-flex; align-items: center; min-height: 48px; padding: 0 22px; border-radius: 12px; font-weight: 650; text-decoration: none; border: 1px solid var(--line); color: var(--text); background: var(--surface); }
+.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin: 8px 0 40px; }
+.stat { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; }
+.stat span { display: block; font-size: 13px; color: var(--muted); }
+.stat strong { display: block; font-size: 28px; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+h2 { font-size: 26px; letter-spacing: -0.02em; margin: 40px 0 16px; }
+.steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; counter-reset: step; padding: 0; list-style: none; }
+.steps li { counter-increment: step; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; }
+.steps li::before { content: counter(step); display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); font-weight: 700; margin-bottom: 10px; }
+.steps h3 { margin: 0 0 6px; font-size: 17px; }
+.steps p { margin: 0; color: var(--muted); font-size: 15px; }
+.formula { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; font-family: var(--mono); font-size: 15px; overflow-x: auto; }
+.formula small { display: block; margin-top: 8px; font-family: system-ui, sans-serif; color: var(--muted); font-size: 14px; }
+table { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; font-size: 15px; }
+th, td { padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--line); }
+th { font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+tr:last-child td { border-bottom: 0; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+.scroll { overflow-x: auto; }
+.mono { font-family: var(--mono); font-size: 13px; word-break: break-all; }
+.feed { list-style: none; margin: 0; padding: 0; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
+.feed li { display: flex; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--line); font-size: 15px; }
+.feed li:last-child { border-bottom: 0; }
+.tag { font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--good); }
+.tag.no { background: transparent; color: var(--bad); border: 1px solid var(--bad); }
+.muted { color: var(--muted); }
+footer.site { margin: 56px 0 32px; color: var(--muted); font-size: 14px; }
+@media (max-width: 560px) { .hero { padding-top: 32px; } th, td { padding: 8px 10px; } }
