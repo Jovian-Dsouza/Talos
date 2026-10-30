@@ -240,7 +240,13 @@ function bindUi(): void {
     try {
       await beginRound();
     } catch (error) {
-      $("intro-error").textContent = `Could not start: ${error instanceof Error ? error.message : String(error)}`;
+      const message = error instanceof Error ? error.message : String(error);
+      const tunnelHint =
+        message === "Failed to fetch" &&
+        (POOL_URL.startsWith("http://127.0.0.1") || POOL_URL.endsWith("/pool"))
+          ? " Make sure practice.py (or the miner) is running on port 8091. For two tunnels, use the URL from scripts/demo/tunnels.sh."
+          : "";
+      $("intro-error").textContent = `Could not start: ${message}${tunnelHint}`;
       start.disabled = false;
     }
   });
