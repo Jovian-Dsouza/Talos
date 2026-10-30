@@ -72,6 +72,27 @@ class Chain:
             )
         return views
 
+    def balance_rao(self, coldkey_ss58: str) -> int:
+        return int(self._st.read("balance", coldkey_ss58=coldkey_ss58).rao)
+
+    def burn_rao(self) -> int:
+        """Current cost to register one neuron on this subnet."""
+        return int(self._st.read("burn", netuid=self.netuid).rao)
+
+    def uid_of(self, hotkey_ss58: str) -> int | None:
+        uid = self._st.read("uid", hotkey_ss58=hotkey_ss58, netuid=self.netuid)
+        return None if uid is None else int(uid)
+
+    def transfer(self, wallet: "bt.Wallet", dest_ss58: str, amount_rao: int) -> None:
+        amount = bt.Balance.from_rao(amount_rao)
+        _must(self._st.execute(bt.Transfer(dest_ss58, amount), wallet), "transfer")
+
+    def burned_register(self, wallet: "bt.Wallet", hotkey_ss58: str) -> None:
+        """Register `hotkey_ss58` on the subnet, paid by the wallet's coldkey. Raw call because the
+        BurnedRegister intent preflights storage the Docker localnet runtime lacks."""
+        call = bt.calls.SubtensorModule.burned_register(netuid=self.netuid, hotkey=hotkey_ss58)
+        _must(self._st.submit_call(call, wallet), "burned register")
+
     def serve_endpoint(self, wallet: "bt.Wallet", ip: str, port: int) -> None:
         _must(self._st.execute(bt.ServeAxon(self.netuid, ip, port), wallet), "serve endpoint")
 
