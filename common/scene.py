@@ -84,7 +84,93 @@ def _cube_scene(rng: random.Random) -> dict[str, Any]:
     }
 
 
-SCENE_BUILDERS: dict[str, Callable[[random.Random], dict[str, Any]]] = {TASK_ID: _cube_scene}
+VIAL_TASK_ID = "rack_vial"
+VIAL_COLORS = ("red", "green", "blue", "orange", "purple", "teal")
+RACK_ROWS = "AB"
+RACK_COLS = 4
+RACK_PITCH = 0.042  # metres between slot centres
+RACK_RADIUS_RANGE = (0.20, 0.235)
+RACK_ANGLE_RANGE = (-0.35, 0.35)
+VIAL_RADIUS_RANGE = (0.17, 0.24)
+VIAL_ANGLE_RANGE = (-0.9, 0.9)
+RACK_CLEARANCE = 0.115  # keep loose vials away from the rack footprint
+VIAL_SEPARATION = 0.06
+
+
+def slot_ids() -> list[str]:
+    return [f"{row}{col + 1}" for row in RACK_ROWS for col in range(RACK_COLS)]
+
+
+def slot_offset(slot: str) -> tuple[float, float]:
+    """Slot centre in the rack frame: columns run along x, rows along y, centred on the rack."""
+    col = int(slot[1:]) - 1
+    row = RACK_ROWS.index(slot[0])
+    return (
+        (col - (RACK_COLS - 1) / 2) * RACK_PITCH,
+        (row - (len(RACK_ROWS) - 1) / 2) * RACK_PITCH,
+    )
+
+
+def slot_world(rack: dict[str, Any], slot: str) -> tuple[float, float]:
+    ox, oy = slot_offset(slot)
+    c, s = math.cos(rack["yaw"]), math.sin(rack["yaw"])
+    return rack["x"] + c * ox - s * oy, rack["y"] + s * ox + c * oy
+
+
+def _vial_scene(rng: random.Random) -> dict[str, Any]:
+    angle = rng.uniform(*RACK_ANGLE_RANGE)
+    radius = rng.uniform(*RACK_RADIUS_RANGE)
+    rack = {
+        "id": "rack",
+        "kind": "rack",
+        "color": "gray",
+        "x": round(radius * math.cos(angle), 4),
+        "y": round(radius * math.sin(angle), 4),
+        # Long side tangent to the arm's reach so every slot is reachable from above.
+        "yaw": round(angle + math.pi / 2 + rng.uniform(-0.1, 0.1), 4),
+    }
+    colors = rng.sample(VIAL_COLORS, 3)
+    spots: list[tuple[float, float]] = []
+    tries = 0
+    while len(spots) < 3:
+        tries += 1
+        r = rng.uniform(*VIAL_RADIUS_RANGE)
+        a = rng.uniform(*VIAL_ANGLE_RANGE)
+        x, y = r * math.cos(a), r * math.sin(a)
+        if math.hypot(x - rack["x"], y - rack["y"]) < RACK_CLEARANCE + (0 if tries < 2000 else -0.02):
+            continue
+        if all(math.hypot(x - px, y - py) >= VIAL_SEPARATION for px, py in spots):
+            spots.append((x, y))
+    slots = slot_ids()
+    target_slot = rng.choice(slots)
+    filled = rng.sample([s for s in slots if s != target_slot], rng.randint(1, 2))
+    vials = [
+        {"id": vial_id, "kind": "vial", "color": color, "x": round(x, 4), "y": round(y, 4),
+         "yaw": round(rng.uniform(-math.pi, math.pi), 4)}
+        for vial_id, color, (x, y) in zip(("vial_target", "vial_a", "vial_b"), colors, spots)
+    ]
+    # Pre-filled slots hold seated vials, so the player threads around real obstacles.
+    seated = []
+    for index, slot in enumerate(filled):
+        x, y = slot_world(rack, slot)
+        seated.append({"id": f"vial_seated_{index}", "kind": "vial", "color": rng.choice(VIAL_COLORS),
+                       "x": round(x, 4), "y": round(y, 4), "yaw": 0.0, "seated": True})
+    tx, ty = slot_world(rack, target_slot)
+    template = task_config(VIAL_TASK_ID)["instruction_template"]
+    return {
+        "task_id": VIAL_TASK_ID,
+        "instruction": template.format(cap_color=colors[0], slot=target_slot),
+        "pick": "vial_target",
+        "place": {"x": round(tx, 4), "y": round(ty, 4), "z": 0.06},
+        "target_slot": target_slot,
+        "objects": [rack, *vials, *seated],
+    }
+
+
+SCENE_BUILDERS: dict[str, Callable[[random.Random], dict[str, Any]]] = {
+    TASK_ID: _cube_scene,
+    VIAL_TASK_ID: _vial_scene,
+}
 
 
 def make_scene(task_id: str, seed: int) -> dict[str, Any]:

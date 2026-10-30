@@ -40,4 +40,25 @@ def _object_in_container(
     return ok, details
 
 
-CHECKERS = {"object_in_container": _object_in_container}
+def _object_in_slot(
+    model: mujoco.MjModel, data: mujoco.MjData, rule: Mapping[str, Any], spec: Mapping[str, Any]
+) -> tuple[bool, dict[str, Any]]:
+    obj = data.body(spec["pick"])
+    slot = data.site(f"slot_{spec['target_slot']}")
+    dxy = float(np.linalg.norm(obj.xpos[:2] - slot.xpos[:2]))
+    z = float(obj.xpos[2])
+    upright = float(obj.xmat.reshape(3, 3)[2, 2])
+    obj_speed = float(np.linalg.norm(data.qvel[model.body(spec["pick"]).dofadr[0] :][:6]))
+    arm_speed = float(np.linalg.norm(data.qvel[:ARM_DOFS]))
+    details = {"dxy": dxy, "z": z, "upright": upright, "object_speed": obj_speed, "arm_speed": arm_speed}
+    ok = (
+        dxy <= rule["xy_radius"]
+        and rule["z_min"] <= z <= rule["z_max"]
+        and upright >= rule["min_upright"]
+        and obj_speed <= rule["max_speed"]
+        and arm_speed <= rule["max_arm_speed"]
+    )
+    return ok, details
+
+
+CHECKERS = {"object_in_container": _object_in_container, "object_in_slot": _object_in_slot}

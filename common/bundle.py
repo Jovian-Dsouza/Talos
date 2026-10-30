@@ -14,7 +14,9 @@ import numpy as np
 from common.schema import CHECKPOINT_EVERY, MIN_STEPS, NUM_JOINTS, Ticket
 from common.scene import task_config
 
-STATE_WIDTH = 38  # qpos (20) + qvel (18) for the arm plus two free bodies
+ARM_STATE_WIDTH = 12  # qpos (6) + qvel (6) for the arm
+FREE_BODY_STATE_WIDTH = 13  # qpos (7) + qvel (6) per free body
+FREE_KINDS = ("cube", "vial")
 MAX_ABS_CTRL = 10.0
 MAX_INPUT_EVENTS = 20000
 MAX_CONTRIBUTOR_LEN = 64
@@ -63,6 +65,12 @@ def _matrix(raw: Any, width: int, name: str) -> np.ndarray:
     return array
 
 
+def state_width(scene_spec: Mapping[str, Any]) -> int:
+    """Checkpoint row width: the arm plus every free body the scene spec lists."""
+    free = sum(1 for obj in scene_spec["objects"] if obj["kind"] in FREE_KINDS)
+    return ARM_STATE_WIDTH + FREE_BODY_STATE_WIDTH * free
+
+
 def parse_bundle(raw: Mapping[str, Any]) -> Bundle:
     try:
         ticket = Ticket.from_dict(raw["ticket"])
@@ -71,7 +79,7 @@ def parse_bundle(raw: Mapping[str, Any]) -> Bundle:
         reported_success = bool(raw.get("reported_success", False))
         contributor = str(raw.get("contributor", ""))[:MAX_CONTRIBUTOR_LEN]
         ctrl = _matrix(raw["ctrl"], NUM_JOINTS, "ctrl")
-        checkpoints = _matrix(raw["checkpoints"], STATE_WIDTH, "checkpoints")
+        checkpoints = _matrix(raw["checkpoints"], state_width(ticket.scene_spec), "checkpoints")
         events = tuple(raw.get("input_events", ()))
     except (KeyError, TypeError, ValueError) as exc:
         if isinstance(exc, BundleError):
