@@ -22,6 +22,7 @@ class ValidatorConfig:
     poll_seconds: float
     weights_every_blocks: int
     miner_urls: dict[str, str]
+    hosted_miner_url: str | None
     accepted_dir: Path
     pipeline: PipelineConfig
 
@@ -36,6 +37,7 @@ class ValidatorConfig:
             poll_seconds=float(os.environ.get("POLL_SECONDS", "3")),
             weights_every_blocks=int(os.environ.get("WEIGHTS_EVERY_BLOCKS", "10")),
             miner_urls=_overrides(os.environ.get("MINER_URLS", "")),
+            hosted_miner_url=(os.environ.get("HOSTED_MINER_URL") or "").rstrip("/") or None,
             accepted_dir=Path(os.environ.get("ACCEPTED_DIR", "data/accepted")),
             pipeline=PipelineConfig(
                 replay_mode=os.environ.get("REPLAY_MODE", "strict"),

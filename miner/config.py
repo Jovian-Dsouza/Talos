@@ -1,4 +1,4 @@
-"""Miner settings, read once from environment variables."""
+"""Hosted miner settings, read once from environment variables."""
 
 import os
 from dataclasses import dataclass
@@ -12,7 +12,7 @@ def _csv(name: str) -> tuple[str, ...]:
 
 
 def _task_ids() -> tuple[str, ...]:
-    """Tasks this pool serves, first is the default. Fails at startup on an unknown name."""
+    """Tasks the service offers, first is the default. Fails at startup on an unknown name."""
     tasks = _csv("TASK_IDS") or DEFAULT_TASKS
     unknown = [task for task in tasks if task not in SCENE_BUILDERS]
     if unknown:
@@ -20,36 +20,49 @@ def _task_ids() -> tuple[str, ...]:
     return tasks
 
 
+def _treasury_secret(chain_endpoint: str) -> str:
+    """The dev account pays on a local chain; anywhere else the treasury key must be supplied."""
+    secret = os.environ.get("TREASURY_MNEMONIC", "")
+    if secret:
+        return secret
+    if chain_endpoint.startswith(("ws://127.0.0.1", "ws://localhost")):
+        return "//Alice"
+    raise RuntimeError("TREASURY_MNEMONIC is required on a public network")
+
+
 @dataclass(frozen=True)
 class MinerConfig:
     chain_endpoint: str
     netuid: int
-    wallet_name: str
-    hotkey_name: str
     host: str
     port: int
-    public_ip: str
     data_dir: Path
+    database_url: str
     allowed_origins: tuple[str, ...]
     validator_allowlist: tuple[str, ...]
     task_ids: tuple[str, ...]
-    publish_endpoint: bool
     trust_proxy: bool
+    treasury_mnemonic: str
+    wallet_encryption_key: str
 
     @staticmethod
     def from_env() -> "MinerConfig":
+        key = os.environ.get("WALLET_ENCRYPTION_KEY", "")
+        if not key:
+            raise RuntimeError("WALLET_ENCRYPTION_KEY is required")
+        chain_endpoint = os.environ.get("CHAIN_ENDPOINT", "ws://127.0.0.1:9944")
+        data_dir = Path(os.environ.get("MINER_DATA_DIR", "data/hosted"))
         return MinerConfig(
-            chain_endpoint=os.environ.get("CHAIN_ENDPOINT", "ws://127.0.0.1:9944"),
+            chain_endpoint=chain_endpoint,
             netuid=int(os.environ.get("NETUID", "2")),
-            wallet_name=os.environ.get("MINER_WALLET", "bittesnor-pool-open"),
-            hotkey_name=os.environ.get("MINER_HOTKEY", "default"),
             host=os.environ.get("MINER_HOST", "0.0.0.0"),
-            port=int(os.environ.get("MINER_PORT", "8091")),
-            public_ip=os.environ.get("MINER_PUBLIC_IP", "127.0.0.1"),
-            data_dir=Path(os.environ.get("MINER_DATA_DIR", "data/miner-open")),
+            port=int(os.environ.get("PORT", os.environ.get("MINER_PORT", "8091"))),
+            data_dir=data_dir,
+            database_url=os.environ.get("DATABASE_URL", f"sqlite:///{data_dir}/accounts.db"),
             allowed_origins=_csv("MINER_ALLOWED_ORIGINS") or ("*",),
             validator_allowlist=_csv("MINER_VALIDATOR_ALLOWLIST"),
             task_ids=_task_ids(),
-            publish_endpoint=os.environ.get("MINER_PUBLISH_ENDPOINT", "1") == "1",
             trust_proxy=os.environ.get("MINER_TRUST_PROXY", "0") == "1",
+            treasury_mnemonic=_treasury_secret(chain_endpoint),
+            wallet_encryption_key=key,
         )

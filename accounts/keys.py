@@ -71,8 +71,12 @@ class KeyVault:
         return CustodialWallet(coldkey=cold, coldkeypub=Keypair(ss58_address=cold.ss58_address), hotkey=hot)
 
 
-def wallet_from_mnemonics(coldkey_mnemonic: str, hotkey_mnemonic: str) -> CustodialWallet:
+def _keypair(secret: str) -> Keypair:
+    """A mnemonic, or a dev key URI such as //Alice (localnet only)."""
+    return Keypair.create_from_uri(secret) if secret.startswith("//") else Keypair.create_from_mnemonic(secret)
+
+
+def wallet_from_mnemonics(coldkey_secret: str, hotkey_secret: str) -> CustodialWallet:
     """Treasury and validator keys supplied through environment variables."""
-    cold = Keypair.create_from_mnemonic(coldkey_mnemonic)
-    hot = Keypair.create_from_mnemonic(hotkey_mnemonic)
+    cold, hot = _keypair(coldkey_secret), _keypair(hotkey_secret)
     return CustodialWallet(coldkey=cold, coldkeypub=Keypair(ss58_address=cold.ss58_address), hotkey=hot)

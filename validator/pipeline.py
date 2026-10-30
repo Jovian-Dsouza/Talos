@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any, Mapping, Protocol
 
 import mujoco
+from bittensor_core import Keypair
 
 from common.bundle import BundleError, parse_bundle
 from common.mjcf import model_hash
@@ -31,6 +32,7 @@ class PipelineConfig:
     eps_object: float = 0.005
     ttl_blocks: int = TICKET_TTL_BLOCKS
     tempo_blocks: int = 360
+    require_miner_signature: bool = True
 
 
 @dataclass(frozen=True)
@@ -41,19 +43,33 @@ class Context:
     accepted_dir: Path | None = None
 
 
-def process(raw: Mapping[str, Any], miner_hotkey: str, ctx: Context) -> tuple[str, Verdict]:
+def process(
+    raw: Mapping[str, Any], miner_hotkey: str, ctx: Context, miner_signature: str | None = None
+) -> tuple[str, Verdict]:
     """Validate one recording; returns (bundle_id, verdict). Never raises on bad input."""
     try:
         bundle = parse_bundle(raw)
     except BundleError as exc:
         return "", rejected(f"malformed upload: {exc}")
     bundle_id = bundle.bundle_id()
-    verdict = _evaluate(bundle, bundle_id, miner_hotkey, ctx)
+    if ctx.config.require_miner_signature and not _signed_by(miner_hotkey, bundle_id, miner_signature):
+        verdict = rejected("run not signed by the miner hotkey")
+    else:
+        verdict = _evaluate(bundle, bundle_id, miner_hotkey, ctx)
     if verdict.accepted and ctx.accepted_dir is not None:
         ctx.accepted_dir.mkdir(parents=True, exist_ok=True)
         (ctx.accepted_dir / f"{bundle_id}.json").write_text(json.dumps(raw))
     ctx.store.add_verdict(bundle_id, miner_hotkey, verdict.to_dict())
     return bundle_id, verdict
+
+
+def _signed_by(hotkey: str, bundle_id: str, signature: str | None) -> bool:
+    if not signature:
+        return False
+    try:
+        return bool(Keypair(ss58_address=hotkey).verify(bundle_id.encode(), bytes.fromhex(signature)))
+    except (ValueError, TypeError):
+        return False
 
 
 def _evaluate(bundle, bundle_id: str, miner_hotkey: str, ctx: Context) -> Verdict:

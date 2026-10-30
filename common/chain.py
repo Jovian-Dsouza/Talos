@@ -11,6 +11,7 @@ from typing import Sequence
 import bittensor as bt
 
 LOCALNET = "ws://127.0.0.1:9944"
+U16_MAX = 65535
 
 
 class ChainCallError(RuntimeError):
@@ -29,6 +30,8 @@ class NeuronView:
     validator_permit: bool
     stake: float
     endpoint: tuple[str, int] | None
+    incentive: float = 0.0  # share of subnet incentive, 0..1
+    emission: int = 0  # rao per tempo
 
 
 def _endpoint(axon: dict) -> tuple[str, int] | None:
@@ -68,6 +71,8 @@ class Chain:
                     validator_permit=bool(n.validator_permit),
                     stake=float(n.total_stake.alpha),
                     endpoint=_endpoint(raw.get("axon_info", {})),
+                    incentive=float(raw.get("incentive", 0)) / U16_MAX,
+                    emission=int(raw.get("emission", 0)),
                 )
             )
         return views
@@ -92,6 +97,14 @@ class Chain:
         BurnedRegister intent preflights storage the Docker localnet runtime lacks."""
         call = bt.calls.SubtensorModule.burned_register(netuid=self.netuid, hotkey=hotkey_ss58)
         _must(self._st.submit_call(call, wallet), "burned register")
+
+    def latest_commitment(self, hotkey_ss58: str) -> str | None:
+        """The hotkey's most recent on-chain commitment (the validator's epoch Merkle root)."""
+        try:
+            found = self._st.read("commitment", netuid=self.netuid, hotkey_ss58=hotkey_ss58)
+        except Exception:
+            return None
+        return None if found is None else str(found)
 
     def serve_endpoint(self, wallet: "bt.Wallet", ip: str, port: int) -> None:
         _must(self._st.execute(bt.ServeAxon(self.netuid, ip, port), wallet), "serve endpoint")

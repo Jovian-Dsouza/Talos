@@ -4,6 +4,7 @@ import logging
 import time
 
 import bittensor as bt
+import httpx
 
 from common.chain import Chain, NeuronView
 from validator import scoring
@@ -21,6 +22,8 @@ def miner_url(config: ValidatorConfig, neuron: NeuronView) -> str | None:
     if neuron.endpoint:
         ip, port = neuron.endpoint
         return f"http://{ip}:{port}"
+    if config.hosted_miner_url:
+        return f"{config.hosted_miner_url}/m/{neuron.hotkey}"
     return None
 
 
@@ -31,12 +34,16 @@ def pull_and_validate(config: ValidatorConfig, wallet, ctx: Context, neuron: Neu
     since = ctx.store.get_cursor(neuron.hotkey)
     try:
         bundles = fetch_bundles(wallet, url, neuron.hotkey, since)
+    except httpx.HTTPStatusError as exc:
+        if exc.response.status_code != 404:  # 404: a neuron the hosted service does not run (owner, validator)
+            log.warning("pull from %s failed: %s", neuron.hotkey[:8], exc)
+        return 0
     except Exception as exc:  # network and auth failures must not stop the loop
         log.warning("pull from %s failed: %s", neuron.hotkey[:8], exc)
         return 0
     feed = []
     for item in bundles:
-        bundle_id, verdict = process(item["bundle"], neuron.hotkey, ctx)
+        bundle_id, verdict = process(item["bundle"], neuron.hotkey, ctx, item.get("miner_signature"))
         log.info("%s %s %s", item["bundle_id"][:8], verdict.accepted, verdict.reason)
         feed.append({"bundle_id": item["bundle_id"], "verdict": verdict.to_dict()})
         ctx.store.set_cursor(neuron.hotkey, item["seq"])

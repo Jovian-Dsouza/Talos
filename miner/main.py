@@ -1,22 +1,33 @@
-"""Run the open-pool miner: publish the endpoint on chain, then serve HTTP."""
+"""Run the hosted miner: player accounts, the registrar thread and the HTTP API."""
 
-import bittensor as bt
+import logging
+
 import uvicorn
 
+from accounts.clerk import ClerkAuth, ClerkSettings
+from accounts.keys import KeyVault, wallet_from_mnemonics
+from accounts.registrar import Registrar, RegistrarSettings
+from accounts.store import AccountStore
 from common.chain import Chain
 from miner.app import create_app
 from miner.config import MinerConfig
+from miner.db import MinerDb
+from miner.deps import AppState
 
 
 def main() -> None:
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(message)s")
     config = MinerConfig.from_env()
-    wallet = bt.Wallet(name=config.wallet_name, hotkey=config.hotkey_name)
-    hotkey = wallet.hotkey.ss58_address
     chain = Chain(config.chain_endpoint, config.netuid)
-    if config.publish_endpoint:
-        chain.serve_endpoint(wallet, config.public_ip, config.port)
-        print(f"published endpoint {config.public_ip}:{config.port} for {hotkey}")
-    uvicorn.run(create_app(config, hotkey, chain), host=config.host, port=config.port)
+    vault = KeyVault(config.wallet_encryption_key)
+    accounts = AccountStore(config.database_url)
+    treasury = wallet_from_mnemonics(config.treasury_mnemonic, config.treasury_mnemonic)
+    Registrar(accounts, vault, chain, treasury, RegistrarSettings.from_env()).start()
+    state = AppState(
+        config=config, db=MinerDb(config.data_dir), chain=chain, accounts=accounts, vault=vault,
+        auth=ClerkAuth(ClerkSettings.from_env(config.chain_endpoint)),
+    )
+    uvicorn.run(create_app(state), host=config.host, port=config.port)
 
 
 if __name__ == "__main__":

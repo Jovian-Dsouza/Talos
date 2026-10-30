@@ -74,6 +74,10 @@ class AccountStore:
         with self._engine.connect() as conn:
             return {row[0] for row in conn.execute(select(users.c.hotkey_ss58))}
 
+    def display_names(self) -> dict[str, str]:
+        with self._engine.connect() as conn:
+            return {row[0]: row[1] for row in conn.execute(select(users.c.hotkey_ss58, users.c.display_name))}
+
     def create(self, clerk_user_id: str, email: str, display_name: str, wallet: SealedWallet) -> User:
         with self._engine.begin() as conn:
             conn.execute(insert(users).values(
