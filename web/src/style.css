@@ -178,6 +178,7 @@ button.wide { width: 100%; }
 
 /* Lobby: the signed-in player's strip, personal bests and the live line */
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.player[hidden], .live-strip[hidden] { display: none; }
 .card h1 { font-stretch: 118%; font-weight: 800; }
 .player { display: grid; grid-template-columns: 40px 1fr auto; gap: 4px 12px; align-items: center; margin: 0 0 14px;
   padding: 12px; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--line); }
