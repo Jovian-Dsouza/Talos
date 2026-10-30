@@ -59,7 +59,7 @@ button.grip.on { background: var(--accent); color: var(--accent-text); }
 .chip.ok { color: var(--good); border-color: var(--good); }
 .hud-menu { pointer-events: auto; min-height: 36px; padding: 6px 12px; }
 .hud-exit { pointer-events: auto; min-height: 36px; padding: 6px 12px; }
-.hud-nav { display: none; gap: 8px; flex-wrap: wrap; margin-top: 6px; pointer-events: auto; }
+.hud-nav { display: none; gap: 8px; flex-wrap: nowrap; pointer-events: auto; align-items: center; }
 .hud-menu-panel {
   margin-top: 8px; padding: 10px; border-radius: var(--radius);
   background: color-mix(in srgb, var(--surface) 94%, transparent);
@@ -92,7 +92,7 @@ button.grip.on { background: var(--accent); color: var(--accent-text); }
 }
 
 #insets { position: absolute; right: 12px; top: 96px; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
-.inset { position: relative; width: clamp(140px, 26vw, 250px); aspect-ratio: 4 / 3; border: 2px solid var(--surface); border-radius: 8px; box-shadow: 0 3px 14px rgb(0 0 0 / 0.25); }
+.inset { position: relative; width: clamp(155px, 28vw, 275px); aspect-ratio: 4 / 3; border: 2px solid var(--surface); border-radius: 8px; box-shadow: 0 3px 14px rgb(0 0 0 / 0.25); }
 .inset span { position: absolute; left: 6px; top: 4px; padding: 1px 7px; font-size: 12px; font-weight: 600; background: var(--surface); border-radius: 999px; }
 
 .tip { font-size: 13px; }
@@ -131,7 +131,8 @@ body.touch {
 }
 body.touch .card h1 { font-size: 1.35rem; }
 body.touch .hud-nav { display: flex; }
-body.touch .hud-stats { margin-top: 0; margin-bottom: 6px; }
+body.touch .hud-stats { margin-top: 0; margin-bottom: 6px; align-items: center; }
+body.touch .chip-status { display: none; }
 body.touch #instruction {
   display: block; max-width: min(72vw, 520px); padding: 4px 10px; font-size: 13px; font-weight: 600; line-height: 1.25;
 }
@@ -139,7 +140,6 @@ body.touch .chip-timer {
   font-size: 24px; font-weight: 700; padding: 2px 14px; letter-spacing: 0.02em;
   background: color-mix(in srgb, var(--surface) 92%, transparent);
 }
-body.touch .chip-status { font-size: 11px; padding: 3px 8px; max-width: 42vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 body.touch #hud-menu-panel:not([hidden]) {
   display: block; position: static; margin-top: 8px; width: min(280px, 100%); z-index: 5;
 }
@@ -163,7 +163,7 @@ body.touch .stick {
 }
 body.touch #stick-move { left: var(--edge); }
 body.touch #stick-lift { right: var(--edge); }
-body.touch .inset { width: clamp(72px, 18vw, 120px); }
+body.touch .inset { width: clamp(88px, 21vw, 138px); }
 body.touch #insets { top: 88px; right: max(8px, env(safe-area-inset-right)); gap: 6px; }
 @media (orientation: landscape) and (max-height: 600px) {
   body.touch #insets { top: max(8px, env(safe-area-inset-top)); flex-direction: row; }

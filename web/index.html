@@ -32,15 +32,15 @@
           <div class="hud-copy">
             <div class="hud-stats">
               <span id="timer" class="chip chip-timer">0.0 s</span>
+              <div class="hud-nav">
+                <button type="button" id="hud-menu" class="tool hud-menu" aria-expanded="false" aria-controls="hud-menu-panel" hidden>
+                  Menu
+                </button>
+                <button type="button" id="hud-exit" class="tool hud-exit" hidden>Exit</button>
+              </div>
               <span id="status" class="chip chip-status">Touch the scene to begin</span>
             </div>
             <p id="instruction"></p>
-            <div class="hud-nav">
-              <button type="button" id="hud-menu" class="tool hud-menu" aria-expanded="false" aria-controls="hud-menu-panel" hidden>
-                Menu
-              </button>
-              <button type="button" id="hud-exit" class="tool hud-exit" hidden>Exit</button>
-            </div>
             <div id="hud-menu-panel" class="hud-menu-panel" hidden>
               <div class="chips tools">
                 <button id="sticks-toggle" class="tool" aria-pressed="false">Joysticks</button>

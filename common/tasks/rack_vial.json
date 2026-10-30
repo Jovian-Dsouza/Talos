@@ -1,7 +1,7 @@
 {
   "task_id": "rack_vial",
   "instruction_template": "Rack the {cap_color}-cap vial in slot {slot}",
-  "max_steps": 3000,
+  "max_steps": 15000,
   "checker": {
     "type": "object_in_slot",
     "xy_radius": 0.008,

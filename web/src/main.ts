@@ -1,6 +1,6 @@
 import { fetchLeaderboard, fetchTasks, fetchTicket, submitBundle, waitForVerdict } from "./api";
 import { EXPLORER_URL, POOL_URL, POOL_URLS } from "./config";
-import { HEIGHT_MAX, HEIGHT_MIN } from "./constants";
+import { CONTROL_DT, HEIGHT_MAX, HEIGHT_MIN } from "./constants";
 import { Controls } from "./controls";
 import { canFullscreen, enterFullscreen, exitFullscreen, haptic, isCoarsePointer, keepAwake, toggleFullscreen } from "./device";
 import { IkSolver } from "./ik";
@@ -174,7 +174,7 @@ function frame(now: number): void {
     session.tick(dt);
     const [tx, ty, tz] = session.currentTarget();
     view.setMarker(tx, ty, tz);
-    $("timer").textContent = `${(session.steps * 0.02).toFixed(1)} s`;
+    $("timer").textContent = `${(session.steps * CONTROL_DT).toFixed(1)} s`;
     if (session.phase === "full") setStatus("Time limit reached, submit or reset");
     else if (session.readyToSubmit) setStatus(task.done, true);
     else if (session.phase === "recording") setStatus("Recording");

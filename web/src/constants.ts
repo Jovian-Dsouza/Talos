@@ -4,7 +4,7 @@ export const NUM_JOINTS = 6;
 export const SUBSTEPS = 10;
 export const CONTROL_DT = 0.02;
 export const CHECKPOINT_EVERY = 25;
-export const MAX_STEPS = 3000;
+export const MAX_STEPS = 15000; // 5 min at CONTROL_DT
 export const MIN_STEPS = 10;
 
 export const GRIPPER_OPEN = 1.3;
