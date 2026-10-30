@@ -5,14 +5,16 @@ Everything chain related goes through this module so SDK changes stay in one pla
 
 import ipaddress
 import os
+import re
 from dataclasses import dataclass
-from functools import lru_cache
 from typing import Sequence
 
 import bittensor as bt
+import httpx
 
 LOCALNET = "ws://127.0.0.1:9944"
 U16_MAX = 65535
+BLOCK_HASH_CACHE = 4096
 SUBNET_NAME = "taunet"
 SUBNET_DESCRIPTION = "Robot teleoperation data from players, verified by physics replay"
 
@@ -58,18 +60,35 @@ class Chain:
     def __init__(self, endpoint: str, netuid: int) -> None:
         self.netuid = netuid
         self._st = bt.Subtensor(endpoint)
+        self._hashes: dict[int, str] = {}
 
     def current_block(self) -> int:
         return int(self._st.block)
 
     def block_hash(self, block: int) -> str | None:
-        return _cached_block_hash(self, block)
+        """Hash of a block, or None when the node cannot say. Only found hashes are cached."""
+        found = self._hashes.get(block)
+        if found is None:
+            found = self._fetch_block_hash(block)
+            if found is not None:
+                if len(self._hashes) >= BLOCK_HASH_CACHE:
+                    self._hashes.pop(next(iter(self._hashes)))
+                self._hashes[block] = found
+        return found
 
     def _fetch_block_hash(self, block: int) -> str | None:
+        """Plain chain_getBlockHash RPC. Block hashes outlive state pruning, unlike the SDK's
+        block_info, which fails once a non-archive node discards the block's state (the Docker
+        localnet keeps only 256 blocks, about a minute and a half of fast blocks)."""
+        url = re.sub(r"^ws", "http", self._st.endpoint)
+        request = {"jsonrpc": "2.0", "id": 1, "method": "chain_getBlockHash", "params": [block]}
         try:
-            return str(self._st.block_info(block).hash).removeprefix("0x")
-        except Exception:
+            response = httpx.post(url, json=request, timeout=10)
+            response.raise_for_status()
+            result = response.json().get("result")
+        except (httpx.HTTPError, ValueError):
             return None
+        return str(result).removeprefix("0x") if result else None
 
     def tempo(self) -> int:
         return int(self._st.read("metagraph", netuid=self.netuid)["tempo"])
@@ -173,8 +192,3 @@ class Chain:
             netuid=self.netuid, info={"fields": [[{f"Raw{len(data)}": data}]]}
         )
         _must(self._st.submit_call(call, wallet, signer="hotkey"), "commit root")
-
-
-@lru_cache(maxsize=4096)
-def _cached_block_hash(chain: Chain, block: int) -> str | None:
-    return chain._fetch_block_hash(block)
