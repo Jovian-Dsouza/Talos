@@ -32,7 +32,7 @@ class RegistrarSettings:
     def from_env() -> "RegistrarSettings":
         return RegistrarSettings(
             max_burn_rao=int(float(os.environ.get("MAX_BURN_TAO", "0.05")) * RAO_PER_TAO),
-            fee_margin_rao=int(float(os.environ.get("FEE_MARGIN_TAO", "0.002")) * RAO_PER_TAO),
+            fee_margin_rao=int(float(os.environ.get("FEE_MARGIN_TAO", "0.005")) * RAO_PER_TAO),
             max_signups_per_day=int(os.environ.get("MAX_SIGNUPS_PER_DAY", "200")),
             max_uids=int(os.environ.get("MAX_UIDS", "256")),
             max_attempts=int(os.environ.get("REGISTRATION_ATTEMPTS", "3")),
