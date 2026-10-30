@@ -19,11 +19,10 @@ HOVER = 0.09
 CARRY_Z = 0.10
 # Tool tip heights per task: where to close on the object and where to open over the goal.
 TASK_HEIGHTS = {
-    "put_cube_in_bowl": {"grasp": 0.016, "drop": 0.075},
     "rack_vial": {"grasp": 0.028, "drop": 0.042},
 }
 OPEN, CLOSED = 1.3, 0.05
-IK_JOINTS = 4  # pan, lift, elbow, wrist_flex; roll is set from the cube yaw
+IK_JOINTS = 4  # pan, lift, elbow, wrist_flex; roll is set from the vial yaw
 
 
 def solve_ik(model: mujoco.MjModel, q0: np.ndarray, target: np.ndarray) -> np.ndarray:
@@ -58,7 +57,7 @@ def _segment(a: np.ndarray, b: np.ndarray, steps: int) -> np.ndarray:
 
 def plan(model: mujoco.MjModel, spec: Mapping[str, Any]) -> np.ndarray:
     objects = {o["id"]: o for o in spec["objects"]}
-    cube, bowl = objects[spec["pick"]], spec["place"]
+    vial, goal = objects[spec["pick"]], spec["place"]
     heights = TASK_HEIGHTS[spec["task_id"]]
     GRASP_Z, DROP_Z = heights["grasp"], heights["drop"]
     home = np.array(HOME_POSE, dtype=float)
@@ -68,21 +67,21 @@ def plan(model: mujoco.MjModel, spec: Mapping[str, Any]) -> np.ndarray:
         q[4], q[5] = roll, gripper
         return q
 
-    roll = ((cube["yaw"] - np.arctan2(cube["y"], cube["x"]) + np.pi / 4) % (np.pi / 2)) - np.pi / 4
-    above = pose(cube["x"], cube["y"], HOVER, OPEN, roll, home)
-    grasp = pose(cube["x"], cube["y"], GRASP_Z, OPEN, roll, above)
+    roll = ((vial["yaw"] - np.arctan2(vial["y"], vial["x"]) + np.pi / 4) % (np.pi / 2)) - np.pi / 4
+    above = pose(vial["x"], vial["y"], HOVER, OPEN, roll, home)
+    grasp = pose(vial["x"], vial["y"], GRASP_Z, OPEN, roll, above)
     closed = grasp.copy()
     closed[5] = CLOSED
-    lift = pose(cube["x"], cube["y"], CARRY_Z, CLOSED, roll, grasp)
+    lift = pose(vial["x"], vial["y"], CARRY_Z, CLOSED, roll, grasp)
     # Swing across in two halves: one IK solve cannot follow a pan change of 70 degrees or more.
-    mid_angle = (np.arctan2(cube["y"], cube["x"]) + np.arctan2(bowl["y"], bowl["x"])) / 2
-    mid_radius = (np.hypot(cube["x"], cube["y"]) + np.hypot(bowl["x"], bowl["y"])) / 2
+    mid_angle = (np.arctan2(vial["y"], vial["x"]) + np.arctan2(goal["y"], goal["x"])) / 2
+    mid_radius = (np.hypot(vial["x"], vial["y"]) + np.hypot(goal["x"], goal["y"])) / 2
     mid = pose(mid_radius * np.cos(mid_angle), mid_radius * np.sin(mid_angle), CARRY_Z, CLOSED, roll, lift)
-    over = pose(bowl["x"], bowl["y"], CARRY_Z, CLOSED, roll, mid)
-    drop = pose(bowl["x"], bowl["y"], DROP_Z, CLOSED, roll, over)
+    over = pose(goal["x"], goal["y"], CARRY_Z, CLOSED, roll, mid)
+    drop = pose(goal["x"], goal["y"], DROP_Z, CLOSED, roll, over)
     released = drop.copy()
     released[5] = OPEN
-    retreat = pose(bowl["x"], bowl["y"], CARRY_Z, OPEN, roll, drop)
+    retreat = pose(goal["x"], goal["y"], CARRY_Z, OPEN, roll, drop)
     waypoints = [(home, 5), (above, 45), (grasp, 35), (closed, 25), (lift, 40), (mid, 30), (over, 30),
                  (drop, 25), (released, 25), (retreat, 25), (retreat, 30)]
     rows = [np.tile(home, (10, 1))]
@@ -92,7 +91,7 @@ def plan(model: mujoco.MjModel, spec: Mapping[str, Any]) -> np.ndarray:
 
 
 def record(xml: str, ctrl: np.ndarray) -> tuple[np.ndarray, bool]:
-    """Simulate like the browser: return state checkpoints and the final cube position check."""
+    """Simulate like the browser: return state checkpoints and the final vial position check."""
     model = load_model(xml)
     data = mujoco.MjData(model)
     data.qpos[:NUM_JOINTS] = HOME_POSE
@@ -125,7 +124,7 @@ def build_payload(ticket: Ticket, contributor: str = "scripted") -> dict[str, An
     }
 
 
-def main(seed: int, out: str, task_id: str = "put_cube_in_bowl") -> None:
+def main(seed: int, out: str, task_id: str = "rack_vial") -> None:
     from common.mjcf import scene_xml
     from common.scene import make_scene
 

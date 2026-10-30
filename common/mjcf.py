@@ -17,12 +17,6 @@ from common.scene import PALETTE, RACK_COLS, RACK_PITCH, RACK_ROWS, slot_ids, sl
 ASSET_DIR = Path(__file__).resolve().parent.parent / "assets" / "so101"
 ROBOT_FILE = "so101.xml"
 
-CUBE_HALF = 0.0125
-CUBE_MASS = 0.02
-BOWL_BASE_HALF = 0.04
-BOWL_WALL_HALF_HEIGHT = 0.015
-BOWL_WALL_THICKNESS_HALF = 0.003
-BOWL_BASE_THICKNESS_HALF = 0.003
 FRICTION = "1 5e-3 5e-4"
 BENCH_RGBA = "0.62 0.66 0.68 1"
 
@@ -46,34 +40,6 @@ SEATED_Z = 2 * RACK_BASE_HALF_Z + VIAL_HALF[2] + 0.0005
 def _rgba(color: str) -> str:
     r, g, b = PALETTE[color]
     return f"{r} {g} {b} 1"
-
-
-def _cube_xml(obj: Mapping[str, Any]) -> str:
-    return f"""    <body name="{obj['id']}" pos="{obj['x']} {obj['y']} {CUBE_HALF}" euler="0 0 {obj['yaw']}">
-      <freejoint name="{obj['id']}_free"/>
-      <geom name="{obj['id']}_geom" type="box" size="{CUBE_HALF} {CUBE_HALF} {CUBE_HALF}"
-        mass="{CUBE_MASS}" rgba="{_rgba(obj['color'])}" friction="{FRICTION}" condim="4"/>
-    </body>"""
-
-
-def _bowl_xml(obj: Mapping[str, Any]) -> str:
-    base, wall, tb, th = BOWL_BASE_HALF, BOWL_BASE_THICKNESS_HALF, BOWL_BASE_THICKNESS_HALF, BOWL_WALL_HALF_HEIGHT
-    wall_z = 2 * tb + th
-    rgba = _rgba(obj["color"])
-    walls = (
-        (0, base - wall, base, wall, wall_z),
-        (0, -(base - wall), base, wall, wall_z),
-        (base - wall, 0, wall, base, wall_z),
-        (-(base - wall), 0, wall, base, wall_z),
-    )
-    wall_geoms = "\n".join(
-        f'      <geom type="box" pos="{px} {py} {pz}" size="{sx} {sy} {th}" rgba="{rgba}" friction="{FRICTION}"/>'
-        for px, py, sx, sy, pz in walls
-    )
-    return f"""    <body name="{obj['id']}" pos="{obj['x']} {obj['y']} 0" euler="0 0 {obj['yaw']}">
-      <geom type="box" pos="0 0 {tb}" size="{base} {base} {tb}" rgba="{rgba}" friction="{FRICTION}"/>
-{wall_geoms}
-    </body>"""
 
 
 def _vial_xml(obj: Mapping[str, Any]) -> str:
@@ -136,7 +102,7 @@ def _rack_xml(obj: Mapping[str, Any]) -> str:
 
 
 def scene_xml(spec: Mapping[str, Any]) -> str:
-    builders = {"cube": _cube_xml, "bowl": _bowl_xml, "vial": _vial_xml, "rack": _rack_xml}
+    builders = {"vial": _vial_xml, "rack": _rack_xml}
     bodies = "\n".join(builders[o["kind"]](o) for o in spec["objects"])
     return f"""<mujoco model="teleop_scene">
   <include file="{ROBOT_FILE}"/>

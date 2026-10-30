@@ -17,12 +17,12 @@ DUPLICATE_DISTANCE = 0.05
 def path_signature(ee_path: np.ndarray, spec: Mapping[str, Any]) -> np.ndarray:
     objects = {o["id"]: o for o in spec["objects"]}
     pick, place = objects[spec["pick"]], spec["place"]
-    cube = np.array([pick["x"], pick["y"], 0.0])
+    pick_xyz = np.array([pick["x"], pick["y"], 0.0])
     offset = np.array([place["x"] - pick["x"], place["y"] - pick["y"]])
     scale = max(float(np.linalg.norm(offset)), MIN_SCALE)
     u = offset / scale if scale > MIN_SCALE else np.array([1.0, 0.0])
     v = np.array([-u[1], u[0]])
-    rel = ee_path - cube
+    rel = ee_path - pick_xyz
     local = np.stack([rel[:, :2] @ u, rel[:, :2] @ v, rel[:, 2]], axis=1) / scale
     source = np.linspace(0.0, 1.0, len(local))
     target = np.linspace(0.0, 1.0, POINTS)

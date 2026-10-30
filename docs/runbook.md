@@ -13,9 +13,8 @@ cd web && npm install && npm run dev                        # app on http://loca
 Open `http://localhost:5173/?pool=http://127.0.0.1:8091`. The practice server hands out tasks and
 judges each run with the real replay, success check and scoring, with no Bittensor involved.
 
-Pick a task on the start card. Vial racking (lab automation) asks for a named sample vial to be seated
-in a named slot of a 2 by 4 rack among vials already racked. Parts to tote (logistics) moves a named
-part into the matching tote. Both are judged by the same replay pipeline.
+The task is vial racking (lab automation): seat a named sample vial in a named slot of a 2 by 4 rack
+among vials already racked. It is judged by the replay pipeline.
 
 Controls on a phone, or on a desktop after pressing Joysticks:
 
@@ -62,7 +61,7 @@ MINER_WALLET=taunet-pool-two MINER_PORT=8092 MINER_DATA_DIR=data/miner-two uv ru
 
 Environment: `CHAIN_ENDPOINT` (default `ws://127.0.0.1:9944`, use `test` for testnet),
 `TASK_IDS` (comma list of tasks this pool serves, the first is the default, default
-`rack_vial,put_cube_in_bowl`; the app reads `GET /tasks` and `GET /ticket?task=ID`),
+`rack_vial`; the app reads `GET /tasks` and `GET /ticket?task=ID`),
 `MINER_ALLOWED_ORIGINS` (comma list, default any), `MINER_TRUST_PROXY=1` behind a tunnel or CDN so
 rate limits key on the real client address. Validators are recognized by validator permit on chain,
 plus anything in `MINER_VALIDATOR_ALLOWLIST` (needed on localnet until the permit appears).

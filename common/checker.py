@@ -21,25 +21,6 @@ def check_success(
     return CHECKERS[rule["type"]](model, data, rule, spec)
 
 
-def _object_in_container(
-    model: mujoco.MjModel, data: mujoco.MjData, rule: Mapping[str, Any], spec: Mapping[str, Any]
-) -> tuple[bool, dict[str, Any]]:
-    obj = data.body(rule["object"])
-    container = data.body(rule["container"])
-    dxy = float(np.linalg.norm(obj.xpos[:2] - container.xpos[:2]))
-    z = float(obj.xpos[2])
-    obj_speed = float(np.linalg.norm(data.qvel[model.body(rule["object"]).dofadr[0] :][:6]))
-    arm_speed = float(np.linalg.norm(data.qvel[:ARM_DOFS]))
-    details = {"dxy": dxy, "z": z, "object_speed": obj_speed, "arm_speed": arm_speed}
-    ok = (
-        dxy <= rule["xy_radius"]
-        and rule["z_min"] <= z <= rule["z_max"]
-        and obj_speed <= rule["max_speed"]
-        and arm_speed <= rule["max_arm_speed"]
-    )
-    return ok, details
-
-
 def _object_in_slot(
     model: mujoco.MjModel, data: mujoco.MjData, rule: Mapping[str, Any], spec: Mapping[str, Any]
 ) -> tuple[bool, dict[str, Any]]:
@@ -61,4 +42,4 @@ def _object_in_slot(
     return ok, details
 
 
-CHECKERS = {"object_in_container": _object_in_container, "object_in_slot": _object_in_slot}
+CHECKERS = {"object_in_slot": _object_in_slot}

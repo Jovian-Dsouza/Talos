@@ -3,7 +3,7 @@
 Each simulated phone signs in as its own dev player (the server needs AUTH_DEV_LOGIN=1), so every
 one gets its own custodial wallet and registered miner.
 
-Usage: [TASK=put_cube_in_bowl] python scripts/dev/sim_phone.py BASE_URL [COUNT] [CONCURRENCY] [NAME]
+Usage: python scripts/dev/sim_phone.py BASE_URL [COUNT] [CONCURRENCY] [NAME]
 """
 
 import os
@@ -16,7 +16,7 @@ import httpx
 from common.schema import Ticket
 from scripts.dev.scripted_demo import build_payload
 
-TASK = os.environ.get("TASK", "put_cube_in_bowl")  # the scripted solver is tuned for this task
+TASK = os.environ.get("TASK", "rack_vial")
 POLL_SECONDS = 1.0
 POLL_LIMIT_SECONDS = 120.0
 

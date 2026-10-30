@@ -132,10 +132,10 @@ uv run --python 3.12 python scripts/dev/sim_phone.py http://127.0.0.1:8091 3 3 b
 curl -s -H "Authorization: Bearer dev:player1" http://127.0.0.1:8091/me | python3 -m json.tool
 ```
 
-2. Fetch a task ticket (`rack_vial` or `put_cube_in_bowl`):
+2. Fetch a task ticket (`rack_vial`):
 
 ```bash
-curl -s -H "Authorization: Bearer dev:player1" "http://127.0.0.1:8091/ticket?task=put_cube_in_bowl" | python3 -m json.tool
+curl -s -H "Authorization: Bearer dev:player1" "http://127.0.0.1:8091/ticket?task=rack_vial" | python3 -m json.tool
 ```
 
 3. Inspect live network state (miners, UIDs, scores, incentives, emissions, validators, and recent verdicts):
@@ -155,7 +155,7 @@ curl -s http://127.0.0.1:8091/leaderboard | python3 -m json.tool
 ```bash
 curl -s "http://127.0.0.1:8091/activity?window=1h" | python3 -m json.tool   # or window=24h
 curl -s http://127.0.0.1:8091/datasets | python3 -m json.tool
-curl -s "http://127.0.0.1:8091/episodes?task=put_cube_in_bowl&count=10" | python3 -m json.tool
+curl -s "http://127.0.0.1:8091/episodes?task=rack_vial&count=10" | python3 -m json.tool
 curl -s -H "Authorization: Bearer dev:player1" http://127.0.0.1:8091/me/progress | python3 -m json.tool
 curl -s -H "Authorization: Bearer dev:player1" http://127.0.0.1:8091/me/wallet | python3 -m json.tool
 ```

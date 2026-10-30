@@ -15,13 +15,6 @@ export const TASKS: readonly TaskInfo[] = [
     blurb: "Seat the named sample vial in its slot of the rack.",
     done: "Vial is seated. Submit when ready.",
   },
-  {
-    id: "put_cube_in_bowl",
-    title: "Parts to tote",
-    industry: "Logistics",
-    blurb: "Move the named part into the matching tote.",
-    done: "Part is in the tote. Submit when ready.",
-  },
 ];
 
 export function taskInfo(id: string): TaskInfo {

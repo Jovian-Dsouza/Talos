@@ -27,5 +27,5 @@ SPEED=0.5 uv run --python 3.12 --extra realarm python -m realarm.replay_episode 
 
 The arm glides to the first pose over three seconds, then plays the recorded actions at half speed.
 Every command is limited to `MAX_STEP_DEG` (default 8) from the current pose. Keep the workspace
-clear and a hand on the power switch for the first runs. Place a cube and bowl roughly where the
+clear and a hand on the power switch for the first runs. Place a vial and rack roughly where the
 scene shows (the table plane is the simulator floor) if you want the real arm to do the task.

@@ -1,6 +1,6 @@
 export interface SceneObject {
   id: string;
-  kind: "cube" | "bowl" | "vial" | "rack";
+  kind: "vial" | "rack";
   color: string;
   x: number;
   y: number;

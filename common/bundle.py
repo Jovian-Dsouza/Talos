@@ -16,7 +16,7 @@ from common.scene import task_config
 
 ARM_STATE_WIDTH = 12  # qpos (6) + qvel (6) for the arm
 FREE_BODY_STATE_WIDTH = 13  # qpos (7) + qvel (6) per free body
-FREE_KINDS = ("cube", "vial")
+FREE_KINDS = ("vial",)
 MAX_ABS_CTRL = 10.0
 MAX_INPUT_EVENTS = 20000
 MAX_CONTRIBUTOR_LEN = 64
