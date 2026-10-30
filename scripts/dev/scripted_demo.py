@@ -20,7 +20,7 @@ CARRY_Z = 0.10
 # Tool tip heights per task: where to close on the object and where to open over the goal.
 TASK_HEIGHTS = {
     "put_cube_in_bowl": {"grasp": 0.016, "drop": 0.075},
-    "rack_vial": {"grasp": 0.0205, "drop": 0.034},
+    "rack_vial": {"grasp": 0.028, "drop": 0.042},
 }
 OPEN, CLOSED = 1.3, 0.05
 IK_JOINTS = 4  # pan, lift, elbow, wrist_flex; roll is set from the cube yaw

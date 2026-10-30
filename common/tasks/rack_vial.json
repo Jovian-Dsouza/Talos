@@ -4,9 +4,9 @@
   "max_steps": 15000,
   "checker": {
     "type": "object_in_slot",
-    "xy_radius": 0.008,
-    "z_min": 0.026,
-    "z_max": 0.034,
+    "xy_radius": 0.011,
+    "z_min": 0.032,
+    "z_max": 0.041,
     "min_upright": 0.94,
     "max_speed": 0.05,
     "max_arm_speed": 0.2

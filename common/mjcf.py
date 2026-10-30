@@ -26,19 +26,18 @@ BOWL_BASE_THICKNESS_HALF = 0.003
 FRICTION = "1 5e-3 5e-4"
 BENCH_RGBA = "0.62 0.66 0.68 1"
 
-# 30 mL sample vial: a box collides (stable, and as wide as the cube the jaws are proven on),
-# cylinders are only drawn.
-VIAL_HALF = (0.0125, 0.0125, 0.022)
-VIAL_MASS = 0.015
-VIAL_CAP_HALF = 0.0045
-VIAL_BODY_RADIUS = 0.0130
-VIAL_CAP_RADIUS = 0.0140
+# Sample vial: box collision (stable grip width), cylinders for draw only. Sized for teleop on phone.
+VIAL_HALF = (0.0175, 0.0175, 0.030)
+VIAL_MASS = 0.028
+VIAL_CAP_HALF = 0.0065
+VIAL_BODY_RADIUS = 0.0185
+VIAL_CAP_RADIUS = 0.0195
 VIAL_GLASS_RGBA = "0.82 0.9 0.95 0.5"
 
 # Rack: base plate, then a top plate with square holes. Seated vial centre sits on the base.
 RACK_BASE_HALF_Z = 0.003
 RACK_TOP = 0.025
-RACK_HOLE_HALF = 0.0185
+RACK_HOLE_HALF = 0.0205
 RACK_RIM = 0.008
 RACK_RGBA = "0.28 0.31 0.34 1"
 SEATED_Z = 2 * RACK_BASE_HALF_Z + VIAL_HALF[2] + 0.0005
@@ -122,6 +121,8 @@ def _rack_xml(obj: Mapping[str, Any]) -> str:
         f'      <geom type="box" pos="0 0 {RACK_BASE_HALF_Z}" size="{half_x} {half_y} {RACK_BASE_HALF_Z}" rgba="{RACK_RGBA}" friction="{FRICTION}"/>'
     ]
     for cx, cy, sx, sy in _rack_strips():
+        if sx < 1e-4 or sy < 1e-4:
+            continue
         geoms.append(
             f'      <geom type="box" pos="{cx:.5f} {cy:.5f} {plate_z}" size="{sx:.5f} {sy:.5f} {plate_half}" rgba="{RACK_RGBA}" friction="{FRICTION}"/>'
         )

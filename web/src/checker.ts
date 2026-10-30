@@ -4,7 +4,7 @@ import type { SceneSpec } from "./types";
 // Same rules as common/tasks/*.json. Only the validator's copy decides success; this one gives
 // instant feedback.
 const CONTAINER_RULE = { xyRadius: 0.03, zMin: 0.008, zMax: 0.03, maxSpeed: 0.05, maxArmSpeed: 0.2 };
-const SLOT_RULE = { xyRadius: 0.008, zMin: 0.026, zMax: 0.034, minUpright: 0.94, maxSpeed: 0.05, maxArmSpeed: 0.2 };
+const SLOT_RULE = { xyRadius: 0.011, zMin: 0.032, zMax: 0.041, minUpright: 0.94, maxSpeed: 0.05, maxArmSpeed: 0.2 };
 
 export interface Progress {
   success: boolean;
