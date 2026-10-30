@@ -7,7 +7,7 @@ In both modes the success check runs on state the validator simulated itself.
 """
 
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Mapping
 
 import mujoco
 import numpy as np
@@ -17,7 +17,6 @@ from common.checker import check_success
 from common.mjcf import load_model
 from common.schema import CHECKPOINT_EVERY, HOME_POSE, NUM_JOINTS, SUBSTEPS
 
-OBJECT_BODIES = ("cube_target", "cube_distractor")
 GRIPPER_BODIES = {"gripper", "moving_jaw_so101_v1", "camera_mount"}
 ARM_BODIES = {"base", "shoulder", "upper_arm", "lower_arm", "wrist"} | GRIPPER_BODIES
 
@@ -39,10 +38,8 @@ def _home(model: mujoco.MjModel, data: mujoco.MjData) -> None:
 
 
 def _object_slices(model: mujoco.MjModel) -> list[slice]:
-    return [
-        slice(adr, adr + 3)
-        for adr in (model.joint(f"{name}_free").qposadr[0] for name in OBJECT_BODIES)
-    ]
+    free = np.flatnonzero(model.jnt_type == mujoco.mjtJoint.mjJNT_FREE)
+    return [slice(int(model.jnt_qposadr[j]), int(model.jnt_qposadr[j]) + 3) for j in free]
 
 
 def _state(data: mujoco.MjData) -> np.ndarray:
@@ -93,11 +90,11 @@ def _finish(
     model: mujoco.MjModel,
     data: mujoco.MjData,
     stepper: _Stepper,
-    task_id: str,
+    spec: Mapping[str, Any],
     drift_arm: float,
     drift_obj: float,
 ) -> ReplayResult:
-    success, details = check_success(model, data, task_id)
+    success, details = check_success(model, data, spec)
     return ReplayResult(
         drift_arm, drift_obj, success, details, np.array(stepper.ee), stepper.contact_steps
     )
@@ -115,7 +112,7 @@ def replay_strict(bundle: Bundle) -> ReplayResult:
             recorded = bundle.checkpoints[(index + 1) // CHECKPOINT_EVERY - 1]
             arm, obj = _drift(model, recorded, _state(data))
             drift_arm, drift_obj = max(drift_arm, arm), max(drift_obj, obj)
-    return _finish(model, data, stepper, bundle.ticket.task_id, drift_arm, drift_obj)
+    return _finish(model, data, stepper, bundle.ticket.scene_spec, drift_arm, drift_obj)
 
 
 def replay_windowed(bundle: Bundle) -> ReplayResult:
@@ -135,7 +132,7 @@ def replay_windowed(bundle: Bundle) -> ReplayResult:
             drift_arm, drift_obj = max(drift_arm, arm), max(drift_obj, obj)
             _load_state(model, data, recorded)
         start = end
-    return _finish(model, data, stepper, bundle.ticket.task_id, drift_arm, drift_obj)
+    return _finish(model, data, stepper, bundle.ticket.scene_spec, drift_arm, drift_obj)
 
 
 def replay(bundle: Bundle, mode: str = "strict") -> ReplayResult:

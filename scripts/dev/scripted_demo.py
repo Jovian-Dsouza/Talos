@@ -55,7 +55,7 @@ def _segment(a: np.ndarray, b: np.ndarray, steps: int) -> np.ndarray:
 
 def plan(model: mujoco.MjModel, spec: Mapping[str, Any]) -> np.ndarray:
     objects = {o["id"]: o for o in spec["objects"]}
-    cube, bowl = objects["cube_target"], objects["bowl_target"]
+    cube, bowl = objects[spec["pick"]], spec["place"]
     home = np.array(HOME_POSE, dtype=float)
 
     def pose(x: float, y: float, z: float, gripper: float, roll: float, seed: np.ndarray):
@@ -120,7 +120,7 @@ def main(seed: int, out: str) -> None:
     from common.mjcf import scene_xml
     from common.scene import TASK_ID, make_scene
 
-    spec = make_scene(seed)
+    spec = make_scene(TASK_ID, seed)
     ticket = Ticket(0, "00" * 32, "dev", TASK_ID, 0, seed, spec, scene_xml(spec), spec["instruction"], 10**9)
     payload = build_payload(ticket)
     from common.bundle import parse_bundle

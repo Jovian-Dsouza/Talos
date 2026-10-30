@@ -1,6 +1,6 @@
 """Seeded scene generation for the put_cube_in_bowl task.
 
-make_scene(seed) is the only place a scene is randomized. The miner calls it to build a ticket
+make_scene(task_id, seed) is the only place a scene is randomized. The miner calls it to build a ticket
 and every validator calls it again to confirm the ticket, so the output must depend on the seed
 alone. Python's random.Random (Mersenne Twister) is stable across versions, and every number is
 rounded so JSON round trips compare equal.
@@ -11,7 +11,7 @@ import math
 import random
 from functools import lru_cache
 from importlib import resources
-from typing import Any
+from typing import Any, Callable
 
 TASK_ID = "put_cube_in_bowl"
 
@@ -53,8 +53,7 @@ def _place(rng: random.Random, count: int) -> list[tuple[float, float]]:
     return points
 
 
-def make_scene(seed: int) -> dict[str, Any]:
-    rng = random.Random(seed)
+def _cube_scene(rng: random.Random) -> dict[str, Any]:
     colors = rng.sample(sorted(PALETTE), 4)
     spots = _place(rng, 4)
     roles = (
@@ -75,8 +74,18 @@ def make_scene(seed: int) -> dict[str, Any]:
         for (object_id, kind, color), (x, y) in zip(roles, spots)
     ]
     template = task_config(TASK_ID)["instruction_template"]
+    bowl = objects[1]
     return {
         "task_id": TASK_ID,
         "instruction": template.format(cube_color=colors[0], bowl_color=colors[1]),
+        "pick": "cube_target",
+        "place": {"x": bowl["x"], "y": bowl["y"], "z": 0.05},
         "objects": objects,
     }
+
+
+SCENE_BUILDERS: dict[str, Callable[[random.Random], dict[str, Any]]] = {TASK_ID: _cube_scene}
+
+
+def make_scene(task_id: str, seed: int) -> dict[str, Any]:
+    return SCENE_BUILDERS[task_id](random.Random(seed))

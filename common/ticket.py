@@ -14,7 +14,7 @@ def build_ticket(
 ) -> Ticket:
     task_config(task_id)
     seed = derive_seed(block_hash, hotkey, task_id, counter)
-    spec = make_scene(seed)
+    spec = make_scene(task_id, seed)
     return Ticket(
         block=block,
         block_hash=block_hash,

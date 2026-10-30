@@ -15,14 +15,14 @@ ARM_DOFS = 6
 
 
 def check_success(
-    model: mujoco.MjModel, data: mujoco.MjData, task_id: str
+    model: mujoco.MjModel, data: mujoco.MjData, spec: Mapping[str, Any]
 ) -> tuple[bool, dict[str, Any]]:
-    rule = task_config(task_id)["checker"]
-    return _object_in_container(model, data, rule)
+    rule = task_config(spec["task_id"])["checker"]
+    return CHECKERS[rule["type"]](model, data, rule, spec)
 
 
 def _object_in_container(
-    model: mujoco.MjModel, data: mujoco.MjData, rule: Mapping[str, Any]
+    model: mujoco.MjModel, data: mujoco.MjData, rule: Mapping[str, Any], spec: Mapping[str, Any]
 ) -> tuple[bool, dict[str, Any]]:
     obj = data.body(rule["object"])
     container = data.body(rule["container"])
@@ -38,3 +38,6 @@ def _object_in_container(
         and arm_speed <= rule["max_arm_speed"]
     )
     return ok, details
+
+
+CHECKERS = {"object_in_container": _object_in_container}

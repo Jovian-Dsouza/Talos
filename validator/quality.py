@@ -1,7 +1,7 @@
 """Quality metrics for a replayed episode, each mapped to 0..1 (higher is better).
 
 Smoothness comes from the end-effector jerk, path efficiency compares the traveled length with the
-shortest start to cube to bowl route, idle time and gripper chatter penalize dithering, and arm
+shortest start to pick to place route, idle time and gripper chatter penalize dithering, and arm
 contact with the floor penalizes crashing.
 """
 
@@ -37,8 +37,8 @@ def _smoothness(ee: np.ndarray) -> float:
 
 def _efficiency(ee: np.ndarray, spec: Mapping[str, Any], home_ee: np.ndarray) -> float:
     objects = {o["id"]: o for o in spec["objects"]}
-    cube, bowl = objects["cube_target"], objects["bowl_target"]
-    waypoints = np.array([home_ee, [cube["x"], cube["y"], 0.02], [bowl["x"], bowl["y"], 0.05]])
+    pick, place = objects[spec["pick"]], spec["place"]
+    waypoints = np.array([home_ee, [pick["x"], pick["y"], 0.02], [place["x"], place["y"], place["z"]]])
     shortest = float(np.linalg.norm(np.diff(waypoints, axis=0), axis=1).sum())
     traveled = float(np.linalg.norm(np.diff(ee, axis=0), axis=1).sum())
     return float(np.clip(shortest / max(traveled, 1e-6), 0.0, 1.0))

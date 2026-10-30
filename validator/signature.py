@@ -1,8 +1,8 @@
 """Path signatures for duplicate detection and novelty.
 
 Absolute end-effector paths differ between seeds, so each path is expressed in a frame built from
-the scene: origin at the target cube, first axis toward the target bowl, lengths divided by the
-cube to bowl distance. Two recordings of the same motion then give nearly equal vectors.
+the scene: origin at the picked object, first axis toward the place point, lengths divided by the
+pick to place distance. Two recordings of the same motion then give nearly equal vectors.
 """
 
 from typing import Any, Mapping
@@ -17,9 +17,9 @@ NOVELTY_SCALE = 0.5
 
 def path_signature(ee_path: np.ndarray, spec: Mapping[str, Any]) -> np.ndarray:
     objects = {o["id"]: o for o in spec["objects"]}
-    cube = np.array([objects["cube_target"]["x"], objects["cube_target"]["y"], 0.0])
-    bowl = np.array([objects["bowl_target"]["x"], objects["bowl_target"]["y"], 0.0])
-    offset = bowl[:2] - cube[:2]
+    pick, place = objects[spec["pick"]], spec["place"]
+    cube = np.array([pick["x"], pick["y"], 0.0])
+    offset = np.array([place["x"] - pick["x"], place["y"] - pick["y"]])
     scale = max(float(np.linalg.norm(offset)), MIN_SCALE)
     u = offset / scale if scale > MIN_SCALE else np.array([1.0, 0.0])
     v = np.array([-u[1], u[0]])
