@@ -34,6 +34,14 @@ users = Table(
 )
 
 
+def _driver_url(url: str) -> str:
+    """Render hands out postgres:// URLs; SQLAlchemy needs the psycopg driver named."""
+    for prefix in ("postgres://", "postgresql://"):
+        if url.startswith(prefix):
+            return "postgresql+psycopg://" + url.removeprefix(prefix)
+    return url
+
+
 @dataclass(frozen=True)
 class User:
     id: int
@@ -57,7 +65,7 @@ def _user(row) -> User:
 
 class AccountStore:
     def __init__(self, url: str) -> None:
-        self._engine = create_engine(url, pool_pre_ping=True)
+        self._engine = create_engine(_driver_url(url), pool_pre_ping=True)
         _meta.create_all(self._engine)
 
     def by_clerk_id(self, clerk_user_id: str) -> User | None:

@@ -1,0 +1,82 @@
+# Render blueprint: hosted miner (web), validator (worker) and Postgres. Secrets marked sync: false
+# are pasted in the Render dashboard (values come from scripts/testnet/export_secrets.py).
+databases:
+  - name: bittesnor-db
+    plan: basic-256mb
+    databaseName: bittesnor
+    user: bittesnor
+
+services:
+  - type: web
+    name: bittesnor-miner
+    runtime: docker
+    dockerfilePath: ./deploy/Dockerfile
+    dockerContext: .
+    plan: starter
+    healthCheckPath: /health
+    disk:
+      name: miner-data
+      mountPath: /data
+      sizeGB: 2
+    envVars:
+      - key: CHAIN_ENDPOINT
+        value: test
+      - key: NETUID
+        sync: false
+      - key: MINER_DATA_DIR
+        value: /data/hosted
+      - key: MINER_TRUST_PROXY
+        value: "1"
+      - key: MAX_BURN_TAO
+        value: "0.5"
+      - key: MAX_SIGNUPS_PER_DAY
+        value: "20"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: bittesnor-db
+          property: connectionString
+      - key: CLERK_ISSUER
+        sync: false
+      - key: CLERK_SECRET_KEY
+        sync: false
+      - key: CLERK_ALLOWED_ORIGINS
+        sync: false
+      - key: MINER_ALLOWED_ORIGINS
+        sync: false
+      - key: MINER_VALIDATOR_ALLOWLIST
+        sync: false
+      - key: WALLET_ENCRYPTION_KEY
+        sync: false
+      - key: TREASURY_MNEMONIC
+        sync: false
+
+  - type: worker
+    name: bittesnor-validator
+    runtime: docker
+    dockerfilePath: ./deploy/Dockerfile
+    dockerContext: .
+    dockerCommand: python -m validator.main
+    plan: starter
+    disk:
+      name: validator-data
+      mountPath: /data
+      sizeGB: 5
+    envVars:
+      - key: CHAIN_ENDPOINT
+        value: test
+      - key: NETUID
+        sync: false
+      - key: HOSTED_MINER_URL
+        value: https://bittesnor-miner.onrender.com
+      - key: VALIDATOR_DB
+        value: /data/validator.db
+      - key: ACCEPTED_DIR
+        value: /data/accepted
+      - key: TEMPO_BLOCKS
+        value: "360"
+      - key: WEIGHTS_EVERY_BLOCKS
+        value: "60"
+      - key: POLL_SECONDS
+        value: "5"
+      - key: VALIDATOR_MNEMONIC
+        sync: false

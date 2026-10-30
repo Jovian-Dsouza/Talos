@@ -1,0 +1,9 @@
+{
+  "framework": "vite",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/pool/:path*", "destination": "https://bittesnor-miner.onrender.com/:path*" }
+  ]
+}

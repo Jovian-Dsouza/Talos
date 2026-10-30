@@ -5,6 +5,7 @@ FROM python:3.12-slim
 RUN pip install --no-cache-dir uv
 WORKDIR /app
 COPY pyproject.toml ./
+COPY accounts ./accounts
 COPY common ./common
 COPY assets ./assets
 COPY miner ./miner

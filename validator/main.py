@@ -1,11 +1,13 @@
 """Validator loop: pull recordings, validate them, push verdicts, set weights, commit epoch roots."""
 
 import logging
+import os
 import time
 
 import bittensor as bt
 import httpx
 
+from accounts.keys import wallet_from_mnemonics
 from common.chain import Chain, NeuronView
 from validator import scoring
 from validator.config import ValidatorConfig
@@ -79,10 +81,18 @@ def commit_finished_epochs(chain: Chain, wallet, ctx: Context, last: int, curren
     return max(last, current_epoch - 1)
 
 
+def load_wallet(config: ValidatorConfig):
+    """The validator hotkey from VALIDATOR_MNEMONIC (hosted), else from the local wallet files."""
+    mnemonic = os.environ.get("VALIDATOR_MNEMONIC")
+    if mnemonic:
+        return wallet_from_mnemonics(mnemonic, mnemonic)
+    return bt.Wallet(name=config.wallet_name, hotkey=config.hotkey_name)
+
+
 def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(message)s")
     config = ValidatorConfig.from_env()
-    wallet = bt.Wallet(name=config.wallet_name, hotkey=config.hotkey_name)
+    wallet = load_wallet(config)
     chain = Chain(config.chain_endpoint, config.netuid)
     config.db_path.parent.mkdir(parents=True, exist_ok=True)
     ctx = Context(config.pipeline, Store(config.db_path), chain, config.accepted_dir)

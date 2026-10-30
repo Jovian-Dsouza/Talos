@@ -8,3 +8,4 @@ data/
 .env
 dist/
 out/
+deploy/secrets.env
