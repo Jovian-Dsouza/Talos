@@ -1,16 +1,21 @@
-import { fetchLeaderboard, fetchMe, fetchTasks, fetchTicket, submitBundle, waitForVerdict } from "./api";
+import { fetchLeaderboard, fetchMe, fetchProgress, fetchTasks, fetchTicket, submitBundle, waitForVerdict } from "./api";
 import { authAvailable, initAuth, onAuthChange, playerName, signIn, signOut } from "./auth";
 import { EXPLORER_URL, POOL_URL } from "./config";
 import { CONTROL_DT, HEIGHT_MAX, HEIGHT_MIN } from "./constants";
 import { Controls } from "./controls";
 import { canFullscreen, enterFullscreen, exitFullscreen, haptic, isCoarsePointer, keepAwake, toggleFullscreen } from "./device";
+import { escapeHtml } from "./format";
+import { link } from "./header";
 import { IkSolver } from "./ik";
 import { buildSlotLabels } from "./labels";
 import { Joystick } from "./joystick";
+import { loadStanding, refreshLiveStrip, renderBests, renderPlayer } from "./play/lobby";
+import { setJourney, showReward } from "./play/result";
 import { Session } from "./session";
 import { getMujoco, Sim } from "./sim";
 import { TASKS, taskInfo, type TaskInfo } from "./tasks";
-import type { LeaderboardEntry, Me, Verdict } from "./types";
+import type { LeaderboardEntry, Me, Progress, Verdict } from "./types";
+import { points, reasonLabel, seconds } from "./words";
 import { SceneView } from "./view";
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
@@ -22,6 +27,7 @@ let ik: IkSolver | null = null;
 let controls: Controls | null = null;
 let session: Session | null = null;
 let me: Me | null = null;
+let progress: Progress | null = null;
 let simReady = false;
 let submitting = false;
 let sticksOn = false;
@@ -32,6 +38,8 @@ let slowSeconds = 0;
 
 const SLOW_FRAME_S = 0.035; // drop shadows when frames stay slower than ~28 fps
 const SLOW_LIMIT_S = 2;
+const ME_POLL_MS = 4000;
+const LOBBY_POLL_MS = 15_000;
 
 function show(id: string, visible: boolean): void {
   $(id).hidden = !visible;
@@ -82,6 +90,7 @@ function renderTasks(offered: readonly TaskInfo[]): void {
     const card = document.createElement("button");
     card.type = "button";
     card.className = "task";
+    card.dataset.task = info.id;
     card.setAttribute("role", "radio");
     for (const [tag, text] of [["em", info.industry], ["strong", info.title], ["span", info.blurb]] as const) {
       const part = document.createElement(tag);
@@ -98,6 +107,7 @@ function renderTasks(offered: readonly TaskInfo[]): void {
   task = first;
   cards.forEach((card, i) => card.setAttribute("aria-checked", String(offered[i] === first)));
   list.append(...cards);
+  renderBests(progress);
 }
 
 /** Offer the tasks the pool serves, in its order; fall back to the full catalog if it cannot say. */
@@ -120,6 +130,7 @@ function backToIntro(): void {
   for (const id of ["result", "hud", "dock", "insets"]) show(id, false);
   show("intro", true);
   updateStartButton();
+  void refreshLobby();
 }
 
 function closeHudMenu(): void {
@@ -205,14 +216,13 @@ function renderVerdict(verdict: Verdict): void {
   title.textContent = verdict.accepted ? "Verified" : "Not accepted";
   title.className = verdict.accepted ? "good" : "bad";
   $("verdict-detail").textContent = verdict.accepted
-    ? "Validators replayed your run and it checks out."
-    : `Reason: ${verdict.reason}`;
+    ? "A validator replayed your run step by step and it checks out. It is now part of the dataset."
+    : `${reasonLabel(verdict.reason)}. Rejected runs earn nothing, so try another run.`;
   $("metrics").innerHTML = verdict.accepted
     ? metric("Replay", "matches") +
-      metric("Task", verdict.success ? "completed" : "failed") +
-      metric("Time", `${verdict.duration_s.toFixed(1)} s (${verdict.time_score.toFixed(2)})`) +
-      metric("Smoothness", verdict.smooth_score.toFixed(2)) +
-      metric("Score", verdict.score.toFixed(2))
+      metric("Time", `${seconds(verdict.duration_s)} (${points(verdict.time_score)} of 100)`) +
+      metric("Smoothness", `${points(verdict.smooth_score)} of 100`) +
+      metric("Score", `${points(verdict.score)} of 100`)
     : metric("Task", verdict.success ? "completed" : "not completed");
 }
 
@@ -223,13 +233,9 @@ function renderLeaderboard(entries: LeaderboardEntry[]): void {
       .slice(0, 8)
       .map((e) => {
         const rank = e.uid === undefined ? "" : ` <small>UID ${e.uid}</small>`;
-        return `<li><strong>${escapeHtml(e.contributor)}</strong>${rank}: ${e.value.toFixed(2)} (${e.accepted}/${e.submitted} accepted)</li>`;
+        return `<li><strong>${escapeHtml(e.contributor)}</strong>${rank}: ${points(e.value)} points (${e.accepted} of ${e.submitted} verified)</li>`;
       })
       .join("") || "<li>No scores yet</li>";
-}
-
-function escapeHtml(text: string): string {
-  return text.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c] as string);
 }
 
 async function submit(): Promise<void> {
@@ -244,20 +250,28 @@ async function submit(): Promise<void> {
   $("verdict-detail").textContent = "A validator will replay it in the same physics engine.";
   $("metrics").innerHTML = "";
   $("leaderboard").innerHTML = "";
-  $("pools").textContent = "";
+  const before = progress;
+  setJourney("sending");
+  showReward(null, null, false);
   try {
     const { bundle_id, registration } = await submitBundle(session.bundle(playerName() ?? ""));
-    $("verdict-title").textContent = "Waiting for validators...";
+    setJourney("waiting");
+    $("verdict-title").textContent = "Waiting for a validator...";
     if (registration !== "registered") {
       $("verdict-detail").textContent = "Your miner is still being registered on the subnet. Validators score this run as soon as it is.";
     }
     const verdict = await waitForVerdict(bundle_id);
+    setJourney(verdict.accepted ? "accepted" : "rejected");
     renderVerdict(verdict);
+    const after = await fetchProgress().catch(() => null);
+    showReward(before, after, verdict.accepted);
+    progress = after ?? progress;
     renderLeaderboard(await fetchLeaderboard().catch(() => []));
     const link = $<HTMLAnchorElement>("explorer");
     link.hidden = !EXPLORER_URL;
     if (EXPLORER_URL) link.href = EXPLORER_URL;
   } catch (error) {
+    setJourney("failed");
     $("verdict-title").textContent = "Something went wrong";
     $("verdict-title").className = "bad";
     $("verdict-detail").textContent = error instanceof Error ? error.message : String(error);
@@ -299,6 +313,15 @@ async function refreshMe(): Promise<void> {
   if (playerName() === null) me = null;
   else me = await fetchMe().catch(() => me);
   renderAccount();
+}
+
+/** Level, XP, goal and earnings for the signed-in player, plus bests on the task cards. */
+async function refreshLobby(): Promise<void> {
+  const name = playerName();
+  const standing = name === null ? { progress: null, wallet: null } : await loadStanding();
+  progress = standing.progress ?? (name === null ? null : progress);
+  renderPlayer(name, { ...standing, progress });
+  renderBests(progress);
 }
 
 function bindUi(): void {
@@ -401,6 +424,10 @@ function bindUi(): void {
 
 bindUi();
 void loadTasks();
+void refreshLiveStrip();
+for (const anchor of document.querySelectorAll<HTMLAnchorElement>("a[data-link]")) {
+  anchor.href = link(anchor.getAttribute("href") ?? "/");
+}
 requestAnimationFrame(frame);
 if (new URLSearchParams(window.location.search).has("debug")) {
   // Test hook for automated browser runs: lets a script read the live session and view.
@@ -408,11 +435,21 @@ if (new URLSearchParams(window.location.search).has("debug")) {
 }
 initAuth()
   .then(() => {
-    onAuthChange(() => void refreshMe());
+    onAuthChange(() => {
+      void refreshMe();
+      void refreshLobby();
+    });
     void refreshMe();
+    void refreshLobby();
     window.setInterval(() => {
       if (!$("intro").hidden) void refreshMe();
-    }, 4000);
+    }, ME_POLL_MS);
+    window.setInterval(() => {
+      if (!$("intro").hidden) {
+        void refreshLobby();
+        void refreshLiveStrip();
+      }
+    }, LOBBY_POLL_MS);
   })
   .catch((error) => {
     $("intro-error").textContent = `Sign-in failed to load: ${error instanceof Error ? error.message : String(error)}`;

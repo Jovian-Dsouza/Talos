@@ -3,8 +3,13 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
-    <meta name="theme-color" content="#e9ecef" />
+    <meta name="theme-color" content="#e8eeeb" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0e1614" media="(prefers-color-scheme: dark)" />
     <title>Play | TauNet</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&display=swap" />
+    <link rel="stylesheet" href="/src/tokens.css" />
     <link rel="stylesheet" href="/src/style.css" />
   </head>
   <body>
@@ -17,6 +22,7 @@
       </div>
 
       <section id="intro" class="card">
+        <div id="player" class="player" hidden></div>
         <h1>Teach the arm</h1>
         <p>Pick a job, then drive a simulated SO-101 robot arm through it. Validators replay your run and score it, and the network pays for data that checks out.</p>
         <div id="tasks" class="task-list" role="radiogroup" aria-label="Task"></div>
@@ -28,7 +34,8 @@
         <p class="tip touch-only">Tip: hold your phone sideways for the biggest view.</p>
         <button id="start" class="primary" disabled>Loading simulator...</button>
         <p id="intro-error" class="error" role="alert"></p>
-        <p class="nav"><a href="/">Home</a> <a href="/network">Network</a></p>
+        <p id="live-strip" class="live-strip" hidden></p>
+        <p class="nav"><a href="/" data-link>Home</a> <a href="/network" data-link>Live</a> <a href="/datasets" data-link>Datasets</a> <a href="/wallet" data-link>Wallet</a></p>
       </section>
 
       <header id="hud" hidden>
@@ -81,12 +88,13 @@
       </footer>
 
       <section id="result" class="card" hidden>
+        <ol id="journey" class="journey" aria-label="Your run through the network"></ol>
         <h2 id="verdict-title"></h2>
         <p id="verdict-detail"></p>
+        <div id="reward" class="reward" hidden></div>
         <dl id="metrics"></dl>
         <h3>Leaderboard</h3>
         <ol id="leaderboard"></ol>
-        <p id="pools"></p>
         <p><a id="explorer" target="_blank" rel="noreferrer" hidden>See the validator's weights on chain</a></p>
         <button id="again" class="primary">Same task, new scene</button>
         <button id="switch" class="secondary wide">Switch task</button>
