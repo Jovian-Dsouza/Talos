@@ -11,7 +11,7 @@ import {
 import type { Controls } from "./controls";
 import type { IkSolver } from "./ik";
 import type { Sim } from "./sim";
-import type { Ticket } from "./types";
+import type { PracticeScene, Ticket } from "./types";
 
 const MAX_TARGET_SPEED = 0.4; // m/s for the tip target
 const MAX_JOINT_SPEED = 4.0; // rad/s per arm joint
@@ -40,7 +40,7 @@ export class Session {
     readonly sim: Sim,
     private readonly controls: Controls,
     private readonly ik: IkSolver,
-    readonly ticket: Ticket,
+    readonly ticket: Ticket | PracticeScene,
   ) {
     this.target = sim.tip();
     for (let i = 0; i < IK_WARMUP; i++) this.q = this.ik.solve(this.q, this.target);
@@ -103,6 +103,7 @@ export class Session {
   }
 
   bundle(contributor: string): Record<string, unknown> {
+    if ("kind" in this.ticket) throw new Error("Practice runs stay in this browser.");
     return {
       ticket: this.ticket,
       mujoco_version: "3.17.0",

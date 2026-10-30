@@ -32,6 +32,14 @@ export interface Ticket {
   model_hash?: string;
 }
 
+/** Local scene data has no ticket, chain identity, or reward eligibility. */
+export interface PracticeScene {
+  kind: "practice";
+  scene_spec: SceneSpec;
+  scene_xml: string;
+  instruction: string;
+}
+
 export interface Verdict {
   accepted: boolean;
   reason: string;

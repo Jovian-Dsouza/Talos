@@ -10,3 +10,9 @@ Third-party material in this repository
   (Apache License 2.0, https://github.com/AxisAIOrg/AxisWebInfra). No source code from that
   repository was copied: it targets a Franka arm, an older mujoco-js build and Next.js, none of
   which fit this project's requirement of one exact MuJoCo version in browser and validator.
+
+- The landing robot chassis, wheel geometry, joint poses, and arm visual transforms were adapted
+  from the user-provided awign-hackathon-2026/frontend project. The arm uses this repository's
+  existing SO-101 decimated meshes; its license is also included in web/public/assets/so101/LICENSE.
+- The landing reference film and derived poster came from Axis Robotics at the user's direction
+  (https://axisrobotics.ai/media/bottleneck-card-2.mp4). Attribution appears in the site footer.

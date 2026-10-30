@@ -11,7 +11,7 @@
   </head>
   <body>
     <main id="app">
-      <canvas id="stage" aria-label="Robot arm simulation"></canvas>
+      <canvas id="stage" tabindex="0" aria-label="Robot arm simulation. Use WASD to move, Q and E for height, arrow keys for wrist rotation, and space to grip."></canvas>
 
       <div id="insets" hidden>
         <div class="inset" id="inset-top"><span>Top</span></div>
@@ -26,11 +26,13 @@
         <div id="tasks" class="task-list" role="radiogroup" aria-label="Task"></div>
         <div class="account">
           <p id="account-line"></p>
-          <button id="sign-in" class="secondary wide" hidden>Sign in with Google</button>
+          <button id="sign-in" class="primary wide" hidden>Sign in to earn</button>
           <button id="sign-out" class="link" hidden>Sign out</button>
         </div>
+        <button id="start" class="primary" disabled hidden>Start earning</button>
+        <button id="practice" class="secondary wide" disabled>Loading simulator…</button>
+        <p class="practice-note">Try it without an account. Practice runs stay in your browser.</p>
         <p class="tip touch-only">Tip: hold your phone sideways for the biggest view.</p>
-        <button id="start" class="primary" disabled>Loading simulator...</button>
         <p id="intro-error" class="error" role="alert"></p>
         <p id="live-strip" class="live-strip" hidden></p>
         <p class="nav"><a href="/" data-link>Home</a> <a href="/network" data-link>Live</a> <a href="/datasets" data-link>Datasets</a> <a href="/wallet" data-link>Wallet</a></p>
@@ -41,6 +43,7 @@
           <div class="hud-copy">
             <div class="hud-stats">
               <span id="timer" class="chip chip-timer">0.0 s</span>
+              <span id="practice-chip" class="chip" hidden>Practice / no rewards</span>
               <div class="hud-nav">
                 <button type="button" id="hud-menu" class="tool hud-menu" aria-expanded="false" aria-controls="hud-menu-panel" hidden>
                   Menu
@@ -56,6 +59,7 @@
                 <button id="camera" class="tool">Cam: Front</button>
                 <button id="views" class="tool" aria-pressed="true">Views</button>
                 <button id="fullscreen" class="tool" hidden>Full screen</button>
+                <button id="leave" class="tool">Back to start</button>
               </div>
               <div class="menu-actions">
                 <button type="button" class="menu-action" data-for="reset">Reset run</button>
@@ -91,11 +95,12 @@
         <p id="verdict-detail"></p>
         <div id="reward" class="reward" hidden></div>
         <dl id="metrics"></dl>
-        <h3>Leaderboard</h3>
+        <h3 id="leaderboard-title">Leaderboard</h3>
         <ol id="leaderboard"></ol>
         <p><a id="explorer" target="_blank" rel="noreferrer" hidden>See the validator's weights on chain</a></p>
         <button id="again" class="primary">Same task, new scene</button>
         <button id="switch" class="secondary wide">Switch task</button>
+        <button id="practice-sign-in" class="secondary wide" hidden>Sign in to earn</button>
       </section>
     </main>
     <script type="module" src="/src/main.ts"></script>

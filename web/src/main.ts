@@ -11,6 +11,7 @@ import { buildSlotLabels } from "./labels";
 import { Joystick } from "./joystick";
 import { loadStanding, refreshLiveStrip, renderBests, renderPlayer } from "./play/lobby";
 import { setJourney, showReward } from "./play/result";
+import { practiceScene } from "./play/practice";
 import { Session } from "./session";
 import { getMujoco, Sim } from "./sim";
 import { TASKS, taskInfo, type TaskInfo } from "./tasks";
@@ -31,6 +32,9 @@ let progress: Progress | null = null;
 let simReady = false;
 let submitting = false;
 let sticksOn = false;
+let practiceMode = false;
+let onlineEnabled = false;
+let starting = false;
 let task: TaskInfo = TASKS[0];
 let lastFrame = performance.now();
 let frameAverage = 1 / 60;
@@ -59,7 +63,7 @@ function cleanup(): void {
 
 async function beginRound(): Promise<void> {
   cleanup();
-  const [mujoco, ticket] = await Promise.all([getMujoco(), fetchTicket(task.id)]);
+  const [mujoco, ticket] = await Promise.all([getMujoco(), practiceMode ? practiceScene() : fetchTicket(task.id)]);
   sim = new Sim(mujoco, ticket.scene_xml);
   view.build(sim);
   view.setDecor(buildSlotLabels(sim, ticket.scene_spec));
@@ -71,6 +75,17 @@ async function beginRound(): Promise<void> {
   controls.useSticks(sticksOn);
   session = new Session(sim, controls, ik, ticket);
   $("instruction").textContent = ticket.instruction;
+  show("practice-chip", practiceMode);
+  show("journey", !practiceMode);
+  show("leaderboard-title", !practiceMode);
+  show("leaderboard", !practiceMode);
+  show("practice-sign-in", false);
+  show("reward", false);
+  show("explorer", false);
+  $("submit").textContent = practiceMode ? "Finish practice" : "Submit";
+  document.querySelector<HTMLElement>('[data-for="submit"]')!.textContent = practiceMode ? "Finish practice" : "Submit run";
+  $("again").textContent = practiceMode ? "Try another practice scene" : "Same task, new scene";
+  $("switch").textContent = practiceMode ? "Back to start" : "Switch task";
   $<HTMLInputElement>("height").value = String(Math.min(HEIGHT_MAX, Math.max(HEIGHT_MIN, tip[2])));
   setStatus("Touch the scene to begin");
   $<HTMLButtonElement>("submit").disabled = true;
@@ -81,6 +96,7 @@ async function beginRound(): Promise<void> {
   show("insets", true);
   submitting = false;
   keepAwake(true);
+  canvas.focus({ preventScroll: true });
 }
 
 function renderTasks(offered: readonly TaskInfo[]): void {
@@ -142,9 +158,11 @@ function backToIntro(): void {
   void exitFullscreen();
   closeHudMenu();
   for (const id of ["result", "hud", "dock", "insets"]) show(id, false);
+  practiceMode = false;
   show("intro", true);
   updateStartButton();
   void refreshLobby();
+  $("practice").focus();
 }
 
 function closeHudMenu(): void {
@@ -202,9 +220,9 @@ function frame(now: number): void {
     const [tx, ty, tz] = session.currentTarget();
     view.setMarker(tx, ty, tz);
     $("timer").textContent = `${(session.steps * CONTROL_DT).toFixed(1)} s`;
-    if (session.phase === "full") setStatus("Time limit reached, submit or reset");
+    if (session.phase === "full") setStatus(practiceMode ? "Time limit reached, finish or reset" : "Time limit reached, submit or reset");
     else if (session.readyToSubmit) setStatus(task.done, true);
-    else if (session.phase === "recording") setStatus("Recording");
+    else if (session.phase === "recording") setStatus(practiceMode ? "Practicing locally" : "Recording");
     $<HTMLButtonElement>("submit").disabled = !session.canSubmit;
     const menuSubmit = document.querySelector<HTMLButtonElement>('[data-for="submit"]');
     if (menuSubmit) menuSubmit.disabled = !session.canSubmit;
@@ -254,6 +272,20 @@ function renderLeaderboard(entries: LeaderboardEntry[]): void {
 
 async function submit(): Promise<void> {
   if (!session || submitting) return;
+  if (practiceMode) {
+    submitting = true;
+    keepAwake(false);
+    for (const id of ["hud", "dock", "insets", "journey", "leaderboard-title", "leaderboard", "reward", "explorer"]) show(id, false);
+    show("result", true);
+    const complete = session.readyToSubmit;
+    $("verdict-title").textContent = complete ? "Practice complete" : "Keep practicing";
+    $("verdict-title").className = complete ? "good" : "";
+    $("verdict-detail").textContent = `${complete ? "The vial is seated in its target slot." : "The vial has not settled in its target slot yet. Give it another try."} This run stayed in your browser. Practice runs are not submitted and do not earn rewards.`;
+    $("metrics").innerHTML = metric("Mode", "Local practice") + metric("Task", complete ? "completed" : "not completed") + metric("Time", seconds(session.steps * CONTROL_DT));
+    show("practice-sign-in", playerName() === null && authAvailable);
+    $("again").focus();
+    return;
+  }
   submitting = true;
   keepAwake(false);
   show("dock", false);
@@ -294,14 +326,13 @@ async function submit(): Promise<void> {
 
 function updateStartButton(): void {
   const start = $<HTMLButtonElement>("start");
-  if (!simReady) {
-    start.disabled = true;
-    start.textContent = "Loading simulator...";
-    return;
-  }
   const signedIn = playerName() !== null;
-  start.disabled = !signedIn;
-  start.textContent = signedIn ? "Start" : "Sign in to start";
+  start.hidden = !signedIn;
+  start.disabled = !simReady || starting || !signedIn;
+  start.textContent = !simReady ? "Loading simulator…" : starting ? "Opening task…" : "Start earning";
+  const practice = $<HTMLButtonElement>("practice");
+  practice.disabled = !simReady || starting;
+  practice.textContent = !simReady ? "Loading simulator…" : starting ? "Opening task…" : "Try the simulator";
 }
 
 function minerLine(name: string): string {
@@ -325,6 +356,7 @@ function renderAccount(): void {
 }
 
 async function refreshMe(): Promise<void> {
+  if (!onlineEnabled || practiceMode) return;
   if (playerName() === null) me = null;
   else me = await fetchMe().catch(() => me);
   renderAccount();
@@ -332,6 +364,7 @@ async function refreshMe(): Promise<void> {
 
 /** Level, XP, goal and earnings for the signed-in player, plus bests on the task cards. */
 async function refreshLobby(): Promise<void> {
+  if (!onlineEnabled || practiceMode) return;
   const name = playerName();
   const standing = name === null ? { progress: null, wallet: null } : await loadStanding();
   progress = standing.progress ?? (name === null ? null : progress);
@@ -341,28 +374,51 @@ async function refreshLobby(): Promise<void> {
 
 function bindUi(): void {
   $("sign-in").addEventListener("click", signIn);
+  $("practice-sign-in").addEventListener("click", signIn);
   $("sign-out").addEventListener("click", () => void signOut().then(() => refreshMe()));
-  const start = $<HTMLButtonElement>("start");
-  start.addEventListener("click", async () => {
+  const startRound = async (practice: boolean): Promise<void> => {
+    if (starting || !simReady) return;
+    starting = true;
+    practiceMode = practice;
+    onlineEnabled = !practice;
+    $("intro-error").textContent = "";
+    show("live-strip", false);
     if (isCoarsePointer()) void enterFullscreen();
-    start.disabled = true;
+    updateStartButton();
     try {
+      if (!practice) await loadTasks();
       await beginRound();
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       const tunnelHint =
-        message === "Failed to fetch" &&
+        !practice && message === "Failed to fetch" &&
         (POOL_URL.startsWith("http://127.0.0.1") || POOL_URL.endsWith("/pool"))
           ? " Make sure the backend is running and reachable."
           : "";
       $("intro-error").textContent = `Could not start: ${message}${tunnelHint}`;
+    } finally {
+      starting = false;
       updateStartButton();
     }
-  });
+  };
+  $("start").addEventListener("click", () => void startRound(false));
+  $("practice").addEventListener("click", () => void startRound(true));
+  $("leave").addEventListener("click", backToIntro);
   $("switch").addEventListener("click", backToIntro);
-  $("again").addEventListener("click", () => {
+  $("again").addEventListener("click", async () => {
+    if (starting) return;
+    starting = true;
+    const again = $<HTMLButtonElement>("again");
+    again.disabled = true;
     if (isCoarsePointer()) void enterFullscreen();
-    void beginRound().catch((e) => ($("verdict-detail").textContent = String(e)));
+    try {
+      await beginRound();
+    } catch (error) {
+      $("verdict-detail").textContent = `Could not open the scene. ${error instanceof Error ? error.message : String(error)}`;
+    } finally {
+      starting = false;
+      again.disabled = false;
+    }
   });
   $("reset").addEventListener("click", replayAttempt);
   $("submit").addEventListener("click", () => void submit());
@@ -443,8 +499,7 @@ function bindUi(): void {
 }
 
 bindUi();
-void loadTasks();
-void refreshLiveStrip();
+renderTasks(TASKS);
 for (const anchor of document.querySelectorAll<HTMLAnchorElement>("a[data-link]")) {
   anchor.href = link(anchor.getAttribute("href") ?? "/");
 }
@@ -456,16 +511,18 @@ if (new URLSearchParams(window.location.search).has("debug")) {
 initAuth()
   .then(() => {
     onAuthChange(() => {
+      renderAccount();
       void refreshMe();
       void refreshLobby();
     });
+    renderAccount();
     void refreshMe();
     void refreshLobby();
     window.setInterval(() => {
       if (!$("intro").hidden) void refreshMe();
     }, ME_POLL_MS);
     window.setInterval(() => {
-      if (!$("intro").hidden) {
+      if (!$("intro").hidden && onlineEnabled && !practiceMode) {
         void refreshLobby();
         void refreshLiveStrip();
       }

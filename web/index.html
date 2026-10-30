@@ -29,14 +29,32 @@
             </div>
           </div>
           <figure class="hero-media">
-            <div class="media-well">
-              <video id="robot-film" width="1280" height="720" poster="/media/teleoperation-poster.jpg" preload="none" controls playsinline aria-label="Reference footage of a human operating a robotic hand">
-                <source src="/media/teleoperation.mp4" type="video/mp4" />
-                <a href="/media/teleoperation.mp4">Watch the robotics demonstration</a>
-              </video>
-              <span class="media-corner" aria-hidden="true">↗</span>
+            <div class="media-toolbar" role="tablist" aria-label="Explore the robot">
+              <button class="media-tab" id="film-tab" type="button" role="tab" aria-selected="true" aria-controls="film-panel">Teleoperation film</button>
+              <button class="media-tab" id="demo-tab" type="button" role="tab" aria-selected="false" aria-controls="demo-panel" tabindex="-1">Interactive 3D <span aria-hidden="true">↗</span></button>
             </div>
-            <figcaption><span>Human intent. Robot action.</span><span>Teleoperation reference <span class="label-divider">/</span> <a href="https://axisrobotics.ai/" target="_blank" rel="noreferrer">Axis Robotics ↗</a></span></figcaption>
+            <div class="media-well">
+              <div class="film-panel" id="film-panel" role="tabpanel" aria-labelledby="film-tab">
+                <video id="robot-film" width="1280" height="720" poster="/media/teleoperation-poster.jpg" preload="metadata" autoplay loop muted playsinline aria-hidden="true">
+                  <source src="/media/teleoperation.mp4" type="video/mp4" />
+                </video>
+                <div class="film-overlay"><span>Human intent.<br />Robot action.</span><button type="button" class="btn small film-toggle" id="film-toggle" aria-controls="robot-film">Pause video</button></div>
+              </div>
+              <div class="demo-panel" id="demo-panel" role="tabpanel" aria-labelledby="demo-tab" hidden>
+                <div class="demo-viewport" id="demo-viewport"><canvas id="robot-demo" role="img" aria-label="Interactive model of an SO-101 arm on a wheeled rover"></canvas><p class="demo-status" id="demo-status" role="status">Loading the robot model…</p><button type="button" class="btn small demo-retry" id="demo-retry" hidden>Retry 3D demo</button></div>
+                <div class="demo-controls" id="demo-controls" hidden>
+                  <div class="demo-controls-head"><div><p class="eyebrow">Explore the SO-101</p><p class="demo-hint">Drag to orbit. Use + / − to zoom.</p></div><button type="button" class="btn small" id="demo-reset">Reset view</button></div>
+                  <div class="demo-presets" role="group" aria-label="Arm pose"><button type="button" class="btn small" data-pose="Ready" aria-pressed="true">Ready</button><button type="button" class="btn small" data-pose="Reach shelf" aria-pressed="false">Reach</button><button type="button" class="btn small" data-pose="Grasp" aria-pressed="false">Grasp</button></div>
+                  <div class="demo-sliders">
+                    <label for="demo-pan"><span>Base rotation</span><output id="demo-pan-value" for="demo-pan">0°</output><input id="demo-pan" type="range" min="-110" max="110" step="1" value="0" data-joint="shoulder_pan" /></label>
+                    <label for="demo-lift"><span>Arm lift</span><output id="demo-lift-value" for="demo-lift">-40°</output><input id="demo-lift" type="range" min="-100" max="100" step="1" value="-40" data-joint="shoulder_lift" /></label>
+                    <label for="demo-grip"><span>Gripper</span><output id="demo-grip-value" for="demo-grip">40°</output><input id="demo-grip" type="range" min="-10" max="100" step="1" value="40" data-joint="gripper" /></label>
+                  </div>
+                  <div class="demo-view-actions" role="group" aria-label="Camera controls"><button type="button" class="btn small" data-view="left" aria-label="Rotate view left">↶</button><button type="button" class="btn small" data-view="right" aria-label="Rotate view right">↷</button><button type="button" class="btn small" data-view="in" aria-label="Zoom in">+</button><button type="button" class="btn small" data-view="out" aria-label="Zoom out">−</button><a class="inline-link" href="/play" data-link>Try a task <span aria-hidden="true">↗</span></a></div>
+                </div>
+              </div>
+            </div>
+            <figcaption><span>Human intent. Robot action.</span><span id="media-description">Teleoperation reference footage</span></figcaption>
           </figure>
           <dl class="hero-facts" aria-label="TauNet capabilities">
             <div><dt>01 / CONTROL</dt><dd>Browser-based<br />teleoperation</dd></div>
@@ -79,7 +97,7 @@
         </section>
 
         <section class="bay closing-cta" data-bay="06" aria-labelledby="join-title"><div><p class="eyebrow">Build the data layer</p><h2 id="join-title">Ready to teach<br />a robot?</h2></div><a class="btn primary" href="/play" data-link>Run your first task <span aria-hidden="true">↗</span></a></section>
-        <footer class="site landing-footer"><a class="brand" href="/" data-link><span class="mark" aria-hidden="true">τ</span>TauNet</a><span>Simulation and replay run on MuJoCo 3.17.</span><span>A Bittensor subnet.</span><a href="#top">Back to top ↑</a></footer>
+        <footer class="site landing-footer"><a class="brand" href="/" data-link><span class="mark" aria-hidden="true">τ</span>TauNet</a><span>Simulation and replay run on MuJoCo 3.17.<br /><span class="media-credit">Reference footage: <a href="https://axisrobotics.ai/" target="_blank" rel="noreferrer">Axis Robotics ↗</a></span></span><span>A Bittensor subnet.</span><a href="#top">Back to top ↑</a></footer>
       </main>
     </div>
     <script type="module" src="/src/landing.ts"></script>
